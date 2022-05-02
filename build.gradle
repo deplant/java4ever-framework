@@ -1,0 +1,133 @@
+plugins {
+    id "java-library"
+    id 'maven-publish'
+    id "io.freefair.lombok" version "6.4.3" // apply false
+}
+
+// Global variables for all modules
+ext {
+    lo4jVersion = "2.17.1" // <2.15="CVE-2021-44228 Log4j 2 Vulnerability"
+    junitVersion = "5.8.2"
+    v_groupRepo = "deplant"
+    v_groupId = "tech.deplant.java4ever"
+    v_version = "1.1.1-SNAPSHOT"
+    v_bindingName = "java4ever-binding"
+    v_bindingRepo = "java4ever-binding"
+    v_frameworkName = "java4ever-framework"
+    v_frameworkRepo = "java4ever-framework"
+    v_developerId = "cassandrus"
+    v_developerName = "Dmitriy Yankin"
+    v_developerEmail = "cassandrus@protonmail.com"
+}
+
+
+group v_groupId
+version v_version
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+publishing {
+    publications {
+        Binding(MavenPublication) {
+            groupId = v_groupId
+            artifactId = v_frameworkName
+            version = v_version
+
+            from components.java
+
+            pom {
+                name = 'java4ever/Framework'
+                description = 'Framework for Everscale DApp development'
+                url = "https://github.com/deplant/" + v_frameworkRepo
+//                properties = [
+//                        myProp          : "value",
+//                        "prop.with.dots": "anotherValue"
+//                ]
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = v_developerId
+                        name = v_developerName
+                        email = v_developerEmail
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/deplant/java4ever-framework.git'
+                    developerConnection = 'scm:git:ssh://github.com/deplant/java4ever-framework.git'
+                    url = 'http://github.com/deplant/java4ever-framework'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    // Logging
+    implementation "org.apache.logging.log4j:log4j-core:$lo4jVersion"
+    implementation "org.apache.logging.log4j:log4j-api:$lo4jVersion"
+
+    // JSON
+    implementation "com.google.code.gson:gson:2.8.9"
+
+    // Dependent on binding module
+    implementation "$v_groupId:$v_bindingName:$v_version"
+}
+
+java {
+    modularity.inferModulePath = false
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "--enable-preview"
+}
+tasks.withType(Test) {
+    jvmArgs += "--enable-preview"
+}
+tasks.withType(JavaExec) {
+    jvmArgs += "--enable-preview"
+    jvmArgs += "--add-modules=jdk.incubator.foreign"
+    jvmArgs += "--enable-native-access=java4ever.binding"
+    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
+    jvmArgs += "-XX:+UseShenandoahGC"
+    jvmArgs += "-XX:+AlwaysPreTouch"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    doFirst {
+        options.compilerArgs += [
+                '--module-path', classpath.asPath
+        ]
+        classpath = files()
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    jvmArgs += "--enable-preview"
+}
+

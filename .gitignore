@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+build/
+target/
+.settings
+.project
+.classpath
+hs_err_pid*.*
+*.iml
+.DS_Store

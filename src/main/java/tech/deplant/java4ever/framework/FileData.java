@@ -11,7 +11,7 @@ import java.util.Base64;
 @Log4j2
 public class FileData {
 
-    public static final String CONTRACTS_PATH = "src/main/resources/contracts";
+    public static final String CONTRACTS_PATH = "src/main/resources/artifacts";
 
     public static String storedContractPath(String fileName) {
         return FileData.CONTRACTS_PATH + "/" + fileName;

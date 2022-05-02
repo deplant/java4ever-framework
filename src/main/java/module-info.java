@@ -5,6 +5,7 @@ module java4ever.framework {
     requires static lombok;
     requires java4ever.binding;
     exports tech.deplant.java4ever.framework;
+    exports tech.deplant.java4ever.framework.artifact;
     exports tech.deplant.java4ever.framework.type;
     exports tech.deplant.java4ever.framework.giver;
     opens tech.deplant.java4ever.framework to com.google.gson;

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
+import tech.deplant.java4ever.framework.artifact.Artifact;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,14 +21,8 @@ public class ExplorerConfig {
         this.contracts = new HashMap<>();
     }
 
-    public static ExplorerConfig ofConfigFile(String configPath) {
-        String str = null;
-        try {
-            str = FileData.jsonFromFile(configPath);
-        } catch (IOException e) {
-            log.error("Path: {}, Error: {}", () -> configPath, () -> e.getMessage());
-        }
-        return new Gson().fromJson(str, ExplorerConfig.class);
+    public static ExplorerConfig ofConfigFile(Artifact artifact) {
+        return new Gson().fromJson(artifact.getAsJsonString(), ExplorerConfig.class);
     }
 
     public void store(String path) throws IOException {

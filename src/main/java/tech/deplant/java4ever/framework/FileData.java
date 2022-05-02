@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,7 +12,7 @@ import java.util.Base64;
 @Log4j2
 public class FileData {
 
-    public static final String CONTRACTS_PATH = "src/main/resources/artifacts";
+    public static final String CONTRACTS_PATH = "/artifacts";
 
     public static String storedContractPath(String fileName) {
         return FileData.CONTRACTS_PATH + "/" + fileName;
@@ -22,7 +23,18 @@ public class FileData {
     }
 
     public static String stringFromFile(String path) throws IOException {
-        return Files.readString(Paths.get(path), StandardCharsets.UTF_8);
+        log.trace("Accessing file:" + path);
+        try {
+            return Files.readString(
+                    Paths.get(
+                            FileData.class.getClassLoader().getResource(path).toURI()
+                    ),
+                    StandardCharsets.UTF_8
+            );
+        } catch (URISyntaxException e) {
+            log.error("Wrong path: " + path + "Error: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String jsonFromFile(String path) throws IOException {

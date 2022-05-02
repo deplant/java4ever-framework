@@ -3,12 +3,14 @@ package tech.deplant.java4ever.framework;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import tech.deplant.java4ever.binding.Boc;
+import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.FileArtifact;
 
 
 @AllArgsConstructor
 public class ContractTvc {
 
-    public static ContractTvc SAFE_MULTISIG = ofBundled("SafeMultisigWallet.tvc");
+    public static ContractTvc SAFE_MULTISIG = ContractTvc.ofStored(FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.tvc"));
 
     /**
      * TVC, encoded as base64 string.
@@ -16,12 +18,8 @@ public class ContractTvc {
     @Getter
     String tvcString;
 
-    public static ContractTvc ofStored(String path) {
-        return new ContractTvc(FileData.fileToBase64String(path));
-    }
-
-    public static ContractTvc ofBundled(String fileName) {
-        return ofStored(FileData.storedContractPath(fileName));
+    public static ContractTvc ofStored(Artifact artifact) {
+        return artifact.getAsTVC();
     }
 
 

@@ -4,6 +4,7 @@ import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.framework.artifact.FileArtifact;
 import tech.deplant.java4ever.framework.giver.Giver;
 
 import java.math.BigInteger;
@@ -17,7 +18,10 @@ import java.util.concurrent.TimeoutException;
 @Log4j2
 public class ContractTemplate {
 
-    public static final ContractTemplate SAFE_MULTISIG = ContractTemplate.ofBundled("SafeMultisigWallet.abi.json", "SafeMultisigWallet.tvc");
+    public static final ContractTemplate SAFE_MULTISIG = new ContractTemplate(
+            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json").getAsABI(),
+            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.tvc").getAsTVC()
+    );
     ContractAbi abi;
     ContractTvc tvc;
 
@@ -41,8 +45,9 @@ public class ContractTemplate {
                 ).get(300L, TimeUnit.SECONDS);
                 if (pLinker.exitValue() == 0) {
                     return new ContractTemplate(
-                            ContractAbi.ofStored(buildPath + "/" + contractName + ".abi.json"),
-                            ContractTvc.ofStored(buildPath + "/" + contractName + ".tvc"));
+                            FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".abi.json").getAsABI(),
+                            FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".tvc").getAsTVC()
+                    );
                 } else {
                     log.error("TvmLinker exit code:" + pLinker.exitValue());
                     return null;
@@ -55,10 +60,6 @@ public class ContractTemplate {
             log.error(e.getMessage());
             return null;
         }
-    }
-
-    public static ContractTemplate ofBundled(String abiFileName, String tvcFileName) {
-        return new ContractTemplate(ContractAbi.ofBundled(abiFileName), ContractTvc.ofBundled(tvcFileName));
     }
 
     public ContractTemplate insertPublicKey() {

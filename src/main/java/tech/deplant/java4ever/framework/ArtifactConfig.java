@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
+import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.FileArtifact;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,21 +23,16 @@ public class ArtifactConfig {
 
     Map<String, ContractTemplate> templates = new HashMap<>();
 
-    public ArtifactConfig(String configPath) {
-        String str = null;
-        try {
-            str = FileData.jsonFromFile(configPath);
-        } catch (IOException e) {
-            log.error("Path: {}, Error: {}", () -> configPath, () -> e.getMessage());
-        }
-        JsonObject jsonRoot = JsonParser.parseString(str).getAsJsonObject();
+    public ArtifactConfig(Artifact fileArtifact) {
+
+        JsonObject jsonRoot = JsonParser.parseString(fileArtifact.getAsJsonString()).getAsJsonObject();
         jsonRoot.get("contracts").getAsJsonArray().iterator().forEachRemaining(elem ->
                 {
                     var obj = elem.getAsJsonObject();
                     this.templates.put(obj.get("name").getAsString(),
                             new ContractTemplate(
-                                    ContractAbi.ofStored(obj.get("abiPath").getAsString()),
-                                    ContractTvc.ofStored(obj.get("tvcPath").getAsString())
+                                    FileArtifact.ofResourcePath(obj.get("abiPath").getAsString()).getAsABI(),
+                                    FileArtifact.ofResourcePath(obj.get("tvcPath").getAsString()).getAsTVC()
                             )
                     );
                 }

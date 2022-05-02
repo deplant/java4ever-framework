@@ -4,6 +4,8 @@ import com.google.gson.JsonParser;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.FileArtifact;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import java.util.Map;
 @Value
 public class ContractAbi {
 
-    public static ContractAbi SAFE_MULTISIG = ContractAbi.ofBundled("SafeMultisigWallet.abi.json");
+    public static ContractAbi SAFE_MULTISIG = ContractAbi.ofStored(FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json"));
     String abiJsonString;
     List<String> headers = new ArrayList<>();
     Map<String, Function> functions = new HashMap<>();
@@ -42,19 +44,8 @@ public class ContractAbi {
         this.abiJsonString = abiJsonString;
     }
 
-    public static ContractAbi ofStored(String path) {
-        String str = null;
-        try {
-            str = FileData.jsonFromFile(path);
-        } catch (IOException e) {
-            log.error("Path: {}, Error: {}", () -> path, () -> e.getMessage());
-            return null;
-        }
-        return new ContractAbi(str);
-    }
-
-    public static ContractAbi ofBundled(String fileName) {
-        return ofStored(FileData.storedContractPath(fileName));
+    public static ContractAbi ofStored(Artifact artifact) {
+        return artifact.getAsABI();
     }
 
     public boolean hasHeader(String name) {

@@ -81,17 +81,17 @@ public class ContractAbi {
      * <ul>
      *    <li>{@link #Contract}
      * When type is 'Contract'
-     * {@code value: AbiContract}
+     * {@code value: AbiContract}</li>
      *    <li>{@link #Json}
      * When type is 'Json'
-     * {@code value: string}
+     * {@code value: string}</li>
      *    <li>{@link #Handle}
      * When type is 'Handle'
-     * {@code value: AbiHandle}
+     * {@code value: AbiHandle}</li>
      *    <li>{@link #Serialized}
      * When type is 'Serialized'
-     * {@code value: AbiContract}
-     * <ul>
+     * {@code value: AbiContract}</li>
+     * </ul>
      */
     public enum AbiType {
         Contract,

@@ -84,7 +84,6 @@ public class Data {
      *
      * @param text Text string to encode.
      * @return Hex string
-     * @throws UnsupportedEncodingException
      */
     public static String strToHex(String text) {
         final byte[] data;

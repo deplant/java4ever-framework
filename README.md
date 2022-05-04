@@ -1,76 +1,57 @@
-# java4ever:framework
+# java4ever-framework
 
-[![JDK version](https://img.shields.io/badge/Java-17+-green.svg)](https://shields.io/)
-[![SDK version](https://img.shields.io/badge/TON%20SDK-v1.28.1-orange)](https://github.com/tonlabs/TON-SDK/tree/1.28.0)
+[![JDK version](https://img.shields.io/badge/Java-17.0.2+-green.svg)](https://shields.io/)
+[![SDK version](https://img.shields.io/badge/TON%20SDK-v1.33.0+-orange)](https://github.com/tonlabs/TON-SDK/tree/1.28.0)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 
-Java Framework for testing and integration with Everscale network.
-
-Java framework & binding library over Everscale TON-SDK. Native interconnection is not based on JNI derivatives but on
-modern [Foreign Memory Access API](https://openjdk.java.net/jeps/393)
+**java4ever:framework** is a Java library for development, testing & DApps for
+[Everscale](https://everscale.network/) network.
+Framework is based (and dependant) on [java4ever-binding](https://github.com/deplant/java4ever-framework) library.
 
 **Get quick help in our telegram
-channel:** [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/ton\_sdk)
+channel:** [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/deplant\_chat)
 
 ### Goals
 
-* Provide Java binding for TON-SDK based on modern Java native memory access
 * Provide Java framework for Everscale development and testing
-* Support any modern versions of TON-SDK, including your custom ones without rebuild
-* Support different ways to plug TON-SDK library
-* Support arbitrarily complex objects (with deep inheritance hierarchies and extensive use of generic types)
+* Provide Java binding for EVER-SDK based on modern Java native memory access
+* Support any modern versions of EVER-SDK without rebuild of binding itself
+* Support custom EVER-SDK binaries
 
-### Download (Framework & Binding)
+### Prerequisites
+
+* **JDK 17** (17.0.2 or higher)
+* **EVER-SDK** binary lib "**ton_client**" (build it yourself from github or get [precomiled ones](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries))
+* **java.library.path** set. Add correct path to library as argument to Java run: `-Djava.library.path=<path_to_ton_client>`.
+
+
+### Download
 
 #### Gradle
 
-```gradle
+```groovy
 dependencies {
-  implementation 'tech.deplant.binding:binding:1.1.5'
-  implementation 'tech.deplant.binding:framework:1.1.5'  
+    implementation 'tech.deplant.java4ever:java4ever-binding:1.1.1'
+    implementation 'tech.deplant.java4ever:java4ever-framework:1.1.1'    
 }
 ```
 
 #### Maven
 
 ```xml
-
 <dependency>
-    <groupId>tech.deplant.binding</groupId>
-    <artifactId>binding</artifactId>
-    <version>1.1.5</version>
+    <groupId>tech.deplant.java4ever</groupId>
+    <artifactId>java4ever-binding</artifactId>
+    <version>1.1.1</version>
 </dependency>
 <dependency>
-<groupId>tech.deplant.binding</groupId>
-<artifactId>framework</artifactId>
-<version>1.1.5</version>
+    <groupId>tech.deplant.java4ever</groupId>
+    <artifactId>java4ever-framework</artifactId>
+    <version>1.1.1</version>
 </dependency>
 ```
-
-### Download (Binding-only)
-
-#### Gradle
-
-```gradle
-dependencies {
-  implementation 'tech.deplant.binding:binding:1.1.5'
-}
-```
-
-#### Maven
-
-```xml
-
-<dependency>
-    <groupId>tech.deplant.binding</groupId>
-    <artifactId>binding</artifactId>
-    <version>1.1.5</version>
-</dependency>
-```
-
-## Features
 
 ### Can be used with any TON-SDK version
 
-You can use TON-SDK 1.16.0+ for your project or even load multiple libraries with different versions. You can use your
-custom TON-SDK fork if you like. 
+You can use TON-SDK 1.33.0+ for your project or even load multiple libraries with different versions. You can use your
+custom TON-SDK fork if you like. You can use even lower versions, but we will not fix any issues with it.

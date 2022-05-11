@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
-public class AccountController {
+public class Contract {
     @Getter
     @Setter
     private Account account;
@@ -21,16 +21,16 @@ public class AccountController {
     private Credentials externalOwner;
     @Getter
     @Setter
-    private AccountController internalOwner;
+    private Contract internalOwner;
 
-    public AccountController(Account account, Credentials externalOwner, AccountController internalOwner) {
+    public Contract(Account account, Credentials externalOwner, Contract internalOwner) {
         this.account = account;
         this.externalOwner = externalOwner;
         this.internalOwner = internalOwner;
     }
 
-    public static AccountController ofAddress(ContractAbi abi, Address address, Sdk sdk, Credentials externalOwner, AccountController internalOwner) throws Sdk.SdkException {
-        return new AccountController(Account.ofAddress(sdk, address, abi), externalOwner, internalOwner);
+    public static Contract ofAddress(ContractAbi abi, Address address, Sdk sdk, Credentials externalOwner, Contract internalOwner) throws Sdk.SdkException {
+        return new Contract(Account.ofAddress(sdk, address, abi), externalOwner, internalOwner);
     }
 
     public Map<String, Object> callExternalFromOwner(@NonNull String functionName, Map<String, Object> functionInputs) throws Sdk.SdkException {
@@ -41,7 +41,7 @@ public class AccountController {
     }
 
 
-    public Map<String, Object> callInternalFromCustom(AccountController customSender, @NonNull String functionName, Map<String, Object> functionInputs, BigInteger functionValue, boolean functionBounce) throws Sdk.SdkException {
+    public Map<String, Object> callInternalFromCustom(Contract customSender, @NonNull String functionName, Map<String, Object> functionInputs, BigInteger functionValue, boolean functionBounce) throws Sdk.SdkException {
         if (this.account.abi().hasFunction(functionName)) {
             convertInputs(functionName, functionInputs);
             Map<String, Object> result = this.account.callInternalFromMsig(

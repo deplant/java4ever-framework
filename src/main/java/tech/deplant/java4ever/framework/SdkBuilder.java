@@ -30,7 +30,7 @@ public class SdkBuilder {
     public SdkBuilder() {
     }
 
-    public SdkBuilder networkEndpoint(String[] endpoints) {
+    public SdkBuilder networkEndpoints(String[] endpoints) {
         this.endpoints = endpoints;
         return this;
     }

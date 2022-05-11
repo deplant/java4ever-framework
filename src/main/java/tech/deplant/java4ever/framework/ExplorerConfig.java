@@ -44,22 +44,22 @@ public class ExplorerConfig {
         return this;
     }
 
-    public ExplorerConfig addAccountController(String name, AccountController accountController) {
+    public ExplorerConfig addAccountController(String name, Contract contract) {
         this.contracts.put(name, new ExplorerConfig.ContractConfig(
-                accountController.account().abi().abiJsonString(),
-                accountController.account().address().makeAddrStd(),
-                accountController.internalOwner() != null ? accountController.internalOwner().account().address().makeAddrStd() : null,
-                accountController.externalOwner())
+                contract.account().abi().abiJsonString(),
+                contract.account().address().makeAddrStd(),
+                contract.internalOwner() != null ? contract.internalOwner().account().address().makeAddrStd() : null,
+                contract.externalOwner())
         );
         return this;
     }
 
-    public AccountController accountController(String name, Sdk sdk) throws Sdk.SdkException {
+    public Contract accountController(String name, Sdk sdk) throws Sdk.SdkException {
         var acc = this.contracts.get(name);
         if (acc == null) {
             return null;
         } else {
-            return AccountController.ofAddress(new ContractAbi(acc.abi()),
+            return Contract.ofAddress(new ContractAbi(acc.abi()),
                     new Address(acc.address()),
                     sdk,
                     acc.externalOwner(),

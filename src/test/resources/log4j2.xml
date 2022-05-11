@@ -4,10 +4,22 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <!-- Async Loggers will auto-flush in batches, so switch off immediateFlush. -->
+        <RandomAccessFile name="RandomAccessFile" fileName="java4ever-binding-trace.log" immediateFlush="false" append="false">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m %ex%n</Pattern>
+            </PatternLayout>
+        </RandomAccessFile>
     </appenders>
     <loggers>
-        <root level="trace">
-            <appenderRef ref="Console"/>
+        <logger name="tech.deplant.java4ever.framework" level="debug" additivity="false">
+            <appender-ref ref="RandomAccessFile" />
+        </logger>
+        <logger name="tech.deplant.java4ever.binding" level="trace" additivity="false">
+            <appender-ref ref="RandomAccessFile" />
+        </logger>
+        <root level="warn">
+            <appenderRef ref="RandomAccessFile"/>
         </root>
     </loggers>
 </configuration>

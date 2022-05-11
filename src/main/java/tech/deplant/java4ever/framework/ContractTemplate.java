@@ -16,20 +16,15 @@ import java.util.concurrent.TimeoutException;
 
 @Value
 @Log4j2
-public class ContractTemplate {
+public record ContractTemplate(ContractAbi abi,
+                               ContractTvc tvc) {
 
     public static final ContractTemplate SAFE_MULTISIG = new ContractTemplate(
             FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json").getAsABI(),
             FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.tvc").getAsTVC()
     );
-    ContractAbi abi;
-    ContractTvc tvc;
 
     //TODO convertPublicKeyToTonSafeFormat(@NonNull Context context, @NonNull String publicKey)
-    public ContractTemplate(ContractAbi abi, ContractTvc tvc) {
-        this.abi = abi;
-        this.tvc = tvc;
-    }
 
     public static ContractTemplate ofSoliditySource(Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) {
         try {
@@ -87,7 +82,7 @@ public class ContractTemplate {
     }
 
     public Map<String, Object> giveAndDeploy(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
-        var address = tech.deplant.java4ever.framework.Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
+        var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
         log.debug("Future address: " + address.makeAddrStd());
         giver.give(address, value);
         var result = sdk.syncCall(Processing.processMessage(

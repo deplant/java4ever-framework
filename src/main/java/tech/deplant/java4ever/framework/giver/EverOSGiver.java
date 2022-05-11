@@ -6,6 +6,7 @@ import tech.deplant.java4ever.framework.artifact.FileArtifact;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.Map;
 
 @Value
 public class EverOSGiver implements Giver {
@@ -28,14 +29,11 @@ public class EverOSGiver implements Giver {
 
     @Override
     public void give(Address to, BigInteger amount) throws Sdk.SdkException {
-        var params = new HashMap<String, Object>();
-        //sendTransaction
-        // {"dest":"<address>",
-        // "value":<nanotokens>,
-        // "bounce":false}'
-        params.put("dest", to.makeAddrStd());
-        params.put("value", amount);
-        params.put("bounce", false);
+        Map<String,Object> params = Map.of(
+            "dest", to.makeAddrStd(),
+            "value", amount,
+            "bounce", false
+        );
         this.account.callExternal(this.credentials, "sendTransaction", params);
     }
 }

@@ -1,19 +1,15 @@
 package tech.deplant.java4ever.framework.artifact;
 
 import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.framework.ContractAbi;
-import tech.deplant.java4ever.framework.ContractTvc;
 import tech.deplant.java4ever.framework.FileData;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
-import java.util.Objects;
 
 @Log4j2
 public record FileArtifact(Path path) implements Artifact {
@@ -33,7 +29,7 @@ public record FileArtifact(Path path) implements Artifact {
             return new FileArtifact(Paths.get(
                     FileData.class.getClassLoader().getResource(cleanedPath).toURI()
             ));
-        } catch (URISyntaxException| NullPointerException e) {
+        } catch (URISyntaxException | NullPointerException e) {
             log.error("Wrong path: Path: " + cleanedPath + ", Error: " + e.getMessage());
             return null;
         }
@@ -53,7 +49,7 @@ public record FileArtifact(Path path) implements Artifact {
     public byte[] getAsBytes() {
         try {
             return Files.readAllBytes(this.path);
-        }  catch (IOException e) {
+        } catch (IOException e) {
             log.error("File access error! Path: " + this.path + ", Error: " + e.getMessage());
             return new byte[0];
         }
@@ -63,7 +59,7 @@ public record FileArtifact(Path path) implements Artifact {
     public String getAsString() {
         try {
             return Files.readString(this.path);
-        }  catch (IOException e) {
+        } catch (IOException e) {
             log.error("File access error! Path: " + this.path + ", Error: " + e.getMessage());
             return "";
         }
@@ -79,13 +75,4 @@ public record FileArtifact(Path path) implements Artifact {
         return Base64.getEncoder().encodeToString(getAsBytes());
     }
 
-    @Override
-    public ContractAbi getAsABI() {
-        return new ContractAbi(getAsJsonString());
-    }
-
-    @Override
-    public ContractTvc getAsTVC() {
-        return new ContractTvc(getAsBase64String());
-    }
 }

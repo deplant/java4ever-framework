@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Contract is a storage for all your contract stuff - abi, account info from blockchain.
@@ -23,15 +24,15 @@ import java.util.Map;
 @Value
 public class Account {
 
-    tech.deplant.java4ever.framework.Sdk sdk;
-    tech.deplant.java4ever.framework.Address address;
-    tech.deplant.java4ever.framework.ContractAbi abi;
+    Sdk sdk;
+    Address address;
+    ContractAbi abi;
     int status;
     BigDecimal balance;
     String boc;
     Instant lastPaidUtc;
 
-    public Account(tech.deplant.java4ever.framework.Sdk sdk, tech.deplant.java4ever.framework.Address address, tech.deplant.java4ever.framework.ContractAbi abi, int status, BigDecimal balance, String boc, Instant lastPaidUtc) {
+    public Account(Sdk sdk, Address address, ContractAbi abi, int status, BigDecimal balance, String boc, Instant lastPaidUtc) {
         this.sdk = sdk;
         this.address = address;
         this.abi = abi;
@@ -41,7 +42,7 @@ public class Account {
         this.lastPaidUtc = lastPaidUtc;
     }
 
-    public static Account ofAddress(Sdk sdk, tech.deplant.java4ever.framework.Address address, tech.deplant.java4ever.framework.ContractAbi abi) throws Sdk.SdkException {
+    public static Account ofAddress(Sdk sdk, Address address, ContractAbi abi) throws Sdk.SdkException {
         Map<String, Object> filter = new HashMap<>();
         filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
         Object[] results = sdk.syncCall(Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)).result();
@@ -49,7 +50,7 @@ public class Account {
         return new Account(sdk, address, abi, collection.acc_type(), Data.hexToDec(collection.balance(), 9), collection.boc(), Instant.ofEpochSecond(collection.last_paid()));
     }
 
-    public static List<Account> ofAddressList(Sdk sdk, List<tech.deplant.java4ever.framework.Address> addresses, ContractAbi abi) throws Sdk.SdkException {
+    public static List<Account> ofAddressList(Sdk sdk, List<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
         Map<String, Object> filter = new HashMap<>();
         filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.Address::makeAddrStd).toArray(String[]::new)));
         return Arrays
@@ -62,8 +63,12 @@ public class Account {
                 ).toList();
     }
 
-    private Abi.ResultOfEncodeMessage encodeMessage(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
-        return this.sdk.syncCall(Abi.encodeMessage(
+    public boolean isActive() {
+        return status() == 1;
+    }
+
+    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
+        return Abi.encodeMessage(
                 this.sdk().context(),
                 this.abi.abiJson(),
                 this.address.makeAddrStd(),
@@ -75,68 +80,66 @@ public class Account {
                 ),
                 Abi.Signer.None,
                 null
-        ));
-    }
-
-    public boolean isActive() {
-        return status() == 1;
-    }
-
-    public Map<String, Object> runGetter(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
-        Tvm.ResultOfRunTvm msg = this.sdk.syncCall(Tvm.runTvm(
+        ).thenCompose(body ->
+                Tvm.runTvm(
                         this.sdk().context(),
-                        encodeMessage(abiFunction, input).message(),
+                        body.message(),
                         boc(),
                         null,
                         this.abi.abiJson(),
                         null,
                         false
                 )
-        );
-        if (msg.decoded().isPresent()) {
-            return tech.deplant.java4ever.framework.Message.decodeOutputMessage(msg.decoded().get());
-        } else {
-            return new HashMap<>();
-        }
+        ).thenApply(msg -> {
+            if (msg.decoded().isPresent()) {
+                return Message.decodeOutputMessage(msg.decoded().get());
+            } else {
+                return Map.of();
+            }
+        });
     }
 
-    public Map<String, Object> callExternal(Credentials credentials, String functionName, Map<String, Object> functionInputs) throws Sdk.SdkException {
-        return Message.decodeOutputMessage(this.sdk.syncCall(Processing.processMessage(this.sdk.context(),
+    public CompletableFuture<Map<String, Object>> callExternal(Credentials credentials, String functionName, Map<String, Object> functionInputs) throws Sdk.SdkException {
+        return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
+    }
+
+    public CompletableFuture<Map<String, Object>> callInternalFromMsig(Credentials credentials, Address msigAddress, BigInteger transactionValue, String functionName, BigInteger functionValue, Map<String, Object> functionInputs, boolean functionBounce) throws Sdk.SdkException {
+        return Abi.encodeMessageBody(
+                this.sdk.context(),
                 this.abi.abiJson(),
-                this.address().makeAddrStd(),
-                null,
                 new Abi.CallSet(functionName, null, functionInputs),
-                credentials.signer(), null, false, null)).decoded().orElseThrow());
+                true,
+                credentials.signer(),
+                null
+        ).thenCompose(payload ->
+                {
+                    Map<String, Object> inputs = Map.of(
+                            "dest", this.address.makeAddrStd(),
+                            "value", transactionValue.toString(),
+                            "bounce", true,
+                            "flags", 0,
+                            "payload", payload.body()
+                    );
+                    return processMessage(ContractAbi.SAFE_MULTISIG, msigAddress, null, credentials, "sendTransaction", null, inputs);
+                }
+        );
     }
 
-    public Map<String, Object> callInternalFromMsig(Credentials credentials, Address msigAddress, BigInteger transactionValue, String functionName, BigInteger functionValue, Map<String, Object> functionInputs, boolean functionBounce) throws Sdk.SdkException {
-        String payload = this.sdk.syncCall(
-                Abi.encodeMessageBody(
-                        this.sdk.context(),
-                        this.abi.abiJson(),
-                        new Abi.CallSet(functionName, null, functionInputs),
-                        true,
-                        credentials.signer(),
-                        null
-                )
-        ).body();
-        var msigInputs = new HashMap<String, Object>();
-        //				{"name":"dest","type":"address"},
-        //				{"name":"value","type":"uint128"},
-        //				{"name":"bounce","type":"bool"},
-        //				{"name":"flags","type":"uint8"},
-        //				{"name":"payload","type":"cell"}'
-        msigInputs.put("dest", this.address.makeAddrStd());
-        msigInputs.put("value", transactionValue.toString());
-        msigInputs.put("bounce", true);
-        msigInputs.put("flags", 0);
-        msigInputs.put("payload", payload);
-        return Message.decodeOutputMessage(this.sdk.syncCall(Processing.processMessage(this.sdk.context(),
-                ContractAbi.SAFE_MULTISIG.abiJson(),
-                msigAddress.makeAddrStd(),
-                null,
-                new Abi.CallSet("sendTransaction", null, msigInputs),
-                credentials.signer(), null, false, null)).decoded().orElseThrow());
+    private CompletableFuture<Map<String, Object>> processMessage(ContractAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader header, Map<String, Object> functionInputs) {
+        return Processing.processMessage(this.sdk.context(),
+                        abi.abiJson(),
+                        address.makeAddrStd(),
+                        deploySet,
+                        new Abi.CallSet(functionName, header, functionInputs),
+                        credentials.signer(), null, false, null)
+                .thenApply(msg -> {
+                    if (msg.decoded().isPresent()) {
+                        return Message.decodeOutputMessage(msg.decoded().get());
+                    } else {
+                        return Map.of();
+                    }
+                });
+
     }
 
     private Map<String, Object> convertInputsToCompatible(String functionName, Map<String, Object> functionInputs) {

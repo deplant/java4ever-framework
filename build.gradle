@@ -142,6 +142,7 @@ tasks.withType(JavaExec) {
     jvmArgs += "--add-modules=jdk.incubator.foreign"
     jvmArgs += "--enable-native-access=java4ever.binding"
     jvmArgs += "-Djava.library.path=c:/opt/sdk/"
+    jvmArgs += "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 }
 
 java {

@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework.artifact;
 
-import tech.deplant.java4ever.framework.ContractAbi;
-import tech.deplant.java4ever.framework.ContractTvc;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
 

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.giver;
+package tech.deplant.java4ever.framework.contract;
 
 import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;

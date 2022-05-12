@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -19,12 +20,13 @@ public class Sdk {
     Context context;
     long timeout;
     Double version;
+    ObjectMapper mapper;
 
-    public static Sdk fromContext(Context context, long timeout) {
+    public static Sdk ofContext(Context context, long timeout, ObjectMapper mapper) {
         try {
             var verString = Client.version(context).get(timeout, TimeUnit.SECONDS).version();
             var ver2 = Double.valueOf(verString.substring(0, verString.lastIndexOf(".")));
-            return new Sdk(context, timeout, ver2);
+            return new Sdk(context, timeout, ver2, mapper);
         } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
@@ -37,29 +39,8 @@ public class Sdk {
         }
     }
 
-    public static Sdk fromConfig(LibraryLoader loader, Context.Config config, long timeout) {
-        return fromContext(new Context(loader, config.toJson()), timeout);
-    }
-
-    public static Sdk fromDefault(LibraryLoader loader) {
-        return fromContext(new Context(loader, "{}"), 30L);
-    }
-
-    public static Sdk fromEndpoints(LibraryLoader loader, String[] endpoints, long timeout) {
-        return fromConfig(loader, new Context.Config(
-                new Context.NetworkConfig(
-                        endpoints,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                ),
-                null,
-                null), timeout);
+    public static Sdk ofContextConfig(LibraryLoader loader, Context.Config config, long timeout, ObjectMapper mapper) {
+        return ofContext(new Context(loader, config.toJson()), timeout, mapper);
     }
 
     public <T> T syncCall(CompletableFuture<T> future) throws SdkException {

@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.ContractAbi;
+import tech.deplant.java4ever.framework.contract.ControllableContract;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,22 +46,22 @@ public class ExplorerConfig {
         return this;
     }
 
-    public ExplorerConfig addAccountController(String name, Contract contract) {
+    public ExplorerConfig addAccountController(String name, ControllableContract controllableContract) {
         this.contracts.put(name, new ExplorerConfig.ContractConfig(
-                contract.account().abi().abiJsonString(),
-                contract.account().address().makeAddrStd(),
-                contract.internalOwner() != null ? contract.internalOwner().account().address().makeAddrStd() : null,
-                contract.externalOwner())
+                controllableContract.account().abi().abiJsonString(),
+                controllableContract.account().address().makeAddrStd(),
+                controllableContract.internalOwner() != null ? controllableContract.internalOwner().account().address().makeAddrStd() : null,
+                controllableContract.externalOwner())
         );
         return this;
     }
 
-    public Contract accountController(String name, Sdk sdk) throws Sdk.SdkException {
+    public ControllableContract accountController(String name, Sdk sdk) throws Sdk.SdkException {
         var acc = this.contracts.get(name);
         if (acc == null) {
             return null;
         } else {
-            return Contract.ofAddress(new ContractAbi(acc.abi()),
+            return ControllableContract.ofAddress(new ContractAbi(acc.abi()),
                     new Address(acc.address()),
                     sdk,
                     acc.externalOwner(),

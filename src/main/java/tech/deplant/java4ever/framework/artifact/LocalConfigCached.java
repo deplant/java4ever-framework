@@ -3,7 +3,9 @@ package tech.deplant.java4ever.framework.artifact;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Solc;
+import tech.deplant.java4ever.framework.TvmLinker;
+import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +28,8 @@ public record LocalConfigCached(String solcPath,
                     var obj = elem.getAsJsonObject();
                     templates.put(obj.get("name").getAsString(),
                             new ContractTemplate(
-                                    FileArtifact.ofResourcePath(obj.get("abiPath").getAsString()).getAsABI(),
-                                    FileArtifact.ofResourcePath(obj.get("tvcPath").getAsString()).getAsTVC()
+                                    ContractAbi.ofArtifact(FileArtifact.ofResourcePath(obj.get("abiPath").getAsString())),
+                                    ContractTvc.of(FileArtifact.ofResourcePath(obj.get("tvcPath").getAsString()))
                             )
                     );
                 }
@@ -48,7 +50,7 @@ public record LocalConfigCached(String solcPath,
         try {
             return new Solc(this.solcPath);
         } catch (Exception e) {
-            log.error("Solidity Compiler init failed! " + e.getMessage());
+            log.warn("Solidity Compiler init failed! " + e.getMessage());
             return null;
         }
 
@@ -59,18 +61,18 @@ public record LocalConfigCached(String solcPath,
         try {
             return new TvmLinker(this.linkerPath, this.stdLibPath);
         } catch (Exception e) {
-            log.error("Linker init failed! " + e.getMessage());
+            log.warn("Linker init failed! " + e.getMessage());
             return null;
         }
     }
 
     @Override
     public ContractAbi getAbi(String name) {
-        return this.templates.get(name).abi();
+        return this.templates().get(name).abi();
     }
 
     @Override
     public ContractTvc getTvc(String name) {
-        return this.templates.get(name).tvc();
+        return this.templates().get(name).tvc();
     }
 }

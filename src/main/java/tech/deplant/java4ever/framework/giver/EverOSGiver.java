@@ -1,11 +1,15 @@
 package tech.deplant.java4ever.framework.giver;
 
 import lombok.Value;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Address;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.FileArtifact;
+import tech.deplant.java4ever.framework.contract.Account;
+import tech.deplant.java4ever.framework.contract.Giver;
 
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 
 @Value
@@ -23,16 +27,16 @@ public class EverOSGiver implements Giver {
         this.account = Account.ofAddress(
                 sdk,
                 ADDRESS,
-                FileArtifact.ofResourcePath(ABI_FILE_NAME).getAsABI()
+                ContractAbi.ofArtifact(sdk, FileArtifact.ofResourcePath(ABI_FILE_NAME))
         );
     }
 
     @Override
     public void give(Address to, BigInteger amount) throws Sdk.SdkException {
-        Map<String,Object> params = Map.of(
-            "dest", to.makeAddrStd(),
-            "value", amount,
-            "bounce", false
+        Map<String, Object> params = Map.of(
+                "dest", to.makeAddrStd(),
+                "value", amount,
+                "bounce", false
         );
         this.account.callExternal(this.credentials, "sendTransaction", params);
     }

@@ -1,5 +1,10 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.Context;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 
@@ -7,6 +12,12 @@ public class SdkBuilder {
 
     // JavaConfig
     private long timeout = 30L;
+    private ObjectMapper mapper = JsonMapper.builder() // or different mapper for other format
+            .addModule(new ParameterNamesModule())
+            .addModule(new Jdk8Module())
+            .addModule(new JavaTimeModule())
+            // and possibly other configuration, modules, then:
+            .build();
     //Context.NetworkConfig
     private String[] endpoints;
     @Deprecated
@@ -112,26 +123,31 @@ public class SdkBuilder {
         return this;
     }
 
+    public SdkBuilder mapper(ObjectMapper mapper) {
+        this.mapper = mapper;
+        return this;
+    }
+
     public Sdk create(LibraryLoader loader) {
-        return Sdk.fromConfig(loader, new Context.Config(
+        return Sdk.ofContextConfig(loader, new Context.Config(
                 new Context.NetworkConfig(
-                        endpoints,
-                        server_address,
-                        network_retries_count,
-                        message_retries_count,
-                        message_processing_timeout,
-                        wait_for_timeout,
-                        out_of_sync_threshold,
-                        reconnect_timeout,
-                        access_key),
+                        this.endpoints,
+                        this.server_address,
+                        this.network_retries_count,
+                        this.message_retries_count,
+                        this.message_processing_timeout,
+                        this.wait_for_timeout,
+                        this.out_of_sync_threshold,
+                        this.reconnect_timeout,
+                        this.access_key),
                 new Context.CryptoConfig(
-                        mnemonic_dictionary,
-                        mnemonic_word_count,
-                        hdkey_derivation_path),
+                        this.mnemonic_dictionary,
+                        this.mnemonic_word_count,
+                        this.hdkey_derivation_path),
                 new Context.AbiConfig(
-                        workchain,
-                        message_expiration_timeout,
-                        message_expiration_timeout_grow_factor)
-        ), timeout);
+                        this.workchain,
+                        this.message_expiration_timeout,
+                        this.message_expiration_timeout_grow_factor)
+        ), this.timeout, this.mapper);
     }
 }

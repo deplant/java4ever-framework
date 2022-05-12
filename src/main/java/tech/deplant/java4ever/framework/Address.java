@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework;
 
 import lombok.Value;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.math.BigInteger;
 import java.util.Map;

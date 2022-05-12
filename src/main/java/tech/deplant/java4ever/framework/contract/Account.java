@@ -1,14 +1,15 @@
-package tech.deplant.java4ever.framework;
+package tech.deplant.java4ever.framework.contract;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.type.AbiAddressConverter;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,7 +71,7 @@ public class Account {
     public CompletableFuture<Map<String, Object>> runGetter(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
         return Abi.encodeMessage(
                 this.sdk().context(),
-                this.abi.abiJson(),
+                this.abi.ABI(),
                 this.address.makeAddrStd(),
                 null,
                 new Abi.CallSet(
@@ -86,7 +87,7 @@ public class Account {
                         body.message(),
                         boc(),
                         null,
-                        this.abi.abiJson(),
+                        this.abi.ABI(),
                         null,
                         false
                 )
@@ -103,31 +104,31 @@ public class Account {
         return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
     }
 
-    public CompletableFuture<Map<String, Object>> callInternalFromMsig(Credentials credentials, Address msigAddress, BigInteger transactionValue, String functionName, BigInteger functionValue, Map<String, Object> functionInputs, boolean functionBounce) throws Sdk.SdkException {
-        return Abi.encodeMessageBody(
-                this.sdk.context(),
-                this.abi.abiJson(),
-                new Abi.CallSet(functionName, null, functionInputs),
-                true,
-                credentials.signer(),
-                null
-        ).thenCompose(payload ->
-                {
-                    Map<String, Object> inputs = Map.of(
-                            "dest", this.address.makeAddrStd(),
-                            "value", transactionValue.toString(),
-                            "bounce", true,
-                            "flags", 0,
-                            "payload", payload.body()
-                    );
-                    return processMessage(ContractAbi.SAFE_MULTISIG, msigAddress, null, credentials, "sendTransaction", null, inputs);
-                }
-        );
-    }
+//    public CompletableFuture<Map<String, Object>> callInternalFromMsig(Credentials credentials, Address msigAddress, BigInteger transactionValue, String functionName, BigInteger functionValue, Map<String, Object> functionInputs, boolean functionBounce) throws Sdk.SdkException {
+//        return Abi.encodeMessageBody(
+//                this.sdk.context(),
+//                this.abi.ABI(),
+//                new Abi.CallSet(functionName, null, functionInputs),
+//                true,
+//                credentials.signer(),
+//                null
+//        ).thenCompose(payload ->
+//                {
+//                    Map<String, Object> inputs = Map.of(
+//                            "dest", this.address.makeAddrStd(),
+//                            "value", transactionValue.toString(),
+//                            "bounce", true,
+//                            "flags", 0,
+//                            "payload", payload.body()
+//                    );
+//                    return processMessage(ContractAbi.SAFE_MULTISIG, msigAddress, null, credentials, "sendTransaction", null, inputs);
+//                }
+//        );
+//    }
 
     private CompletableFuture<Map<String, Object>> processMessage(ContractAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader header, Map<String, Object> functionInputs) {
         return Processing.processMessage(this.sdk.context(),
-                        abi.abiJson(),
+                        abi.ABI(),
                         address.makeAddrStd(),
                         deploySet,
                         new Abi.CallSet(functionName, header, functionInputs),

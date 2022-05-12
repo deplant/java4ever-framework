@@ -1,30 +1,27 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
-import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Crypto;
+import tech.deplant.java4ever.framework.artifact.Artifact;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 @Log4j2
-@Value
-public class Credentials {
+public record Credentials(@SerializedName("public") String publicKey, @SerializedName("secret") String secretKey) {
+
 
     public final static Credentials NONE = new Credentials(
             "0000000000000000000000000000000000000000000000000000000000000000",
             "0000000000000000000000000000000000000000000000000000000000000000"
     );
-    @SerializedName("public")
-    String publicKey;
-    @SerializedName("secret")
-    String secretKey;
+
 
     private static String generateEntropy(Sdk sdk) throws Sdk.SdkException {
         return sdk.syncCall(Crypto.generateRandomBytes(sdk.context(), 512)).bytes();
@@ -46,26 +43,26 @@ public class Credentials {
         return generateSeedOfRandom(sdk, 24);
     }
 
-    public static Credentials ofStored(String path) {
-        String str = null;
-        try {
-            str = FileData.jsonFromFile(path);
-        } catch (IOException e) {
-            log.error("Path: {}, Error: {}", () -> path, () -> e.getMessage());
-            return null;
-        }
-        JsonObject jsonRoot = JsonParser.parseString(ContractAbi.SAFE_MULTISIG.abiJsonString()).getAsJsonObject();
-        return new Credentials(jsonRoot.get("public").getAsString(), jsonRoot.get("secret").getAsString());
+    public static CompletableFuture<Credentials> ofArtifact(Sdk sdk, Artifact artifact) {
+        return CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return sdk.mapper().readValue(artifact.getAsJsonString(), Credentials.class);
+                    } catch (JsonProcessingException e) {
+                        log.error("JSON parsing error! \"" + e.getMessage() + "\"");
+                        return Credentials.NONE;
+                    }
+                });
     }
 
     /**
      * Generates new random KeyPair by using crypto.generate_random_sign_keys() method of SDK.
      */
-    public static Credentials ofRandom(Sdk sdk) throws Sdk.SdkException {
-        var randomPair = sdk.syncCall(Crypto.generateRandomSignKeys(sdk.context()));
-        return new Credentials(randomPair.publicKey(), randomPair.secretKey());
+    public static CompletableFuture<Credentials> RANDOM(Sdk sdk) throws Sdk.SdkException {
+        return Crypto.generateRandomSignKeys(sdk.context()).thenApply(pair -> new Credentials(pair.publicKey(), pair.secretKey()));
     }
 
+    //TODO Convert to Async
     private static Credentials ofSeed(Sdk sdk, String seed, Number words) throws Sdk.SdkException {
         if (sdk.syncCall(Crypto.mnemonicVerify(sdk.context(), seed, null, words)).valid()) {
             var pairFromSeed = sdk.syncCall(Crypto.mnemonicDeriveSignKeys(sdk.context(), seed, null, null, words));
@@ -76,10 +73,12 @@ public class Credentials {
 
     }
 
+    //TODO Convert to Async
     public static Credentials ofSeed12(Sdk sdk, String seed) throws Sdk.SdkException {
         return ofSeed(sdk, seed, 12);
     }
 
+    //TODO Convert to Async
     public static Credentials ofSeed24(Sdk sdk, String seed) throws Sdk.SdkException {
         return ofSeed(sdk, seed, 24);
     }
@@ -92,10 +91,12 @@ public class Credentials {
         return new Crypto.KeyPair(this.publicKey, this.secretKey);
     }
 
+    //TODO Convert to Async
     public String publicKeyTonSafe(Sdk sdk) throws Sdk.SdkException {
         return sdk.syncCall(Crypto.convertPublicKeyToTonSafeFormat(sdk.context(), this.publicKey)).tonPublicKey();
     }
 
+    //TODO Remove
     public void store(String path) throws IOException {
         FileWriter file = new FileWriter(path);
         try {

@@ -51,7 +51,7 @@ public class ExplorerConfig {
                 controllableContract.account().abi().abiJsonString(),
                 controllableContract.account().address().makeAddrStd(),
                 controllableContract.internalOwner() != null ? controllableContract.internalOwner().account().address().makeAddrStd() : null,
-                controllableContract.externalOwner())
+                controllableContract.tvmKey())
         );
         return this;
     }

@@ -1,7 +1,6 @@
 package tech.deplant.java4ever.framework.artifact;
 
 import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.framework.FileData;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public record FileArtifact(Path path) implements Artifact {
 
         try {
             return new FileArtifact(Paths.get(
-                    FileData.class.getClassLoader().getResource(cleanedPath).toURI()
+                    FileArtifact.class.getClassLoader().getResource(cleanedPath).toURI()
             ));
         } catch (URISyntaxException | NullPointerException e) {
             log.error("Wrong path: Path: " + cleanedPath + ", Error: " + e.getMessage());

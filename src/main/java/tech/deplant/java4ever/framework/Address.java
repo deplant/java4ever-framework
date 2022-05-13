@@ -32,7 +32,7 @@ public class Address {
     public static Address ofFutureDeploy(Sdk sdk, ContractTemplate template, int workchainId, Map<String, Object> initialData, Credentials credentials) throws Sdk.SdkException {
         return new Address(sdk.syncCall(Abi.encodeMessage(
                 sdk.context(),
-                template.abi().abiJson(),
+                template.abi().ABI(),
                 null,
                 new Abi.DeploySet(template.tvc().tvcString(), workchainId, initialData, credentials.publicKey()),
                 null,

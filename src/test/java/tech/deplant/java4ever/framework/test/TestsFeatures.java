@@ -10,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.binding.GraphQL;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
-import tech.deplant.java4ever.framework.Message;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
+import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.contract.Msig;
+import tech.deplant.java4ever.framework.template.ContractTemplate;
+import tech.deplant.java4ever.framework.template.MsigTemplate;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -28,6 +30,27 @@ public class TestsFeatures {
 //        var collection = new Gson().fromJson(new Gson().toJson(results[0]), Account.AccountQueryCollection.class);
 //        return new Account(sdk, address, abi, collection.acc_type(), Data.hexToDec(collection.balance(), 9), collection.boc(), Instant.ofEpochSecond(collection.last_paid()));
 //    }
+
+    @Test
+    public void testBetterComposition() {
+        final Sdk sdkDEV = new SdkBuilder()
+                .networkEndpoints(SdkBuilder.Network.DEV_NET.endpoints())
+                .create(new JavaLibraryPathLoader());
+        final Sdk sdkSE = new SdkBuilder()
+                .networkEndpoints(new String[]{"http://80.78.254.199/"})
+                .timeout(50L)
+                .create(new JavaLibraryPathLoader());
+
+
+        var giver = new Msig(sdkDEV, new Address("0:b238570f9ebe536885b6060c7c9d74a20704e5efa844b17afcf814c7b9ddcfee"), credentialsGiver);
+        ContractTemplate<Msig> template = new MsigTemplate();
+        Msig msig = template.deployWithGiver(sdkDEV, 0, Credentials.RANDOM(sdkDEV), giver, new BigInteger("2"));
+        msig.callExternal("", functionInputs);
+
+        Msig msig2 = new Msig(sdkDEV, address);
+
+    }
+
 
     @Test
     public void testJacksonConvert() throws ExecutionException, InterruptedException {

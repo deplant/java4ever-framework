@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.JSONContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,16 +15,20 @@ import java.util.Map;
 @Value
 public class ContractAbi implements IAbi {
 
-    //public static ContractAbi SAFE_MULTISIG = ContractAbi.ofStored(FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json"));
+    public static final ContractAbi SAFE_MULTISIG = ContractAbi.ofArtifact(FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json"));
     String abiJsonString;
     List<String> headers;
     Map<String, Function> functions;
 
-    public static ContractAbi ofArtifact(Sdk sdk, Artifact artifact) {
-        var abiJsonString = artifact.getAsJsonString();
-        var node = sdk.mapper().valueToTree(abiJsonString);
-        return new ContractAbi(abiJsonString, extractHeaders(node), extractFunctions(node));
+    public static ContractAbi ofArtifact(Artifact artifact) {
+        return ofJson(artifact.getAsJsonString());
     }
+
+    public static ContractAbi ofJson(String json) {
+        var node = JSONContext.MAPPER.valueToTree(json);
+        return new ContractAbi(json, extractHeaders(node), extractFunctions(node));
+    }
+
 
     private static List<String> extractHeaders(JsonNode node) {
         var headers = new ArrayList<String>();

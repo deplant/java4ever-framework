@@ -13,7 +13,6 @@ module java4ever.framework {
     exports tech.deplant.java4ever.framework.contract;
     exports tech.deplant.java4ever.framework.template;
     exports tech.deplant.java4ever.framework.type;
-    exports tech.deplant.java4ever.framework.giver;
     opens tech.deplant.java4ever.framework to com.google.gson;
     opens tech.deplant.java4ever.framework.giver to com.google.gson;
     opens tech.deplant.java4ever.framework.artifact to com.google.gson;

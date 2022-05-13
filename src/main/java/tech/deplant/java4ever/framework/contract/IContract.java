@@ -1,23 +1,25 @@
 package tech.deplant.java4ever.framework.contract;
 
+import lombok.NonNull;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.template.ContractTemplate;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public interface IContract {
 
-    Account account();
+    Credentials tvmKey();
 
-    ContractTemplate template();
+    CompletableFuture<Map<String, Object>> runGetter();
 
-    Credentials externalOwner();
+    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName);
 
-    IContract internalOwner();
+    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs);
+
+    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Credentials credentials);
+
 
     interface ExternallyOwnable {
-
-    }
-
-    interface InternallyOwnable {
 
     }
 
@@ -32,13 +34,4 @@ public interface IContract {
     interface ExternallyDeployable {
 
     }
-
-
-//    CompletableFuture<Map<String, Object>> runGetter();
-//
-//    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName);
-//
-//    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs);
-//
-//    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Credentials credentials);
 }

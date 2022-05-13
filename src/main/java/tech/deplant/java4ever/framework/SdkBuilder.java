@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.Getter;
 import tech.deplant.java4ever.binding.Context;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 
@@ -37,7 +38,6 @@ public class SdkBuilder {
     private Integer workchain = 0;
     private Integer message_expiration_timeout = 40000;
     private Integer message_expiration_timeout_grow_factor = null;
-
     public SdkBuilder() {
     }
 
@@ -149,5 +149,34 @@ public class SdkBuilder {
                         this.message_expiration_timeout,
                         this.message_expiration_timeout_grow_factor)
         ), this.timeout, this.mapper);
+    }
+
+    public enum Network {
+
+        MAIN_NET(new String[]{
+                "https://eri01.main.everos.dev/",
+                "https://gra01.main.everos.dev/",
+                "https://gra02.main.everos.dev/",
+                "https://lim01.main.everos.dev/",
+                "https://rbx01.main.everos.dev/"
+        }),
+
+        DEV_NET(new String[]{
+                "https://eri01.net.everos.dev/",
+                "https://rbx01.net.everos.dev/",
+                "https://gra01.net.everos.dev/"
+        }),
+        LOCALHOST(new String[]{
+                "http://0.0.0.0/",
+                "http://127.0.0.1/",
+                "http://localhost/"
+        });
+
+        @Getter
+        String[] endpoints;
+
+        Network(String[] endpoints) {
+            this.endpoints = endpoints;
+        }
     }
 }

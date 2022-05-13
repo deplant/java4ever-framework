@@ -3,8 +3,9 @@ package tech.deplant.java4ever.framework.contract;
 
 import lombok.Value;
 import tech.deplant.java4ever.framework.Address;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.template.MsigTemplate;
+import tech.deplant.java4ever.framework.artifact.ContractAbi;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -12,11 +13,13 @@ import java.util.Map;
 @Value
 public class Msig extends ControllableContract implements Giver {
 
-    public static Msig ofAddress(Sdk sdk, Address address) {
-        var template = new MsigTemplate(sdk);
-        return new Msig(Account.ofAddress(sdk, address, template.abi()), template);
+    public Msig(Sdk sdk, Address address) {
+        super(sdk, address, Credentials.NONE, ContractAbi.SAFE_MULTISIG);
     }
 
+    public Msig(Sdk sdk, Address address, Credentials owner) {
+        super(sdk, address, owner, ContractAbi.SAFE_MULTISIG);
+    }
 
 //    public static Msig ofLocalConfig(ExplorerConfig config, Sdk sdk, int msigNumber) throws Sdk.SdkException {
 //        return new Msig(config.accountController("msig" + msigNumber, sdk));

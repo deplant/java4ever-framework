@@ -54,7 +54,6 @@ public class TestsFeatures {
 
     @Test
     public void testJacksonConvert() throws ExecutionException, InterruptedException {
-
         final Sdk sdk = new SdkBuilder()
                 .networkEndpoints(new String[]{"http://80.78.254.199/"})
                 .timeout(50L)

@@ -28,7 +28,7 @@ public record LocalConfigCached(String solcPath,
                     var obj = elem.getAsJsonObject();
                     templates.put(obj.get("name").getAsString(),
                             new ContractTemplate(
-                                    ContractAbi.ofArtifact(FileArtifact.ofResourcePath(obj.get("abiPath").getAsString())),
+                                    ContractAbi.ofArtifact(sdk, FileArtifact.ofResourcePath(obj.get("abiPath").getAsString())),
                                     ContractTvc.of(FileArtifact.ofResourcePath(obj.get("tvcPath").getAsString()))
                             )
                     );

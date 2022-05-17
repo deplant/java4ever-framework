@@ -62,7 +62,7 @@ public class ControllableContract implements IContract {
 //        return callInternalFromCustom(this.internalOwner, functionName, functionInputs, functionValue, functionBounce);
 //    }
 
-//    public static List<Account> ofAddressList(Sdk sdk, List<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
+//    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
 //        filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.Address::makeAddrStd).toArray(String[]::new)));
 //        return Arrays

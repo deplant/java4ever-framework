@@ -1,7 +1,10 @@
-package tech.deplant.java4ever.framework;
+package tech.deplant.java4ever.framework.type;
 
 import lombok.Value;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Data;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.math.BigInteger;

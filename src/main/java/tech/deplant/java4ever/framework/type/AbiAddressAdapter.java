@@ -2,7 +2,6 @@ package tech.deplant.java4ever.framework.type;
 
 import com.google.gson.*;
 import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.framework.Address;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;

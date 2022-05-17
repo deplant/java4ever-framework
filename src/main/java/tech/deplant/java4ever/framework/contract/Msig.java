@@ -2,16 +2,20 @@ package tech.deplant.java4ever.framework.contract;
 
 
 import lombok.Value;
-import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.Map;
 
 @Value
 public class Msig extends ControllableContract implements Giver {
+
+    public Msig(IContract contract) {
+        super(contract.sdk(), contract.address(), contract.tvmKey(), contract.abi());
+    }
 
     public Msig(Sdk sdk, Address address) {
         super(sdk, address, Credentials.NONE, ContractAbi.SAFE_MULTISIG);

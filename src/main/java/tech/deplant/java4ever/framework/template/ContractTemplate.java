@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.template;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
@@ -9,34 +8,36 @@ import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.ContractTvc;
 import tech.deplant.java4ever.framework.artifact.FileArtifact;
+import tech.deplant.java4ever.framework.contract.ControllableContract;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.IContract;
+import tech.deplant.java4ever.framework.type.Address;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.RecordComponent;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-@AllArgsConstructor
 @Log4j2
-public class ContractTemplate<T extends IContract> {
+public class ContractTemplate implements IContractTemplate {
 
 //    public static final ContractTemplate SAFE_MULTISIG = new ContractTemplate(
 //            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json").getAsABI(),
 //            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.tvc").getAsTVC()
 //    );
 
+    @Getter
+    private final ContractAbi abi;
+    @Getter
+    private final ContractTvc tvc;
 
-    @Getter
-    ContractAbi abi;
-    @Getter
-    ContractTvc tvc;
+    public ContractTemplate(ContractAbi abi, ContractTvc tvc) {
+        this.abi = abi;
+        this.tvc = tvc;
+    }
 
     //TODO convertPublicKeyToTonSafeFormat(@NonNull Context context, @NonNull String publicKey)
 
-    public static <U extends IContract> CompletableFuture<ContractTemplate<U>> ofSoliditySource(Class<U> type, Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) {
+    public static CompletableFuture<ContractTemplate> ofSoliditySource(Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) {
         return solc.compileContract(
                         contractName,
                         filename,
@@ -51,7 +52,7 @@ public class ContractTemplate<T extends IContract> {
                     }
                 }).thenApply(linkerResult -> {
                     if (linkerResult.exitValue() == 0) {
-                        return new ContractTemplate<>(
+                        return new ContractTemplate(
                                 ContractAbi.ofArtifact(FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".abi.json")),
                                 ContractTvc.of(FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".tvc"))
                         );
@@ -62,25 +63,19 @@ public class ContractTemplate<T extends IContract> {
                 });
     }
 
-    static <R extends Record> Constructor<R> canonicalConstructorOfRecord(Class<R> recordClass)
-            throws NoSuchMethodException, SecurityException {
-        Class<?>[] componentTypes = Arrays.stream(recordClass.getRecordComponents())
-                .map(RecordComponent::getType)
-                .toArray(Class<?>[]::new);
-        return recordClass.getDeclaredConstructor(componentTypes);
-    }
-
-    public ContractTemplate<T> insertPublicKey() {
+    @Override
+    public IContractTemplate insertPublicKey() {
         //TODO return new ContractTemplate(this.abi, updated(this.tvc));
         return this;
     }
 
-    public ContractTemplate<T> updateInitialData() {
+    @Override
+    public IContractTemplate updateInitialData() {
         //TODO return new ContractTemplate(this.abi, updated(this.tvc));
         return this;
     }
 
-    public T deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+    private IContract doDeploy(Sdk sdk, int workchainId, Address address, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
         Message.decodeOutputMessage(sdk.syncCall(Processing.processMessage(
                 sdk.context(),
@@ -94,18 +89,26 @@ public class ContractTemplate<T extends IContract> {
                 null
         )).decoded().orElseThrow());
 
-        Constructor<T> c = canonicalConstructorOfRecord(T.class);
-        return c.newInstance(1, 2);
+        return new ControllableContract(sdk, address, credentials, this.abi);
 
     }
 
-    public T deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
+    @Override
+    public IContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+            credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
+        var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
+        log.debug("Future address: " + address.makeAddrStd());
+        return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
+    }
+
+    @Override
+    public IContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
             String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs) throws
             Sdk.SdkException {
         var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
         log.debug("Future address: " + address.makeAddrStd());
         giver.give(address, value);
-        return deploy(sdk, workchainId, initialData, credentials, constructorInputs);
+        return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
     }
 
 }

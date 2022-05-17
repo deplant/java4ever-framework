@@ -1,10 +1,6 @@
 package tech.deplant.java4ever.framework;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.framework.type.AbiAddressAdapter;
-import tech.deplant.java4ever.framework.type.UintBigIntegerAdapter;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -20,25 +16,6 @@ import java.util.TimeZone;
 @Log4j2
 public class Data {
 
-    //TODO Move to appropriate class
-    public static final BigInteger NANOTON = new BigInteger("1"); // A1 == 1
-    public static final BigInteger NANOEVER = new BigInteger("1");// A1 == 1_== 1E-9 EVER
-    public static final BigInteger MICROTON = new BigInteger("1000"); // A6 == 1_000
-    public static final BigInteger MICROEVER = new BigInteger("1000"); // A6 == 1_000 == 1E-6 EVER
-    public static final BigInteger MILLITON = new BigInteger("1000000"); // A8 == 1_000 000
-    public static final BigInteger MILLIEVER = new BigInteger("1000000"); // A8 == 1_000 000 == 1E-3 EVER
-    public static final BigInteger TON = new BigInteger("1000000000"); // A3 == 1_000 000 000 (1E9)
-    public static final BigInteger EVER = new BigInteger("1000000000"); // A4 == 1_000 000 000 (1E9)
-    public static final BigInteger KILOTON = new BigInteger("1000000000000"); // A9 == 1_000 000 000 000 (1E12)
-    public static final BigInteger KILOEVER = new BigInteger("1000000000000"); // A9 == 1_000 000 000 000 (1E12) == 1E3 EVER
-    public static final BigInteger MEGATON = new BigInteger("1000000000000000"); // A11 == 1_000 000 000 000 000 (1E15)
-    public static final BigInteger MEGAEVER = new BigInteger("1000000000000000"); // A11 == 1_000 000 000 000 000 (1E15) == 1E6 EVER
-    public static final BigInteger GIGATON = new BigInteger("1000000000000000000"); // A13 == 1_000 000 000 000 000 000 (1E18)
-    public static final BigInteger GIGAEVER = new BigInteger("1000000000000000000"); // A13 == 1_000 000 000 000 000 000 (1E18) == 1E9 EVER
-    public static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(BigInteger.class, new UintBigIntegerAdapter())
-            .registerTypeAdapter(Address.class, new AbiAddressAdapter())
-            .create();
 
     public static String base64ToHexString(String base64string) {
         return HexFormat.of().formatHex(Base64.getDecoder().decode(base64string));

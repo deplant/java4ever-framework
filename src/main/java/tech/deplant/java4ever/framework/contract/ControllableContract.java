@@ -6,9 +6,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.*;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.JSONContext;
+import tech.deplant.java4ever.framework.Message;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.type.AbiAddressConverter;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -64,7 +68,7 @@ public class ControllableContract implements IContract {
 
 //    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
-//        filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.Address::makeAddrStd).toArray(String[]::new)));
+//        filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.type.Address::makeAddrStd).toArray(String[]::new)));
 //        return Arrays
 //                .stream(sdk.syncCall(Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)).result())
 //                .map(
@@ -93,11 +97,6 @@ public class ControllableContract implements IContract {
         convertInputs(functionName, functionInputs);
         CompletableFuture<Map<String, Object>> result = callExternal(this.tvmKey, functionName, functionInputs);
         return result;
-    }
-
-    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String abiFunction, Map<String, Object> input) {
-        convertInputs(abiFunction, input);
-        return runGetter(abiFunction, input);
     }
 
     private void convertInputs(String functionName, Map<String, Object> functionInputs) {
@@ -135,31 +134,32 @@ public class ControllableContract implements IContract {
     }
 
     public CompletableFuture<Map<String, Object>> runGetter(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
-        return Abi.encodeMessage(
-                this.sdk().context(),
-                this.abi.ABI(),
-                this.address.makeAddrStd(),
-                null,
-                new Abi.CallSet(
-                        abiFunction,
-                        null,
-                        input
-                ),
-                Abi.Signer.None,
-                null
-        ).thenCompose(body ->
-                Tvm.runTvm(
+        convertInputs(abiFunction, input);
+        CompletableFuture<Abi.ResultOfEncodeMessage> futureEncoded =
+                Abi.encodeMessage(
                         this.sdk().context(),
-                        body.message(),
-                        account().boc(),
-                        null,
                         this.abi.ABI(),
+                        this.address.makeAddrStd(),
                         null,
-                        false
-                )
-        ).thenApply(msg -> {
-            if (msg.decoded().isPresent()) {
-                return Message.decodeOutputMessage(msg.decoded().get());
+                        new Abi.CallSet(
+                                abiFunction,
+                                null,
+                                input
+                        ),
+                        Abi.Signer.None,
+                        null
+                );
+        return account().thenCombineAsync(futureEncoded, (acc, body) -> Tvm.runTvm(
+                this.sdk().context(),
+                body.message(),
+                acc.boc(),
+                null,
+                this.abi.ABI(),
+                null,
+                false
+        ).join()).thenApply(tvm -> {
+            if (tvm.decoded().isPresent()) {
+                return Message.decodeOutputMessage(tvm.decoded().get());
             } else {
                 return Map.of();
             }

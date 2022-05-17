@@ -22,8 +22,14 @@ public record Credentials(@SerializedName("public") String publicKey, @Serialize
             "0000000000000000000000000000000000000000000000000000000000000000"
     );
 
+//    private static String generateEntropyWithJava() {
+//        SecureRandom sr = new SecureRandom();
+//        byte[] rndBytes = new byte[512];
+//        sr.nextBytes(rndBytes);
+//        return sr.;
+//    }
 
-    private static String generateEntropy(Sdk sdk) throws Sdk.SdkException {
+    private static String generateEntropyWithSDK(Sdk sdk) throws Sdk.SdkException {
         return sdk.syncCall(Crypto.generateRandomBytes(sdk.context(), 512)).bytes();
     }
 
@@ -32,7 +38,7 @@ public record Credentials(@SerializedName("public") String publicKey, @Serialize
     }
 
     private static String generateSeedOfRandom(Sdk sdk, Number words) throws Sdk.SdkException {
-        return generateSeedOfEntropy(sdk, words, generateEntropy(sdk));
+        return generateSeedOfEntropy(sdk, words, generateEntropyWithSDK(sdk));
     }
 
     public static String generateSeed12(Sdk sdk) throws Sdk.SdkException {

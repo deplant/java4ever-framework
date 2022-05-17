@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework.type;
 
-import tech.deplant.java4ever.framework.Address;
-
 public class AbiAddressConverter implements AbiValueConverter {
 
     public static Object convert(Object o) {

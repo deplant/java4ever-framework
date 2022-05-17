@@ -10,10 +10,14 @@ import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.binding.GraphQL;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Message;
+import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -23,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 @Log4j2
 public class TestsFeatures {
 
-//    public static Account ofAddress(Sdk sdk, tech.deplant.java4ever.framework.Address address, ContractAbi abi) throws Sdk.SdkException {
+//    public static Account ofAddress(Sdk sdk, tech.deplant.java4ever.framework.type.Address address, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
 //        filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
 //        Object[] results = sdk.syncCall(Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)).result();

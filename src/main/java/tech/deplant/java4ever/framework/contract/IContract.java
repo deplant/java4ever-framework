@@ -2,11 +2,20 @@ package tech.deplant.java4ever.framework.contract;
 
 import lombok.NonNull;
 import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.ContractAbi;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public interface IContract {
+
+    Sdk sdk();
+
+    Address address();
+
+    ContractAbi abi();
 
     Credentials tvmKey();
 

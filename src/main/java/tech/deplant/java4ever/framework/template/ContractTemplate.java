@@ -4,7 +4,10 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Processing;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.Solc;
+import tech.deplant.java4ever.framework.TvmLinker;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.ContractTvc;
 import tech.deplant.java4ever.framework.artifact.FileArtifact;
@@ -75,9 +78,9 @@ public class ContractTemplate implements IContractTemplate {
         return this;
     }
 
-    private IContract doDeploy(Sdk sdk, int workchainId, Address address, Map<String, Object> initialData, Credentials
+    protected CompletableFuture<IContract> doDeploy(Sdk sdk, int workchainId, Address address, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
-        Message.decodeOutputMessage(sdk.syncCall(Processing.processMessage(
+        return Processing.processMessage(
                 sdk.context(),
                 this.abi.ABI(),
                 null,
@@ -87,14 +90,12 @@ public class ContractTemplate implements IContractTemplate {
                 null,
                 false,
                 null
-        )).decoded().orElseThrow());
-
-        return new ControllableContract(sdk, address, credentials, this.abi);
+        ).thenApply(result -> new ControllableContract(sdk, address, credentials, this.abi));
 
     }
 
     @Override
-    public IContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+    public CompletableFuture<IContract> deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
         var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
         log.debug("Future address: " + address.makeAddrStd());
@@ -102,7 +103,7 @@ public class ContractTemplate implements IContractTemplate {
     }
 
     @Override
-    public IContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
+    public CompletableFuture<IContract> deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
             String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs) throws
             Sdk.SdkException {
         var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);

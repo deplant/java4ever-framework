@@ -28,6 +28,6 @@ public class EverOSGiver extends ControllableContract implements Giver {
                 "value", amount,
                 "bounce", false
         );
-        callExternalFromOwner("sendTransaction", params);
+        callExternal("sendTransaction", params, null);
     }
 }

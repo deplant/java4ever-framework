@@ -7,13 +7,14 @@ import tech.deplant.java4ever.framework.contract.IContract;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public interface IContractTemplate {
 
-    public IContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+    public CompletableFuture<IContract> deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs);
 
-    public IContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
+    public CompletableFuture<IContract> deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
             String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs);
 
     public IContractTemplate insertPublicKey();

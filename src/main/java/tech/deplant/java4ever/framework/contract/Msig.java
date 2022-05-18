@@ -1,9 +1,11 @@
 package tech.deplant.java4ever.framework.contract;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Value;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
@@ -25,9 +27,9 @@ public class Msig extends ControllableContract implements Giver {
         super(sdk, address, owner, ContractAbi.SAFE_MULTISIG);
     }
 
-//    public static Msig ofLocalConfig(ExplorerConfig config, Sdk sdk, int msigNumber) throws Sdk.SdkException {
-//        return new Msig(config.accountController("msig" + msigNumber, sdk));
-//    }
+    public static Msig ofConfig(Sdk sdk, Artifact artifact, String msigUniqueName) throws JsonProcessingException {
+        return new Msig(ControllableContract.ofConfig(sdk, artifact, "msig_" + msigUniqueName));
+    }
 
 //    public void storeTo(ExplorerConfig config, int msigNumber) {
 //        config.addAccountController("msig" + msigNumber, contract());
@@ -40,7 +42,7 @@ public class Msig extends ControllableContract implements Giver {
                 "bounce", sendBounce,
                 "flags", flags,
                 "payload", payload);
-        callExternalFromOwner("sendTransaction", params);
+        callExternal("sendTransaction", params, null);
     }
 
     @Override

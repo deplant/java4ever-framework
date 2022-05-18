@@ -6,11 +6,11 @@ import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.ContractTvc;
 import tech.deplant.java4ever.framework.artifact.FileArtifact;
 import tech.deplant.java4ever.framework.contract.Giver;
-import tech.deplant.java4ever.framework.contract.IContract;
 import tech.deplant.java4ever.framework.contract.Msig;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class MsigTemplate extends ContractTemplate {
 
@@ -30,15 +30,12 @@ public class MsigTemplate extends ContractTemplate {
         super(abi, tvc);
     }
 
-    public IContract deployWithGiver(Sdk sdk, int wid, Credentials keys, Giver giver, BigInteger value) throws Sdk.SdkException {
-        //var template = new MsigTemplate(sdk);
-        //var address = Address.ofFutureDeploy(sdk, template, 0, null, keys);
-        //giver.give(address, Data.EVER);
+    public CompletableFuture<Msig> deployWithGiver(Sdk sdk, int wid, Credentials keys, Giver giver, BigInteger value) throws Sdk.SdkException {
         var params = Map.<String, Object>of(
                 "owners", new String[]{"0x" + keys.publicKey()},
                 "reqConfirms", 1);
-        //Map<String, Object> msg = template.deploy(sdk, 0, null, keys, params);
-        return new Msig(super.deployWithGiver(sdk, giver, value, wid, null, keys, params));
+        return super.deployWithGiver(sdk, giver, value, wid, null, keys, params)
+                .thenApply(Msig::new);
     }
 
 }

@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework.artifact;
 
+import com.google.gson.GsonBuilder;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -42,6 +44,32 @@ public record FileArtifact(Path path) implements Artifact {
 
     private static String processPath(String providedPath) {
         return providedPath.replace(File.separator, "/");
+    }
+
+    public void store(String path) throws IOException {
+        FileWriter file = new FileWriter(path);
+        try {
+            var gson = new GsonBuilder().setPrettyPrinting().create();
+            file.write(gson.toJson(this));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            file.flush();
+            file.close();
+        }
+    }
+
+    @Override
+    public void saveString(String content) throws IOException {
+        FileWriter file = new FileWriter(this.path.toString());
+        try {
+            file.write(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            file.flush();
+            file.close();
+        }
     }
 
     @Override

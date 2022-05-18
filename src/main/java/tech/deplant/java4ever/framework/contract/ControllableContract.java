@@ -6,14 +6,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.*;
-import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.JSONContext;
-import tech.deplant.java4ever.framework.Message;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
-import tech.deplant.java4ever.framework.type.AbiAddressConverter;
 import tech.deplant.java4ever.framework.type.Address;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.HashMap;
@@ -22,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 @AllArgsConstructor
-public class ControllableContract implements IContract {
+public class ControllableContract implements IContract, IContract.Cacheable {
 
     @Getter
     Sdk sdk;
@@ -33,40 +31,13 @@ public class ControllableContract implements IContract {
     @Getter
     ContractAbi abi;
 
-//    public static ControllableContract ofAddress(Sdk sdk, Address address, ContractAbi abi) throws Sdk.SdkException {
-//        Map<String, Object> filter = new HashMap<>();
-//        filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
-//        Object[] results = sdk.syncCall(Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)).result();
-//        var collection = new Gson().fromJson(new Gson().toJson(results[0]), Account.AccountQueryCollection.class);
-//        return new ControllableContract(sdk, address, abi, collection.acc_type(), Data.hexToDec(collection.balance(), 9), collection.boc(), Instant.ofEpochSecond(collection.last_paid()));
+//    public static CompletableFuture<ControllableContract> ofAddress(Sdk sdk, Address address, ContractAbi abi) throws Sdk.SdkException {
+//        return graphQLRequest(sdk, address).thenApply(account ->
+//                new ControllableContract(sdk, address, abi, account.acc_type(), Data.hexToDec(account.balance(), 9), account.boc(), Instant.ofEpochSecond(account.last_paid())));
+//
 //    }
 
-
-//    public Map<String, Object> callInternalFromCustom(ControllableContract customSender, @NonNull String functionName, Map<String, Object> functionInputs, BigInteger functionValue, boolean functionBounce) throws Sdk.SdkException {
-//        if (this.account.abi().hasFunction(functionName)) {
-//            convertInputs(functionName, functionInputs);
-//            Map<String, Object> result = this.account.callInternalFromMsig(
-//                    customSender.externalOwner(),
-//                    customSender.account().address(),
-//                    functionValue,
-//                    functionName,
-//                    functionValue,
-//                    functionInputs,
-//                    functionBounce
-//            );
-//            this.account(refreshAcc());
-//            return result;
-//        } else {
-//            log.error(() -> "Function (" + functionName + ") not found in ABI of " + this.account.address().makeAddrStd());
-//            return new HashMap<>();
-//        }
-//    }
-
-//    public Map<String, Object> callInternalFromOwner(@NonNull String functionName, Map<String, Object> functionInputs, BigInteger functionValue, boolean functionBounce) throws IOException, Sdk.SdkException {
-//        return callInternalFromCustom(this.internalOwner, functionName, functionInputs, functionValue, functionBounce);
-//    }
-
-//    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
+    //    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
 //        filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.type.Address::makeAddrStd).toArray(String[]::new)));
 //        return Arrays
@@ -78,11 +49,15 @@ public class ControllableContract implements IContract {
 //                        }
 //                ).toList();
 //    }
+    public static IContract ofConfig(Sdk sdk, Artifact artifact, String name) throws JsonProcessingException {
+        ExplorerCache.ContractRecord contract = ExplorerCache.read(artifact).get(name);
+        return new ControllableContract(sdk, new Address(contract.address()), contract.externalOwner(), ContractAbi.ofJson(contract.abi()));
+    }
 
-    private CompletableFuture<Account> account() {
+    protected static CompletableFuture<Account> graphQLRequest(Sdk sdk, Address address) {
         Map<String, Object> filter = new HashMap<>();
-        filter.put("id", new GraphQL.Filter.In(new String[]{this.address.makeAddrStd()}));
-        return Net.queryCollection(this.sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)
+        filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
+        return Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)
                 .thenApply(response -> {
                     try {
                         return JSONContext.MAPPER.readValue(response.result()[0].toString(), Account.class);
@@ -93,10 +68,9 @@ public class ControllableContract implements IContract {
                 });
     }
 
-    public CompletableFuture<Map<String, Object>> callExternalFromOwner(@NonNull String functionName, Map<String, Object> functionInputs) throws Sdk.SdkException {
-        convertInputs(functionName, functionInputs);
-        CompletableFuture<Map<String, Object>> result = callExternal(this.tvmKey, functionName, functionInputs);
-        return result;
+    @Override
+    public CompletableFuture<Account> account() {
+        return graphQLRequest(this.sdk, this.address);
     }
 
     private void convertInputs(String functionName, Map<String, Object> functionInputs) {
@@ -133,8 +107,46 @@ public class ControllableContract implements IContract {
         return account().thenApply(Account::acc_type).thenApply(type -> type == 1);
     }
 
-    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String abiFunction, Map<String, Object> input) throws Sdk.SdkException {
-        convertInputs(abiFunction, input);
+
+    @Override
+    public CompletableFuture<String> encodeInternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+        convertInputs(functionName, functionInputs);
+        return Abi.encodeMessageBody(
+                this.sdk.context(),
+                this.abi.ABI(),
+                new Abi.CallSet(functionName, functionHeader, functionInputs),
+                true,
+                Credentials.NONE.signer(),
+                null
+        ).thenApply(Abi.ResultOfEncodeMessageBody::body);
+
+    }
+
+    protected CompletableFuture<Map<String, Object>> processMessage(ContractAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
+        return Processing.processMessage(this.sdk.context(),
+                        abi.ABI(),
+                        address.makeAddrStd(),
+                        deploySet,
+                        new Abi.CallSet(functionName, functionHeader, functionInputs),
+                        credentials.signer(), null, false, null)
+                .thenApply(msg -> {
+                    if (msg.decoded().isPresent()) {
+                        return Message.decodeOutputMessage(msg.decoded().get());
+                    } else {
+                        return Map.of();
+                    }
+                });
+
+    }
+
+    @Override
+    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+        return runGetter(functionName, functionInputs, functionHeader, this.tvmKey);
+    }
+
+    @Override
+    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+        convertInputs(functionName, functionInputs);
         CompletableFuture<Abi.ResultOfEncodeMessage> futureEncoded =
                 Abi.encodeMessage(
                         this.sdk().context(),
@@ -142,13 +154,14 @@ public class ControllableContract implements IContract {
                         this.address.makeAddrStd(),
                         null,
                         new Abi.CallSet(
-                                abiFunction,
+                                functionName,
                                 null,
-                                input
+                                functionInputs
                         ),
-                        Abi.Signer.None,
+                        credentials.signer(),
                         null
                 );
+
         return account().thenCombineAsync(futureEncoded, (acc, body) -> Tvm.runTvm(
                 this.sdk().context(),
                 body.message(),
@@ -166,82 +179,22 @@ public class ControllableContract implements IContract {
         });
     }
 
-    public CompletableFuture<Map<String, Object>> callExternal(Credentials credentials, String functionName, Map<String, Object> functionInputs) throws Sdk.SdkException {
+    @Override
+    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+        convertInputs(functionName, functionInputs);
+        return callExternal(functionName, functionInputs, functionHeader, this.tvmKey);
+    }
+
+    @Override
+    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+        convertInputs(functionName, functionInputs);
         return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
     }
 
-//    public CompletableFuture<Map<String, Object>> callInternalFromMsig(Credentials credentials, Address msigAddress, BigInteger transactionValue, String functionName, BigInteger functionValue, Map<String, Object> functionInputs, boolean functionBounce) throws Sdk.SdkException {
-//        return Abi.encodeMessageBody(
-//                this.sdk.context(),
-//                this.abi.ABI(),
-//                new Abi.CallSet(functionName, null, functionInputs),
-//                true,
-//                credentials.signer(),
-//                null
-//        ).thenCompose(payload ->
-//                {
-//                    Map<String, Object> inputs = Map.of(
-//                            "dest", this.address.makeAddrStd(),
-//                            "value", transactionValue.toString(),
-//                            "bounce", true,
-//                            "flags", 0,
-//                            "payload", payload.body()
-//                    );
-//                    return processMessage(ContractAbi.SAFE_MULTISIG, msigAddress, null, credentials, "sendTransaction", null, inputs);
-//                }
-//        );
-//    }
-
-    private CompletableFuture<Map<String, Object>> processMessage(ContractAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader header, Map<String, Object> functionInputs) {
-        return Processing.processMessage(this.sdk.context(),
-                        abi.ABI(),
-                        address.makeAddrStd(),
-                        deploySet,
-                        new Abi.CallSet(functionName, header, functionInputs),
-                        credentials.signer(), null, false, null)
-                .thenApply(msg -> {
-                    if (msg.decoded().isPresent()) {
-                        return Message.decodeOutputMessage(msg.decoded().get());
-                    } else {
-                        return Map.of();
-                    }
-                });
-
-    }
-
-    private Map<String, Object> convertInputsToCompatible(String functionName, Map<String, Object> functionInputs) {
-        Map<String, Object> convertedInputs = new HashMap<>();
-        functionInputs.forEach((inputName, passedObject) -> {
-            switch (this.abi.inputType(functionName, inputName)) {
-                case "address" -> convertedInputs.put(inputName, AbiAddressConverter.convert(passedObject));
-                default -> convertedInputs.put(inputName, passedObject);
-            }
-        });
-        return convertedInputs;
-    }
 
     @Override
-    public CompletableFuture<Map<String, Object>> runGetter() {
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName) {
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs) {
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Credentials credentials) {
-        return null;
-    }
-
-    private record Account(String id, int acc_type, String balance, String boc,
-                           long last_paid) {
+    public void save(Artifact artifact) throws IOException {
+        ExplorerCache.flush(this, artifact);
     }
 
 }

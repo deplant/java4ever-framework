@@ -46,7 +46,8 @@ public class TestsFeatures {
         var giver = new EverOSGiver(sdkSE);
         var msig = MsigTemplate.SAFE_MULTISIG.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
         //msig.get().send();
-
+        new AbiArtifact(abi, "").write();
+        var tvcArtifact =
 
     }
 

@@ -4,18 +4,18 @@ import tech.deplant.java4ever.binding.Abi;
 
 public interface IAbi {
 
-    public boolean hasHeader(String name);
+    boolean hasHeader(String name);
 
-    public boolean hasFunction(String name);
+    boolean hasFunction(String name);
 
-    public boolean hasInput(String functionName, String inputName);
+    boolean hasInput(String functionName, String inputName);
 
-    public boolean hasOutput(String functionName, String outputName);
+    boolean hasOutput(String functionName, String outputName);
 
-    public String inputType(String functionName, String inputName);
+    String inputType(String functionName, String inputName);
 
-    public String outputType(String functionName, String outputName);
+    String outputType(String functionName, String outputName);
 
-    public Abi.ABI ABI();
+    Abi.ABI ABI();
 
 }

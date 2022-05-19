@@ -12,5 +12,5 @@ public interface Artifact {
 
     public String getAsBase64String();
 
-    public void saveString(String content) throws IOException;
+    public void overwrite(byte[] body) throws IOException;
 }

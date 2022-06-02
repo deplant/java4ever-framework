@@ -2,7 +2,11 @@ package tech.deplant.java4ever.framework.artifact;
 
 import tech.deplant.java4ever.binding.Abi;
 
+import java.util.Map;
+
 public interface IAbi {
+
+    String json();
 
     boolean hasHeader(String name);
 
@@ -17,5 +21,8 @@ public interface IAbi {
     String outputType(String functionName, String outputName);
 
     Abi.ABI ABI();
+
+    record Function(Map<String, String> inputs, Map<String, String> outputs) {
+    }
 
 }

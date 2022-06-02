@@ -5,15 +5,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public record LocalStringArtifact(Path path) implements IStringArtifact {
+public record LocalStringArtifact(Path path) implements Artifact<String> {
 
     @Override
-    public void writeString(String content) throws IOException {
+    public void write(String content) throws IOException {
         Files.writeString(this.path, content, StandardCharsets.UTF_8);
     }
 
     @Override
-    public String readString() {
+    public String read() {
         try {
             return Files.readString(this.path);
         } catch (IOException e) {
@@ -21,4 +21,5 @@ public record LocalStringArtifact(Path path) implements IStringArtifact {
             return "";
         }
     }
+
 }

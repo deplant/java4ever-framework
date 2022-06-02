@@ -5,11 +5,11 @@ import tech.deplant.java4ever.framework.Sdk;
 
 import java.util.Base64;
 
-public record CachedTVC(byte[] tvc) implements ITvc {
+public record CachedTVC(byte[] bytes) implements ITvc {
 
     @Override
     public String base64String() {
-        return Base64.getEncoder().encodeToString(this.tvc);
+        return Base64.getEncoder().encodeToString(this.bytes);
     }
 
     @Override

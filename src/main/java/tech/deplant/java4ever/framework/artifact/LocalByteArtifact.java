@@ -21,8 +21,4 @@ public record LocalByteArtifact(Path path) implements Artifact<byte[]> {
         }
     }
 
-    @Override
-    public void persist() throws IOException {
-        write(read());
-    }
 }

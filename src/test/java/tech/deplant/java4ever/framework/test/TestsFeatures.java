@@ -13,6 +13,8 @@ import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
+import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
@@ -46,8 +48,7 @@ public class TestsFeatures {
         var giver = new EverOSGiver(sdkSE);
         var msig = MsigTemplate.SAFE_MULTISIG.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
         //msig.get().send();
-        new AbiArtifact(abi, "").write();
-        var tvcArtifact =
+        IAbi abi = ArtifactABI.SAFE_MULTISIG;
 
     }
 

@@ -8,7 +8,6 @@ import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;

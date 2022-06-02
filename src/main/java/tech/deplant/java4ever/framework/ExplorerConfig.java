@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.artifact.ContractAbi;
 import tech.deplant.java4ever.framework.contract.ControllableContract;
 import tech.deplant.java4ever.framework.type.Address;
 

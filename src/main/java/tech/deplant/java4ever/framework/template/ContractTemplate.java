@@ -9,7 +9,6 @@ import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
 import tech.deplant.java4ever.framework.artifact.ContractAbi;
-import tech.deplant.java4ever.framework.artifact.ContractTvc;
 import tech.deplant.java4ever.framework.artifact.FileArtifact;
 import tech.deplant.java4ever.framework.contract.ControllableContract;
 import tech.deplant.java4ever.framework.contract.Giver;

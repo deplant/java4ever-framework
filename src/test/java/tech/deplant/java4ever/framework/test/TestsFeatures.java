@@ -14,11 +14,14 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.artifact.CachedABI;
 import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.artifact.LocalStringArtifact;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.math.BigInteger;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -49,6 +52,9 @@ public class TestsFeatures {
         var msig = MsigTemplate.SAFE_MULTISIG.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
         //msig.get().send();
         IAbi abi = ArtifactABI.SAFE_MULTISIG;
+        IAbi abi2 = new CachedABI("{}");
+        IAbi abi3 = ArtifactABI.ofResourcePath("");
+        ArtifactABI abi4 = new ArtifactABI(new CachedABI("{}"), new LocalStringArtifact(Paths.get("")));
 
     }
 

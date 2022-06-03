@@ -11,14 +11,14 @@ import java.util.concurrent.CompletableFuture;
 
 public interface IContractTemplate {
 
-    public CompletableFuture<IContract> deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+    CompletableFuture<IContract> deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs);
 
-    public CompletableFuture<IContract> deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
+    CompletableFuture<IContract> deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
             String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs);
 
-    public IContractTemplate insertPublicKey();
+    IContractTemplate insertPublicKey();
 
-    public IContractTemplate updateInitialData();
+    IContractTemplate updateInitialData();
 
 }

@@ -1,12 +1,13 @@
 package tech.deplant.java4ever.framework.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.JSONContext;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.contract.ControllableContract;
-import tech.deplant.java4ever.framework.contract.IContract;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -14,8 +15,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class Auction extends ControllableContract {
 
-    public Auction(IContract contract) {
-        super(contract.sdk(), contract.address(), contract.tvmKey(), contract.abi());
+    public Auction(Sdk sdk, Address address, Credentials owner, IAbi abi) {
+        super(sdk, address, owner, abi);
     }
 
 //    public static Auction ofLocalConfig(ExplorerConfig config, Sdk sdk, boolean isBuyNever) {
@@ -37,9 +38,9 @@ public class Auction extends ControllableContract {
 //        config.addAccountController(str, this.controller());
 //    }
 
-    public static Auction ofConfig(Sdk sdk, Artifact artifact) throws JsonProcessingException {
-        return new Auction(ControllableContract.ofConfig(sdk, artifact, "auction"));
-    }
+//    public static Auction ofConfig(Sdk sdk, Artifact artifact) throws JsonProcessingException {
+//        return new Auction(ControllableContract.ofConfig(sdk, artifact, "auction"));
+//    }
 
     public CompletableFuture<Object> getBidCount() {
         return runGetter("_bidCount", null, null).thenApply(map -> map.get("_bidCount"));

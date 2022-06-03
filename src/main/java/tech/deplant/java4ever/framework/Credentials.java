@@ -49,11 +49,11 @@ public record Credentials(@SerializedName("public") String publicKey, @Serialize
         return generateSeedOfRandom(sdk, 24);
     }
 
-    public static CompletableFuture<Credentials> ofArtifact(Sdk sdk, Artifact artifact) {
+    public static CompletableFuture<Credentials> ofArtifact(Sdk sdk, Artifact<String> artifact) {
         return CompletableFuture
                 .supplyAsync(() -> {
                     try {
-                        return sdk.mapper().readValue(artifact.getAsJsonString(), Credentials.class);
+                        return sdk.mapper().readValue(artifact.read(), Credentials.class);
                     } catch (JsonProcessingException e) {
                         log.error("JSON parsing error! \"" + e.getMessage() + "\"");
                         return Credentials.NONE;

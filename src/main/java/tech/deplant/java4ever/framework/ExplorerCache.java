@@ -10,18 +10,18 @@ import java.util.Map;
 
 public interface ExplorerCache {
 
-    static Map<String, ContractRecord> read(Artifact artifact) throws JsonProcessingException {
+    static Map<String, ContractRecord> read(Artifact<String> artifact) throws JsonProcessingException {
         TypeReference<Map<String, ContractRecord>> typeRef
                 = new TypeReference<>() {
         };
-        return JSONContext.MAPPER.readValue(artifact.getAsJsonString(), typeRef);
+        return JSONContext.MAPPER.readValue(artifact.read(), typeRef);
     }
 
     static void flush(IContract contract, Artifact artifact) throws IOException {
         var content = JSONContext.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
-                new ContractRecord(contract.abi().abiJsonString(), contract.address().makeAddrStd(), contract.tvmKey())
+                new ContractRecord(contract.abi().json(), contract.address().makeAddrStd(), contract.tvmKey())
         );
-        artifact.saveString(content);
+        //TODO artifact.saveString(content);
     }
 
     record ContractRecord(String abi, String address, Credentials externalOwner) {

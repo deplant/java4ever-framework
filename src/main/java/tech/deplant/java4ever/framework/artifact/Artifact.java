@@ -20,7 +20,7 @@ public interface Artifact<T> {
 
         try {
             return Paths.get(
-                    FileArtifact.class.getClassLoader().getResource(cleanedPath).toURI()
+                    Artifact.class.getClassLoader().getResource(cleanedPath).toURI()
             );
         } catch (URISyntaxException | NullPointerException e) {
             //log.error("Wrong path: Path: " + cleanedPath + ", Error: " + e.getMessage());

@@ -8,6 +8,10 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
+import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
+import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.artifact.ITvc;
 import tech.deplant.java4ever.framework.contract.ControllableContract;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.IContract;
@@ -26,11 +30,11 @@ public class ContractTemplate implements IContractTemplate {
 //    );
 
     @Getter
-    private final ContractAbi abi;
+    private final IAbi abi;
     @Getter
-    private final ContractTvc tvc;
+    private final ITvc tvc;
 
-    public ContractTemplate(ContractAbi abi, ContractTvc tvc) {
+    public ContractTemplate(IAbi abi, ITvc tvc) {
         this.abi = abi;
         this.tvc = tvc;
     }
@@ -53,8 +57,8 @@ public class ContractTemplate implements IContractTemplate {
                 }).thenApply(linkerResult -> {
                     if (linkerResult.exitValue() == 0) {
                         return new ContractTemplate(
-                                ContractAbi.ofArtifact(FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".abi.json")),
-                                ContractTvc.of(FileArtifact.ofAbsolutePath(buildPath + "/" + contractName + ".tvc"))
+                                ArtifactABI.ofAbsolute(buildPath + "/" + contractName + ".abi.json"),
+                                ArtifactTVC.ofResource(buildPath + "/" + contractName + ".tvc")
                         );
                     } else {
                         log.error("TvmLinker exit code:" + linkerResult.exitValue());
@@ -81,7 +85,7 @@ public class ContractTemplate implements IContractTemplate {
                 sdk.context(),
                 this.abi.ABI(),
                 null,
-                new Abi.DeploySet(this.tvc.tvcString(), workchainId, initialData, credentials.publicKey()),
+                new Abi.DeploySet(this.tvc.base64String(), workchainId, initialData, credentials.publicKey()),
                 new Abi.CallSet("constructor", null, constructorInputs),
                 credentials.signer(),
                 null,

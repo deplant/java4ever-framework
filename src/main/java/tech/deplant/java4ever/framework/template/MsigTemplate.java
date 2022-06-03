@@ -2,6 +2,10 @@ package tech.deplant.java4ever.framework.template;
 
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
+import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.artifact.ITvc;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Msig;
 
@@ -11,19 +15,19 @@ import java.util.concurrent.CompletableFuture;
 
 public class MsigTemplate extends ContractTemplate {
 
-    public static final MsigTemplate SET_CODE_MULTISIG = new MsigTemplate(
-            ContractAbi.ofArtifact(FileArtifact.ofResourcePath("/artifacts/multisig/SetcodeMultisigWallet.abi.json")),
-            ContractTvc.of(FileArtifact.ofResourcePath("/artifacts/multisig/SetcodeMultisigWallet.tvc")));
+    public static final ArtifactABI SAFE_MULTISIG_ABI = ArtifactABI.ofResource("/artifacts/multisig/SafeMultisigWallet.abi.json");
+    public static final ArtifactABI SETCODE_MULTISIG_ABI = ArtifactABI.ofResource("/artifacts/multisig/SetcodeMultisigWallet.abi.json");
+    public static final ArtifactABI SURF_MULTISIG_ABI = ArtifactABI.ofResource("/artifacts/multisig/SurfMultisigWallet.abi.json");
 
-    public static final MsigTemplate SAFE_MULTISIG = new MsigTemplate(
-            ContractAbi.ofArtifact(FileArtifact.ofResourcePath("/artifacts/multisig/SafeMultisigWallet.abi.json")),
-            ContractTvc.of(FileArtifact.ofResourcePath("/artifacts/multisig/SafeMultisigWallet.tvc")));
+    public static final ArtifactTVC SAFE_MULTISIG_TVC = ArtifactTVC.ofResource("/artifacts/multisig/SafeMultisigWallet.tvc");
+    public static final ArtifactTVC SETCODE_MULTISIG_TVC = ArtifactTVC.ofResource("/artifacts/multisig/SetcodeMultisigWallet.tvc");
+    public static final ArtifactTVC SURF_MULTISIG_TVC = ArtifactTVC.ofResource("/artifacts/multisig/SurfMultisigWallet.tvc");
 
-    public static final MsigTemplate SURF_MULTISIG = new MsigTemplate(
-            ContractAbi.ofArtifact(FileArtifact.ofResourcePath("/artifacts/multisig/SurfMultisigWallet.abi.json")),
-            ContractTvc.of(FileArtifact.ofResourcePath("/artifacts/multisig/SurfMultisigWallet.tvc")));
+    public static final MsigTemplate SAFE_MULTISIG_TEMPLATE = new MsigTemplate(SAFE_MULTISIG_ABI, SAFE_MULTISIG_TVC);
+    public static final MsigTemplate SETCODE_MULTISIG_TEMPLATE = new MsigTemplate(SETCODE_MULTISIG_ABI, SETCODE_MULTISIG_TVC);
+    public static final MsigTemplate SURF_MULTISIG_TEMPLATE = new MsigTemplate(SURF_MULTISIG_ABI, SURF_MULTISIG_TVC);
 
-    public MsigTemplate(ContractAbi abi, ContractTvc tvc) {
+    public MsigTemplate(IAbi abi, ITvc tvc) {
         super(abi, tvc);
     }
 

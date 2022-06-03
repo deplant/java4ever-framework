@@ -37,7 +37,7 @@ public class Address {
                 sdk.context(),
                 template.abi().ABI(),
                 null,
-                new Abi.DeploySet(template.tvc().tvcString(), workchainId, initialData, credentials.publicKey()),
+                new Abi.DeploySet(template.tvc().base64String(), workchainId, initialData, credentials.publicKey()),
                 null,
                 credentials.signer(),
                 null

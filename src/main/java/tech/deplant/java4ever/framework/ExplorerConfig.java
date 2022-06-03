@@ -5,8 +5,6 @@ import com.google.gson.GsonBuilder;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.contract.ControllableContract;
-import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,8 +21,8 @@ public class ExplorerConfig {
         this.contracts = new HashMap<>();
     }
 
-    public static ExplorerConfig ofConfigFile(Artifact artifact) {
-        return new Gson().fromJson(artifact.getAsJsonString(), ExplorerConfig.class);
+    public static ExplorerConfig ofConfigFile(Artifact<String> artifact) {
+        return new Gson().fromJson(artifact.read(), ExplorerConfig.class);
     }
 
     public void store(String path) throws IOException {
@@ -46,28 +44,28 @@ public class ExplorerConfig {
         return this;
     }
 
-    public ExplorerConfig addAccountController(String name, ControllableContract controllableContract) {
-        this.contracts.put(name, new ExplorerConfig.ContractConfig(
-                controllableContract.account().abi().abiJsonString(),
-                controllableContract.account().address().makeAddrStd(),
-                controllableContract.internalOwner() != null ? controllableContract.internalOwner().account().address().makeAddrStd() : null,
-                controllableContract.tvmKey())
-        );
-        return this;
-    }
+//    public ExplorerConfig addAccountController(String name, ControllableContract controllableContract) {
+//        this.contracts.put(name, new ExplorerConfig.ContractConfig(
+//                controllableContract.account().abi().json(),
+//                controllableContract.account().address().makeAddrStd(),
+//                controllableContract.internalOwner() != null ? controllableContract.internalOwner().account().address().makeAddrStd() : null,
+//                controllableContract.tvmKey())
+//        );
+//        return this;
+//    }
 
-    public ControllableContract accountController(String name, Sdk sdk) throws Sdk.SdkException {
-        var acc = this.contracts.get(name);
-        if (acc == null) {
-            return null;
-        } else {
-            return ControllableContract.ofAddress(new ContractAbi(acc.abi()),
-                    new Address(acc.address()),
-                    sdk,
-                    acc.externalOwner(),
-                    null);
-        }
-    }
+//    public ControllableContract accountController(String name, Sdk sdk) throws Sdk.SdkException {
+//        var acc = this.contracts.get(name);
+//        if (acc == null) {
+//            return null;
+//        } else {
+//            return ControllableContract.ofAddress(new ContractAbi(acc.abi()),
+//                    new Address(acc.address()),
+//                    sdk,
+//                    acc.externalOwner(),
+//                    null);
+//        }
+//    }
 
     @Value
     public static class ContractConfig {

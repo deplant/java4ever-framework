@@ -5,6 +5,7 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ public interface IContract {
 
     Address address();
 
-    ContractAbi abi();
+    IAbi abi();
 
     Credentials tvmKey();
 

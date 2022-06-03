@@ -9,8 +9,8 @@ public interface LocalConfig {
 
     TvmLinker getTvmLinker();
 
-    ContractAbi getAbi(String name);
+    IAbi getAbi(String name);
 
-    ContractTvc getTvc(String name);
+    ITvc getTvc(String name);
 
 }

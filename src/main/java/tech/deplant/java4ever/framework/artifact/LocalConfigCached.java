@@ -19,17 +19,17 @@ public record LocalConfigCached(String solcPath,
                                 Map<String, ContractTemplate> templates) implements LocalConfig {
 
 
-    public static LocalConfigCached of(Artifact artifact) {
+    public static LocalConfigCached of(Artifact<String> artifact) {
 
         var templates = new HashMap<String, ContractTemplate>();
-        JsonObject jsonRoot = JsonParser.parseString(artifact.getAsJsonString()).getAsJsonObject();
+        JsonObject jsonRoot = JsonParser.parseString(artifact.read()).getAsJsonObject();
         jsonRoot.get("contracts").getAsJsonArray().iterator().forEachRemaining(elem ->
                 {
                     var obj = elem.getAsJsonObject();
                     templates.put(obj.get("name").getAsString(),
                             new ContractTemplate(
-                                    ContractAbi.ofArtifact(sdk, FileArtifact.ofResourcePath(obj.get("abiPath").getAsString())),
-                                    ContractTvc.of(FileArtifact.ofResourcePath(obj.get("tvcPath").getAsString()))
+                                    ArtifactABI.ofResource(obj.get("abiPath").getAsString()),
+                                    ArtifactTVC.ofResource(obj.get("tvcPath").getAsString())
                             )
                     );
                 }
@@ -67,12 +67,12 @@ public record LocalConfigCached(String solcPath,
     }
 
     @Override
-    public ContractAbi getAbi(String name) {
+    public IAbi getAbi(String name) {
         return this.templates().get(name).abi();
     }
 
     @Override
-    public ContractTvc getTvc(String name) {
+    public ITvc getTvc(String name) {
         return this.templates().get(name).tvc();
     }
 }

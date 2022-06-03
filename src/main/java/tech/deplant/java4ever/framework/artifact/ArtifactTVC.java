@@ -15,6 +15,14 @@ public record ArtifactTVC(ITvc tvc, Artifact<byte[]> artifact) implements ITvc, 
         this(new LocalByteArtifact(path));
     }
 
+    public static ArtifactTVC ofResource(String resourcePath) {
+        return new ArtifactTVC(Artifact.resourceToPath(resourcePath));
+    }
+
+    public static ArtifactTVC ofAbsolute(String absolutePath) {
+        return new ArtifactTVC(Artifact.ofAbsolutePath(absolutePath));
+    }
+
     @Override
     public byte[] bytes() {
         return tvc().bytes();

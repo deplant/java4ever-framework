@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -13,15 +14,11 @@ import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
-import tech.deplant.java4ever.framework.artifact.ArtifactABI;
-import tech.deplant.java4ever.framework.artifact.CachedABI;
 import tech.deplant.java4ever.framework.artifact.IAbi;
-import tech.deplant.java4ever.framework.artifact.LocalStringArtifact;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.math.BigInteger;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -38,23 +35,23 @@ public class TestsFeatures {
 //    }
 
     @Test
-    public void testBetterComposition() throws ExecutionException, InterruptedException {
+    public void testBetterComposition() throws ExecutionException, InterruptedException, JsonProcessingException {
         final Sdk sdkDEV = new SdkBuilder()
                 .networkEndpoints(SdkBuilder.Network.DEV_NET.endpoints())
                 .create(new JavaLibraryPathLoader());
         final Sdk sdkSE = new SdkBuilder()
-                .networkEndpoints(new String[]{"http://80.78.254.199/"})
+                .networkEndpoints(new String[]{"http://80.78.241.3/"})
                 .timeout(50L)
                 .create(new JavaLibraryPathLoader());
 
 
         var giver = new EverOSGiver(sdkSE);
-        var msig = MsigTemplate.SAFE_MULTISIG.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
+        var msig = MsigTemplate.SAFE_MULTISIG_TEMPLATE.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
         //msig.get().send();
-        IAbi abi = ArtifactABI.SAFE_MULTISIG;
-        IAbi abi2 = new CachedABI("{}");
-        IAbi abi3 = ArtifactABI.ofResourcePath("");
-        ArtifactABI abi4 = new ArtifactABI(new CachedABI("{}"), new LocalStringArtifact(Paths.get("")));
+        IAbi abi = MsigTemplate.SAFE_MULTISIG_ABI;
+        //IAbi abi2 = CachedABI.of("{}");
+        //IAbi abi3 = ArtifactABI.ofResource("");
+        //ArtifactABI abi4 = new ArtifactABI(CachedABI.of("{}"), new LocalJsonArtifact(Paths.get("")));
 
     }
 
@@ -83,7 +80,7 @@ public class TestsFeatures {
     }
 
     @Test
-    public void testParallelSdkExecution() throws ExecutionException, InterruptedException {
+    public void testParallelSdkExecution() {
 
     }
 

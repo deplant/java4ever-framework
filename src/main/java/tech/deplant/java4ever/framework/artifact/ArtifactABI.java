@@ -7,22 +7,21 @@ import java.nio.file.Path;
 
 public record ArtifactABI(IAbi abi, Artifact<String> artifact) implements IAbi, Persistable {
 
-    public static final ArtifactABI SAFE_MULTISIG = ArtifactABI.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json");
-
     public ArtifactABI(Artifact<String> artifact) {
-        this(new CachedABI(artifact.read()), artifact);
+        this(CachedABI.of(artifact.read()), artifact);
     }
 
     public ArtifactABI(Path path) {
-        this(new LocalStringArtifact(path));
+        this(new LocalJsonArtifact(path));
     }
 
-    public static ArtifactABI ofResourcePath(String resourcePath) {
+
+    public static ArtifactABI ofResource(String resourcePath) {
         return new ArtifactABI(Artifact.resourceToPath(resourcePath));
     }
 
-    public static ArtifactABI ofAbsolutePath(String resourcePath) {
-        return new ArtifactABI(Artifact.ofAbsolutePath(resourcePath));
+    public static ArtifactABI ofAbsolute(String absolutePath) {
+        return new ArtifactABI(Artifact.ofAbsolutePath(absolutePath));
     }
 
     @Override

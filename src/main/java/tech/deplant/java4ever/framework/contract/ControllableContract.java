@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Log4j2
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class ControllableContract implements IContract, IContract.Cacheable {
     @Getter
     Credentials tvmKey;
     @Getter
-    ContractAbi abi;
+    IAbi abi;
 
 //    public static CompletableFuture<ControllableContract> ofAddress(Sdk sdk, Address address, ContractAbi abi) throws Sdk.SdkException {
 //        return graphQLRequest(sdk, address).thenApply(account ->
@@ -48,10 +50,11 @@ public class ControllableContract implements IContract, IContract.Cacheable {
 //                        }
 //                ).toList();
 //    }
-    public static IContract ofConfig(Sdk sdk, Artifact artifact, String name) throws JsonProcessingException {
-        ExplorerCache.ContractRecord contract = ExplorerCache.read(artifact).get(name);
-        return new ControllableContract(sdk, new Address(contract.address()), contract.externalOwner(), ContractAbi.ofJson(contract.abi()));
-    }
+
+//    public static IContract ofConfig(Sdk sdk, Artifact artifact, String name) throws JsonProcessingException {
+//        ExplorerCache.ContractRecord contract = ExplorerCache.read(artifact).get(name);
+//        return new ControllableContract(sdk, new Address(contract.address()), contract.externalOwner(), new CachedABI(contract.abi()));
+//    }
 
     protected static CompletableFuture<Account> graphQLRequest(Sdk sdk, Address address) {
         Map<String, Object> filter = new HashMap<>();
@@ -72,34 +75,31 @@ public class ControllableContract implements IContract, IContract.Cacheable {
         return graphQLRequest(this.sdk, this.address);
     }
 
-    private void convertInputs(String functionName, Map<String, Object> functionInputs) {
-        if (functionInputs != null) {
-            functionInputs.forEach((key, value) ->
-                    {
-                        if (this.abi.hasInput(functionName, key)) {
-                            var type = this.abi.inputType(functionName, key);
-                            functionInputs.replace(key,
-                                    switch (type) {
-                                        case "uint128", "uint256", "uint64", "uint32" -> switch (value) {
-                                            case BigInteger b -> "0x" + b.toString(16);
-                                            case Instant i -> "0x" + BigInteger.valueOf(i.getEpochSecond()).toString(16);
-                                            case String s && "0x".equals(s.substring(0, 2)) -> s;
-                                            case String s -> "0x" + s;
-                                            default -> value;
-                                        };
-                                        case "address" -> switch (value) {
-                                            case Address a -> a.makeAddrStd();
-                                            default -> value;
-                                        };
-                                        default -> value;
-                                    }
-                            );
-                        } else {
-                            log.error(() -> "Function " + functionName + " doesn't contain input (" + key + ") in ABI of " + this.address.makeAddrStd());
-                        }
+    private Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs) {
+        return functionInputs.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey(), entry -> {
+                    if (this.abi.hasInput(functionName, entry.getKey())) {
+                        var type = this.abi.inputType(functionName, entry.getKey());
+                        return switch (type) {
+                            case "uint128", "uint256", "uint64", "uint32" -> switch (entry.getValue()) {
+                                case BigInteger b -> "0x" + b.toString(16);
+                                case Instant i -> "0x" + BigInteger.valueOf(i.getEpochSecond()).toString(16);
+                                case String s && "0x".equals(s.substring(0, 2)) -> s;
+                                case String s -> "0x" + s;
+                                default -> entry.getValue();
+                            };
+                            case "address" -> switch (entry.getValue()) {
+                                case Address a -> a.makeAddrStd();
+                                default -> entry.getValue();
+                            };
+                            default -> entry.getValue();
+                        };
+                    } else {
+                        log.error(() -> "Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI of " + this.address.makeAddrStd());
+                        return null;
                     }
-            );
-        }
+                }
+        ));
     }
 
     public CompletableFuture<Boolean> isActive() {
@@ -109,11 +109,10 @@ public class ControllableContract implements IContract, IContract.Cacheable {
 
     @Override
     public CompletableFuture<String> encodeInternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
-        convertInputs(functionName, functionInputs);
         return Abi.encodeMessageBody(
                 this.sdk.context(),
                 this.abi.ABI(),
-                new Abi.CallSet(functionName, functionHeader, functionInputs),
+                new Abi.CallSet(functionName, functionHeader, convertInputs(functionName, functionInputs)),
                 true,
                 Credentials.NONE.signer(),
                 null
@@ -121,7 +120,7 @@ public class ControllableContract implements IContract, IContract.Cacheable {
 
     }
 
-    protected CompletableFuture<Map<String, Object>> processMessage(ContractAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
+    protected CompletableFuture<Map<String, Object>> processMessage(IAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
         return Processing.processMessage(this.sdk.context(),
                         abi.ABI(),
                         address.makeAddrStd(),

@@ -30,6 +30,29 @@ repositories {
     mavenLocal()
 }
 
+dependencies {
+    // Logging
+    implementation "org.apache.logging.log4j:log4j-core:$lo4jVersion"
+    implementation "org.apache.logging.log4j:log4j-api:$lo4jVersion"
+
+    // JSON
+    implementation "com.google.code.gson:gson:2.8.9"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2.2"
+    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+
+    // Dependent on binding module
+    implementation "tech.deplant.java4ever:java4ever-binding:1.1.1"
+
+
+    // Tests
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher" // https://github.com/gradle/gradle/issues/18627
+
+}
+
 publishing {
     repositories {
         maven {
@@ -100,28 +123,7 @@ javadoc {
     options.addStringOption('-release', '17')
 }
 
-dependencies {
-    // Logging
-    implementation "org.apache.logging.log4j:log4j-core:$lo4jVersion"
-    implementation "org.apache.logging.log4j:log4j-api:$lo4jVersion"
 
-    // JSON
-    implementation "com.google.code.gson:gson:2.8.9"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2.2"
-    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
-
-    // Dependent on binding module
-    implementation "tech.deplant.java4ever:java4ever-binding:1.1.1"
-
-
-    // Tests
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher" // https://github.com/gradle/gradle/issues/18627
-
-}
 
 java {
     toolchain {
@@ -136,12 +138,12 @@ tasks.withType(JavaCompile) {
 }
 tasks.withType(Test) {
     jvmArgs += "--enable-preview"
+    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
 }
 tasks.withType(JavaExec) {
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.foreign"
     jvmArgs += "--enable-native-access=java4ever.binding"
-    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
     jvmArgs += "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 }
 

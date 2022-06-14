@@ -55,6 +55,7 @@ public class TestsFeatures {
 
     }
 
+    // test generate hashes 1000 times
     @Test
     public void testJacksonConvert() throws ExecutionException, InterruptedException {
         final Sdk sdk = new SdkBuilder()

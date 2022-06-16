@@ -7,4 +7,5 @@ target/
 .classpath
 hs_err_pid*.*
 *.iml
+*.log
 .DS_Store

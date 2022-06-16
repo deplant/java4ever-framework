@@ -43,12 +43,14 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
 
     // Dependent on binding module
-    implementation "tech.deplant.java4ever:java4ever-binding:1.2.0"
+    implementation "tech.deplant.java4ever:java4ever-binding:1.1.1"
+
 
     // Tests
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher" // https://github.com/gradle/gradle/issues/18627
+
 }
 
 publishing {
@@ -121,6 +123,8 @@ javadoc {
     options.addStringOption('-release', '17')
 }
 
+
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -134,12 +138,12 @@ tasks.withType(JavaCompile) {
 }
 tasks.withType(Test) {
     jvmArgs += "--enable-preview"
+    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
 }
 tasks.withType(JavaExec) {
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.foreign"
     jvmArgs += "--enable-native-access=java4ever.binding"
-    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
     jvmArgs += "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 }
 

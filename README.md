@@ -1,5 +1,6 @@
 # java4ever-framework
 
+[![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
 [![JDK version](https://img.shields.io/badge/Java-17.0.2+-green.svg)](https://shields.io/)
 [![SDK version](https://img.shields.io/badge/TON%20SDK-v1.33.0+-orange)](https://github.com/tonlabs/TON-SDK/tree/1.28.0)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)

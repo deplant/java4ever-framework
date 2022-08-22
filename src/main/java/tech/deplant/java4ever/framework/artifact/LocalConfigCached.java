@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework.artifact;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import lombok.extern.log4j.Log4j2;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
@@ -10,7 +12,6 @@ import tech.deplant.java4ever.framework.template.ContractTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Log4j2
 public record LocalConfigCached(String solcPath,
                                 String linkerPath,
                                 String stdLibPath,
@@ -19,28 +20,29 @@ public record LocalConfigCached(String solcPath,
                                 Map<String, ContractTemplate> templates) implements LocalConfig {
 
 
-    public static LocalConfigCached of(Artifact<String> artifact) {
+    private static Logger log = LoggerFactory.getLogger(LocalConfigCached.class);
+
+    public static LocalConfigCached of(Artifact<String> artifact) throws JsonProcessingException {
 
         var templates = new HashMap<String, ContractTemplate>();
-        JsonObject jsonRoot = JsonParser.parseString(artifact.read()).getAsJsonObject();
-        jsonRoot.get("contracts").getAsJsonArray().iterator().forEachRemaining(elem ->
+        JsonNode jsonRoot = Sdk.DEFAULT_MAPPER.readTree(artifact.read());
+        jsonRoot.get("contracts").iterator().forEachRemaining(elem ->
                 {
-                    var obj = elem.getAsJsonObject();
-                    templates.put(obj.get("name").getAsString(),
+                    templates.put(elem.get("name").asText(),
                             new ContractTemplate(
-                                    ArtifactABI.ofResource(obj.get("abiPath").getAsString()),
-                                    ArtifactTVC.ofResource(obj.get("tvcPath").getAsString())
+                                    ArtifactABI.ofResource(elem.get("abiPath").asText()),
+                                    ArtifactTVC.ofResource(elem.get("tvcPath").asText())
                             )
                     );
                 }
         );
 
         return new LocalConfigCached(
-                jsonRoot.get("solc").getAsJsonObject().get("path").getAsString(),
-                jsonRoot.get("linker").getAsJsonObject().get("path").getAsString(),
-                jsonRoot.get("linker").getAsJsonObject().get("stdLibPath").getAsString(),
-                jsonRoot.get("sourcePath").getAsString(),
-                jsonRoot.get("buildPath").getAsString(),
+                jsonRoot.get("solc").get("path").asText(),
+                jsonRoot.get("linker").get("path").asText(),
+                jsonRoot.get("linker").get("stdLibPath").asText(),
+                jsonRoot.get("sourcePath").asText(),
+                jsonRoot.get("buildPath").asText(),
                 templates);
     }
 

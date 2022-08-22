@@ -6,8 +6,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.GraphQLFilter;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-@Log4j2
 public class TestsFeatures {
 
 //    public static Account ofAddress(Sdk sdk, tech.deplant.java4ever.framework.type.Address address, ContractAbi abi) throws Sdk.SdkException {
@@ -33,6 +33,9 @@ public class TestsFeatures {
 //        var collection = new Gson().fromJson(new Gson().toJson(results[0]), Account.AccountQueryCollection.class);
 //        return new Account(sdk, address, abi, collection.acc_type(), Data.hexToDec(collection.balance(), 9), collection.boc(), Instant.ofEpochSecond(collection.last_paid()));
 //    }
+
+
+    private static Logger log = LoggerFactory.getLogger(TestsFeatures.class);
 
     @Test
     public void testBetterComposition() throws ExecutionException, InterruptedException, JsonProcessingException {
@@ -46,7 +49,10 @@ public class TestsFeatures {
 
 
         var giver = new EverOSGiver(sdkDEV);
-        var msig = MsigTemplate.SAFE_MULTISIG_TEMPLATE.deployWithGiver(sdkDEV, 0, Credentials.RANDOM(sdkDEV), giver, new BigInteger("2"));
+        var msig = MsigTemplate
+                .SAFE_MULTISIG_TEMPLATE
+                .deployWithGiver(sdkDEV, 0, Credentials.RANDOM(sdkDEV), giver, new BigInteger("2"));
+        //.send();
         //msig.get().send();
         IAbi abi = MsigTemplate.SAFE_MULTISIG_ABI;
         //IAbi abi2 = CachedABI.of("{}");

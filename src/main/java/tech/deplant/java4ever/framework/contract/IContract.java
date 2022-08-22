@@ -22,11 +22,7 @@ public interface IContract {
 
     Account account();
 
-    Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
-
     Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
-
-    Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
 
     Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
 
@@ -37,15 +33,13 @@ public interface IContract {
     }
 
 
-    interface ExternallyOwnable {
+    interface Owned extends IContract {
+        Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
 
+        Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
     }
 
     interface KnownTVC {
-
-    }
-
-    interface KnownABI {
 
     }
 

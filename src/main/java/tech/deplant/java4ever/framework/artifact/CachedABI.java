@@ -2,7 +2,8 @@ package tech.deplant.java4ever.framework.artifact;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.JSONContext;
 
@@ -11,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Log4j2
 public record CachedABI(String json, List<String> headers,
                         Map<String, Function> functions) implements IAbi {
+
+
+    private static Logger log = LoggerFactory.getLogger(CachedABI.class);
 
     public static CachedABI of(String json) {
         try {

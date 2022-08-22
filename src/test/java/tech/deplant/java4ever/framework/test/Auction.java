@@ -3,7 +3,7 @@ package tech.deplant.java4ever.framework.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.framework.JSONContext;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.artifact.ArtifactABI;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.type.Address;
@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class Auction extends OwnedContract {
 
-    public Auction(Sdk sdk, Address address, Credentials owner, IAbi abi) {
-        super(sdk, address, owner, abi);
+    public Auction(Sdk sdk, Address address, Credentials owner) {
+        super(sdk, address, ArtifactABI.ofResource(""), owner);
     }
 
 //    public static Auction ofLocalConfig(ExplorerConfig config, Sdk sdk, boolean isBuyNever) {

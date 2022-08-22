@@ -1,7 +1,7 @@
 package tech.deplant.java4ever.framework.template;
 
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Sdk;
@@ -11,8 +11,8 @@ import tech.deplant.java4ever.framework.artifact.ArtifactABI;
 import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
 import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.artifact.ITvc;
+import tech.deplant.java4ever.framework.contract.ActiveContract;
 import tech.deplant.java4ever.framework.contract.Giver;
-import tech.deplant.java4ever.framework.contract.IContract;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.type.Address;
@@ -21,25 +21,16 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-@Log4j2
 public class ContractTemplate implements IContractTemplate {
 
-//    public static final ContractTemplate SAFE_MULTISIG = new ContractTemplate(
-//            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.abi.json").getAsABI(),
-//            FileArtifact.ofResourcePath("/artifacts/std/SafeMultisigWallet.tvc").getAsTVC()
-//    );
-
-    @Getter
+    private static Logger log = LoggerFactory.getLogger(ContractTemplate.class);
     private final IAbi abi;
-    @Getter
     private final ITvc tvc;
 
     public ContractTemplate(IAbi abi, ITvc tvc) {
         this.abi = abi;
         this.tvc = tvc;
     }
-
-    //TODO convertPublicKeyToTonSafeFormat(@NonNull Context context, @NonNull String publicKey)
 
     public static CompletableFuture<ContractTemplate> ofSoliditySource(Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) {
         return solc.compileContract(
@@ -67,6 +58,16 @@ public class ContractTemplate implements IContractTemplate {
                 });
     }
 
+    public IAbi abi() {
+        return this.abi;
+    }
+
+    //TODO convertPublicKeyToTonSafeFormat(@NonNull Context context, @NonNull String publicKey)
+
+    public ITvc tvc() {
+        return this.tvc;
+    }
+
     @Override
     public IContractTemplate insertPublicKey() {
         //TODO return new ContractTemplate(this.abi, updated(this.tvc));
@@ -79,7 +80,7 @@ public class ContractTemplate implements IContractTemplate {
         return this;
     }
 
-    protected IContract doDeploy(Sdk sdk, int workchainId, Address address, Map<String, Object> initialData, Credentials
+    protected OwnedContract doDeploy(Sdk sdk, int workchainId, Address address, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
         Processing.processMessage(
                 sdk.context(),
@@ -92,11 +93,11 @@ public class ContractTemplate implements IContractTemplate {
                 false,
                 null
         );
-        return new OwnedContract(sdk, address, credentials, this.abi);
+        return new OwnedContract(new ActiveContract(sdk, address, this.abi), credentials);
     }
 
     @Override
-    public IContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
+    public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
             credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
         var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
         log.debug("Future address: " + address.makeAddrStd());
@@ -104,7 +105,7 @@ public class ContractTemplate implements IContractTemplate {
     }
 
     @Override
-    public IContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
+    public OwnedContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
             String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs) throws
             Sdk.SdkException {
         var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);

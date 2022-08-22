@@ -8,23 +8,19 @@ import tech.deplant.java4ever.framework.type.Address;
 import java.math.BigInteger;
 import java.util.Map;
 
-public record Msig(IContract contract) implements IContract, Giver {
+public class Msig extends OwnedContract implements Giver {
+
+    public Msig(IContract contract) {
+        super(contract.sdk(), contract.address(), MsigTemplate.SAFE_MULTISIG_ABI, Credentials.NONE);
+    }
 
     public Msig(Sdk sdk, Address address) {
-        super(sdk, address, Credentials.NONE, MsigTemplate.SAFE_MULTISIG_ABI);
+        super(sdk, address, MsigTemplate.SAFE_MULTISIG_ABI, Credentials.NONE);
     }
 
     public Msig(Sdk sdk, Address address, Credentials owner) {
-        super(sdk, address, owner, MsigTemplate.SAFE_MULTISIG_ABI);
+        super(sdk, address, MsigTemplate.SAFE_MULTISIG_ABI, owner);
     }
-
-//    public static Msig ofConfig(Sdk sdk, Artifact artifact, String msigUniqueName) throws JsonProcessingException {
-//        return new Msig(ControllableContract.ofConfig(sdk, artifact, "msig_" + msigUniqueName));
-//    }
-
-//    public void storeTo(ExplorerConfig config, int msigNumber) {
-//        config.addAccountController("msig" + msigNumber, contract());
-//    }
 
     public void send(Address to, BigInteger amount, boolean sendBounce, int flags, String payload) throws Sdk.SdkException {
         Map<String, Object> params = Map.of(
@@ -33,7 +29,7 @@ public record Msig(IContract contract) implements IContract, Giver {
                 "bounce", sendBounce,
                 "flags", flags,
                 "payload", payload);
-        callExternal("sendTransaction", params, null);
+        super.callExternal("sendTransaction", params, null);
     }
 
     @Override

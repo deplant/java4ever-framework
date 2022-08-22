@@ -56,22 +56,25 @@ public class ControllableContract implements IContract, IContract.Cacheable {
 //        return new ControllableContract(sdk, new Address(contract.address()), contract.externalOwner(), new CachedABI(contract.abi()));
 //    }
 
-    protected static CompletableFuture<Account> graphQLRequest(Sdk sdk, Address address) {
+    protected static Account graphQLRequest(Sdk sdk, Address address) {
         Map<String, Object> filter = new HashMap<>();
-        filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
-        return Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null)
-                .thenApply(response -> {
-                    try {
-                        return JSONContext.MAPPER.readValue(response.result()[0].toString(), Account.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("JSON Parsing error! " + e.getMessage());
-                        return null;
-                    }
-                });
+        filter.put("id", new GraphQLFilter.In(new String[]{address.makeAddrStd()}));
+        Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
+                                                                 "accounts",
+                                                                 filter,
+                                                                 "id acc_type balance boc last_paid",
+                                                                 null,
+                                                                 null);
+        try {
+            return JSONContext.MAPPER.readValue(result.result()[0].toString(), Account.class);
+        } catch (JsonProcessingException e) {
+            log.error("JSON Parsing error! " + e.getMessage());
+            return null;
+        }
     }
 
     @Override
-    public CompletableFuture<Account> account() {
+    public Account account() {
         return graphQLRequest(this.sdk, this.address);
     }
 
@@ -102,52 +105,49 @@ public class ControllableContract implements IContract, IContract.Cacheable {
         ));
     }
 
-    public CompletableFuture<Boolean> isActive() {
-        return account().thenApply(Account::acc_type).thenApply(type -> type == 1);
+    public Boolean isActive() {
+        return 1 == account().acc_type();
     }
 
-
     @Override
-    public CompletableFuture<String> encodeInternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public String encodeInternal(Address dest, String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         return Abi.encodeMessageBody(
                 this.sdk.context(),
                 this.abi.ABI(),
                 new Abi.CallSet(functionName, functionHeader, convertInputs(functionName, functionInputs)),
                 true,
                 Credentials.NONE.signer(),
-                null
-        ).thenApply(Abi.ResultOfEncodeMessageBody::body);
+                null,
+                dest.makeAddrStd()
+        ).body();
 
     }
 
-    protected CompletableFuture<Map<String, Object>> processMessage(IAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
-        return Processing.processMessage(this.sdk.context(),
-                        abi.ABI(),
-                        address.makeAddrStd(),
-                        deploySet,
-                        new Abi.CallSet(functionName, functionHeader, functionInputs),
-                        credentials.signer(), null, false, null)
-                .thenApply(msg -> {
-                    if (msg.decoded().isPresent()) {
-                        return Message.decodeOutputMessage(msg.decoded().get());
-                    } else {
-                        return Map.of();
-                    }
-                });
+    protected Map<String, Object> processMessage(IAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
+        Processing.ResultOfProcessMessage result = Processing.processMessage(this.sdk.context(),
+                                                                    abi.ABI(),
+                                                                    address.makeAddrStd(),
+                                                                    deploySet,
+                                                                    new Abi.CallSet(functionName, functionHeader, functionInputs),
+                                                                    credentials.signer(), null, false, null);
+        return decodeOutputMessage(result.decoded());
+    }
 
+    public Map<String, Object> decodeOutputMessage(Processing.DecodedOutput decoded) {
+            return decoded.output();
     }
 
     @Override
-    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         return runGetter(functionName, functionInputs, functionHeader, this.tvmKey);
     }
 
     @Override
-    public CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+    public Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
         convertInputs(functionName, functionInputs);
-        CompletableFuture<Abi.ResultOfEncodeMessage> futureEncoded =
+        Abi.ResultOfEncodeMessage msg =
                 Abi.encodeMessage(
-                        this.sdk().context(),
+                        sdk().context(),
                         this.abi.ABI(),
                         this.address.makeAddrStd(),
                         null,
@@ -160,31 +160,26 @@ public class ControllableContract implements IContract, IContract.Cacheable {
                         null
                 );
 
-        return account().thenCombineAsync(futureEncoded, (acc, body) -> Tvm.runTvm(
-                this.sdk().context(),
-                body.message(),
-                acc.boc(),
+        Tvm.ResultOfRunTvm tvmExecuteResult = Tvm.runTvm(
+                sdk().context(),
+                msg.message(),
+                account().boc(),
                 null,
                 this.abi.ABI(),
                 null,
                 false
-        ).join()).thenApply(tvm -> {
-            if (tvm.decoded().isPresent()) {
-                return Message.decodeOutputMessage(tvm.decoded().get());
-            } else {
-                return Map.of();
-            }
-        });
+        );
+        return decodeOutputMessage(tvmExecuteResult.decoded());
     }
 
     @Override
-    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         convertInputs(functionName, functionInputs);
         return callExternal(functionName, functionInputs, functionHeader, this.tvmKey);
     }
 
     @Override
-    public CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+    public Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
         convertInputs(functionName, functionInputs);
         return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
     }

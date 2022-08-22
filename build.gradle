@@ -11,7 +11,7 @@ ext {
     junitVersion = "5.8.2"
     v_groupRepo = "deplant"
     v_groupId = "tech.deplant.java4ever"
-    v_version = "1.1.2"
+    v_version = "1.2.0"
     v_bindingName = "java4ever-binding"
     v_bindingRepo = "java4ever-binding"
     v_frameworkName = "java4ever-framework"
@@ -43,7 +43,7 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
 
     // Dependent on binding module
-    implementation "tech.deplant.java4ever:java4ever-binding:1.1.1"
+    implementation "tech.deplant.java4ever:java4ever-binding:1.2.0"
 
 
     // Tests
@@ -120,14 +120,14 @@ signing {
 javadoc {
     options.addBooleanOption('html5', true)
     options.addBooleanOption('-enable-preview', true)
-    options.addStringOption('-release', '17')
+    options.addStringOption('-release', '19')
 }
 
 
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(19)
     }
     withJavadocJar()
     withSourcesJar()
@@ -139,23 +139,24 @@ tasks.withType(JavaCompile) {
 tasks.withType(Test) {
     jvmArgs += "--enable-preview"
     jvmArgs += "-Djava.library.path=c:/opt/sdk/"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }
 tasks.withType(JavaExec) {
     jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.foreign"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
     jvmArgs += "--enable-native-access=java4ever.binding"
     jvmArgs += "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(19)
     }
 }
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
     doFirst {
         options.compilerArgs += [
                 '--module-path', classpath.asPath
@@ -166,14 +167,14 @@ compileJava {
 
 tasks.withType(JavaCompile).configureEach {
     javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(19)
     }
     options.compilerArgs += "--enable-preview"
 }
 
 tasks.withType(JavaExec).configureEach {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(19)
     }
     jvmArgs += "--enable-preview"
 }
@@ -181,7 +182,7 @@ tasks.withType(JavaExec).configureEach {
 test {
     useJUnitPlatform()
     jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.foreign"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
     jvmArgs += "--enable-native-access=java4ever.binding"
     jvmArgs += "-Djava.library.path=c:/opt/sdk/"
 }

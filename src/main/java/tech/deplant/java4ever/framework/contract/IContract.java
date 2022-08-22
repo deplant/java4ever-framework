@@ -22,17 +22,17 @@ public interface IContract {
 
     Credentials tvmKey();
 
-    CompletableFuture<Account> account();
+    Account account();
 
-    CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
+    Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
 
-    CompletableFuture<Map<String, Object>> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
+    Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
 
-    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
+    Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
 
-    CompletableFuture<Map<String, Object>> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
+    Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials);
 
-    CompletableFuture<String> encodeInternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
+    String encodeInternal(Address dest, String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader);
 
     interface Cacheable {
         void save(Artifact artifact) throws IOException;

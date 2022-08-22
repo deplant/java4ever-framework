@@ -12,6 +12,7 @@ import tech.deplant.java4ever.binding.GraphQL;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.GraphQLFilter;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.artifact.IAbi;
@@ -58,6 +59,8 @@ public class TestsFeatures {
     // test generate hashes 1000 times
     @Test
     public void testJacksonConvert() throws ExecutionException, InterruptedException {
+        System.out.println("");
+        http://iui.com
         final Sdk sdk = new SdkBuilder()
                 .networkEndpoints(new String[]{"http://80.78.254.199/"})
                 .timeout(50L)
@@ -73,7 +76,7 @@ public class TestsFeatures {
         }
 
         Map<String, Object> filter = new HashMap<>();
-        filter.put("id", new GraphQL.Filter.In(new String[]{"0:e2a1dcec8bebff29c207d8944aef1bc8a5a9500789096c6a83a3a9bd71dd75fa"}));
+        filter.put("id", new GraphQLFilter.In(new String[]{"0:e2a1dcec8bebff29c207d8944aef1bc8a5a9500789096c6a83a3a9bd71dd75fa"}));
         Object[] results = Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null).get().result();
         var query = mapper.convertValue(results[0], AccountQuery.class);
 

@@ -1,17 +1,16 @@
 package tech.deplant.java4ever.framework;
 
-import lombok.Value;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-@Log4j2
-@Value
 public class TvmLinker {
 
+    private static Logger log = LoggerFactory.getLogger(TvmLinker.class);
 
     String linkerPath;
     String stdlibSolPath;

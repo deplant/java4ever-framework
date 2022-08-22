@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework;
 
-import lombok.Value;
-
 public interface GraphQLFilter {
 	record In(String[] in) implements GraphQLFilter {
 	}

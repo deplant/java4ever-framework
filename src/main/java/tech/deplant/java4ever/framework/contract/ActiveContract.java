@@ -103,7 +103,7 @@ public record ActiveContract(Sdk sdk, Address address, IAbi abi) implements ICon
                                 case BigInteger b -> "0x" + b.toString(16);
                                 case Instant i -> "0x" + BigInteger.valueOf(i.getEpochSecond()).toString(16);
                                 case String s
-                                        when"0x".equals(s.substring(0, 2)) -> s;
+                                        when "0x".equals(s.substring(0, 2)) -> s;
                                 case String s -> "0x" + s;
                                 default -> entry.getValue();
                             };

@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework;
 
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -13,9 +14,9 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
 
-@Log4j2
 public class Data {
 
+    private static Logger log = LoggerFactory.getLogger(Data.class);
 
     public static String base64ToHexString(String base64string) {
         return HexFormat.of().formatHex(Base64.getDecoder().decode(base64string));

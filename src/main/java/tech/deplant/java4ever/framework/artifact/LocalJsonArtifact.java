@@ -1,14 +1,18 @@
 package tech.deplant.java4ever.framework.artifact;
 
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.framework.TvmLinker;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Log4j2
 public record LocalJsonArtifact(Path path) implements Artifact<String> {
+
+
+    private static Logger log = LoggerFactory.getLogger(LocalJsonArtifact.class);
 
     @Override
     public void write(String content) throws IOException {

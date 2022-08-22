@@ -1,9 +1,6 @@
 package tech.deplant.java4ever.framework;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import lombok.Value;
-import lombok.extern.log4j.Log4j2;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
@@ -12,8 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Value
-@Log4j2
 public class ExplorerConfig {
 
     Map<String, ContractConfig> contracts;
@@ -23,14 +18,18 @@ public class ExplorerConfig {
     }
 
     public static ExplorerConfig ofConfigFile(Artifact<String> artifact) {
-        return new Gson().fromJson(artifact.read(), ExplorerConfig.class);
+        try {
+            return Sdk.DEFAULT_MAPPER.readValue(artifact.read(), ExplorerConfig.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void store(String path) throws IOException {
         FileWriter file = new FileWriter(path);
         try {
-            var gson = new GsonBuilder().setPrettyPrinting().create();
-            file.write(gson.toJson(this));
+            var writer = Sdk.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter();
+            file.write(writer.writeValueAsString(this));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -68,11 +67,5 @@ public class ExplorerConfig {
 //        }
 //    }
 
-    @Value
-    public static class ContractConfig {
-        String abi;
-        String address;
-        String internalOwner;
-        Credentials externalOwner;
-    }
+    public record ContractConfig(String abi, String address, String internalOwner, Credentials externalOwner){}
 }

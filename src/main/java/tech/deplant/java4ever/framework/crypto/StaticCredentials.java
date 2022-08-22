@@ -1,7 +1,6 @@
 package tech.deplant.java4ever.framework.crypto;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.framework.Sdk;
@@ -9,8 +8,8 @@ import tech.deplant.java4ever.framework.Sdk;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public record StaticCredentials(@SerializedName("public") String publicKey,
-                                @SerializedName("secret") String secretKey) implements Credentials {
+public record StaticCredentials(@JsonProperty("public") String publicKey,
+                                @JsonProperty("secret") String secretKey) implements Credentials {
 
     @Override
     public Abi.Signer signer() {
@@ -34,7 +33,7 @@ public record StaticCredentials(@SerializedName("public") String publicKey,
         FileWriter file = null;
         try {
             file = new FileWriter(path);
-            file.write(new Gson().toJson(this));
+            file.write(Sdk.DEFAULT_MAPPER.writeValueAsString(this));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

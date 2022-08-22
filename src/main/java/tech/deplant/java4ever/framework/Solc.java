@@ -1,7 +1,8 @@
 package tech.deplant.java4ever.framework;
 
-import lombok.Value;
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.framework.contract.ActiveContract;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-@Log4j2
-@Value
 public class Solc {
+
+    private static Logger log = LoggerFactory.getLogger(Solc.class);
 
     private final String DEFAULT_SOL_EXTENSION = ".sol";
     String compilerPath;

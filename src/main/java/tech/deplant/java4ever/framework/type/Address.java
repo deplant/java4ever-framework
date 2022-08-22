@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.type;
 
-import lombok.Value;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
@@ -10,22 +9,12 @@ import tech.deplant.java4ever.framework.template.ContractTemplate;
 import java.math.BigInteger;
 import java.util.Map;
 
-@Value
-public class Address {
+public record Address(int wid, BigInteger value) {
 
     public static final Address ZERO = new Address(0, BigInteger.ZERO);
-    int wid;
-    BigInteger value;
-
-    public Address(int wid, BigInteger value) {
-        this.wid = wid;
-        this.value = value;
-    }
 
     public Address(String address) {
-        var splitted = address.split(":");
-        this.wid = Integer.valueOf(splitted[0]);
-        this.value = new BigInteger(splitted[1], 16);
+        this(Integer.valueOf(address.split(":")[0]),new BigInteger(address.split(":")[1], 16));
     }
 
     public Address(BigInteger value) {

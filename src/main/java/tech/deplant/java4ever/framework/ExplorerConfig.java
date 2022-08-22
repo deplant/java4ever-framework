@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.io.FileWriter;
 import java.io.IOException;

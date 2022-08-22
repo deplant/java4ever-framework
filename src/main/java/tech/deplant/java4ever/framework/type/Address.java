@@ -2,9 +2,9 @@ package tech.deplant.java4ever.framework.type;
 
 import lombok.Value;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.math.BigInteger;
@@ -33,7 +33,7 @@ public class Address {
     }
 
     public static Address ofFutureDeploy(Sdk sdk, ContractTemplate template, int workchainId, Map<String, Object> initialData, Credentials credentials) throws Sdk.SdkException {
-        return new Address(sdk.syncCall(Abi.encodeMessage(
+        return new Address(Abi.encodeMessage(
                 sdk.context(),
                 template.abi().ABI(),
                 null,
@@ -41,7 +41,7 @@ public class Address {
                 null,
                 credentials.signer(),
                 null
-        )).address());
+        ).address());
     }
 
     public boolean isNone() {

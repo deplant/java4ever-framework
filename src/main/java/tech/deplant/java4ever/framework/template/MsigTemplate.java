@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.template;
 
-import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.ArtifactABI;
 import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
@@ -8,10 +7,10 @@ import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.artifact.ITvc;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Msig;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class MsigTemplate extends ContractTemplate {
 
@@ -31,12 +30,11 @@ public class MsigTemplate extends ContractTemplate {
         super(abi, tvc);
     }
 
-    public CompletableFuture<Msig> deployWithGiver(Sdk sdk, int wid, Credentials keys, Giver giver, BigInteger value) throws Sdk.SdkException {
+    public Msig deployWithGiver(Sdk sdk, int wid, Credentials keys, Giver giver, BigInteger value) throws Sdk.SdkException {
         var params = Map.<String, Object>of(
                 "owners", new String[]{"0x" + keys.publicKey()},
                 "reqConfirms", 1);
-        return super.deployWithGiver(sdk, giver, value, wid, null, keys, params)
-                .thenApply(Msig::new);
+        return new Msig(super.deployWithGiver(sdk, giver, value, wid, null, keys, params));
     }
 
 }

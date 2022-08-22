@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.contract.IContract;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.io.IOException;
 import java.util.Map;

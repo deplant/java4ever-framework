@@ -1,14 +1,19 @@
 package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-import tech.deplant.java4ever.binding.*;
-import tech.deplant.java4ever.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.Net;
+import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.binding.Tvm;
+import tech.deplant.java4ever.framework.ExplorerCache;
+import tech.deplant.java4ever.framework.GraphQLFilter;
+import tech.deplant.java4ever.framework.JSONContext;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
@@ -16,21 +21,11 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-@Log4j2
-@AllArgsConstructor
-public class ControllableContract implements IContract, IContract.Cacheable {
-
-    @Getter
-    Sdk sdk;
-    @Getter
-    Address address;
-    @Getter
-    Credentials tvmKey;
-    @Getter
-    IAbi abi;
+public record OwnedContract(Sdk sdk, Address address, Credentials tvmKey,
+                            IAbi abi) implements IContract, IContract.Cacheable {
+    private static Logger log = LoggerFactory.getLogger(OwnedContract.class);
 
 //    public static CompletableFuture<ControllableContract> ofAddress(Sdk sdk, Address address, ContractAbi abi) throws Sdk.SdkException {
 //        return graphQLRequest(sdk, address).thenApply(account ->
@@ -60,11 +55,11 @@ public class ControllableContract implements IContract, IContract.Cacheable {
         Map<String, Object> filter = new HashMap<>();
         filter.put("id", new GraphQLFilter.In(new String[]{address.makeAddrStd()}));
         Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
-                                                                 "accounts",
-                                                                 filter,
-                                                                 "id acc_type balance boc last_paid",
-                                                                 null,
-                                                                 null);
+                "accounts",
+                filter,
+                "id acc_type balance boc last_paid",
+                null,
+                null);
         try {
             return JSONContext.MAPPER.readValue(result.result()[0].toString(), Account.class);
         } catch (JsonProcessingException e) {
@@ -87,7 +82,8 @@ public class ControllableContract implements IContract, IContract.Cacheable {
                             case "uint128", "uint256", "uint64", "uint32" -> switch (entry.getValue()) {
                                 case BigInteger b -> "0x" + b.toString(16);
                                 case Instant i -> "0x" + BigInteger.valueOf(i.getEpochSecond()).toString(16);
-                                case String s && "0x".equals(s.substring(0, 2)) -> s;
+                                case String s
+                                        when"0x".equals(s.substring(0, 2)) -> s;
                                 case String s -> "0x" + s;
                                 default -> entry.getValue();
                             };
@@ -98,7 +94,7 @@ public class ControllableContract implements IContract, IContract.Cacheable {
                             default -> entry.getValue();
                         };
                     } else {
-                        log.error(() -> "Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI of " + this.address.makeAddrStd());
+                        log.error("Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI of " + this.address.makeAddrStd());
                         return null;
                     }
                 }
@@ -125,25 +121,25 @@ public class ControllableContract implements IContract, IContract.Cacheable {
 
     protected Map<String, Object> processMessage(IAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
         Processing.ResultOfProcessMessage result = Processing.processMessage(this.sdk.context(),
-                                                                    abi.ABI(),
-                                                                    address.makeAddrStd(),
-                                                                    deploySet,
-                                                                    new Abi.CallSet(functionName, functionHeader, functionInputs),
-                                                                    credentials.signer(), null, false, null);
+                abi.ABI(),
+                address.makeAddrStd(),
+                deploySet,
+                new Abi.CallSet(functionName, functionHeader, functionInputs),
+                credentials.signer(), null, false, null);
         return decodeOutputMessage(result.decoded());
     }
 
     public Map<String, Object> decodeOutputMessage(Processing.DecodedOutput decoded) {
-            return decoded.output();
+        return decoded.output();
     }
 
     @Override
-    public Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         return runGetter(functionName, functionInputs, functionHeader, this.tvmKey);
     }
 
     @Override
-    public Map<String, Object> runGetter(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+    public Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
         convertInputs(functionName, functionInputs);
         Abi.ResultOfEncodeMessage msg =
                 Abi.encodeMessage(
@@ -173,13 +169,13 @@ public class ControllableContract implements IContract, IContract.Cacheable {
     }
 
     @Override
-    public Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         convertInputs(functionName, functionInputs);
         return callExternal(functionName, functionInputs, functionHeader, this.tvmKey);
     }
 
     @Override
-    public Map<String, Object> callExternal(@NonNull String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
+    public Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
         convertInputs(functionName, functionInputs);
         return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
     }

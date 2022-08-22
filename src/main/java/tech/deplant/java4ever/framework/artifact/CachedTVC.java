@@ -14,6 +14,6 @@ public record CachedTVC(byte[] bytes) implements ITvc {
 
     @Override
     public String code(Sdk sdk) throws Sdk.SdkException {
-        return sdk.syncCall(Boc.getCodeFromTvc(sdk.context(), base64String())).code();
+        return Boc.getCodeFromTvc(sdk.context(), base64String()).code();
     }
 }

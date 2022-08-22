@@ -1,44 +1,82 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import lombok.Getter;
-import tech.deplant.java4ever.binding.Context;
+import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 
 public class SdkBuilder {
 
+    private boolean cacheInLocalStorage = true;
+    private String localStoragePath = "~/.tonclient";
     // JavaConfig
     private long timeout = 30L;
-    private ObjectMapper mapper = JsonMapper.builder() // or different mapper for other format
-            .addModule(new ParameterNamesModule())
-            .addModule(new Jdk8Module())
-            .addModule(new JavaTimeModule())
-            // and possibly other configuration, modules, then:
-            .build();
+    private ObjectMapper mapper = Sdk.DEFAULT_MAPPER;
     //Context.NetworkConfig
-    private String[] endpoints;
+    private String[] endpoints = Sdk.DEFAULT_ENDPOINTS;
     @Deprecated
-    private String server_address; // deprecated, use endpoints
-    private Integer network_retries_count = 5;
-    private Integer message_retries_count = 5;
-    private Integer message_processing_timeout = 40000;
-    private Integer wait_for_timeout = 40000;
-    private Integer out_of_sync_threshold = 15000;
-    private Integer reconnect_timeout = 12000;
-    private String access_key;
+    private String serverAddress; // deprecated, use endpoints
+    private Integer networkRetriesCount = 5;
+    private Integer messageRetriesCount = 5;
+    private Integer messageProcessingTimeout = 40000;
+    private Integer waitForTimeout = 40000;
+    private Integer outOfSyncThreshold = 15000;
+    private Integer reconnectTimeout = 12000;
+    private String accessKey;
     //Context.CryptoConfig
-    private Integer mnemonic_dictionary = 1;
-    private Integer mnemonic_word_count = 12;
-    private String hdkey_derivation_path = "m/44'/396'/0'/0/0";
+    private Integer mnemonicDictionary = 1;
+    private Integer mnemonicWordCount = 12;
+    private String hdkeyDerivationPath = "m/44'/396'/0'/0/0";
     //Context.AbiConfig;
     private Integer workchain = 0;
-    private Integer message_expiration_timeout = 40000;
-    private Integer message_expiration_timeout_grow_factor = null;
+    private Integer messageExpirationTimeout = 40000;
+    private Integer messageExpirationTimeoutGrowFactor = null;
+    private Integer cacheMaxSize = 10240;
+    private Integer maxReconnectTimeout = 120000;
+    private Integer sendingEndpointCount = 1;
+    private Integer latencyDetectionInterval = 60000;
+    private Integer maxLatency = 60000;
+    private Integer queryTimeout = 60000;
+    private Client.NetworkQueriesProtocol queriesProtocol = Client.NetworkQueriesProtocol.HTTP;
+    private Integer firstRempStatusTimeout = 1000;
+    private Integer nextRempStatusTimeout = 5000;
+
     public SdkBuilder() {
+    }
+
+    public void proofsCacheInLocalStorage(boolean cacheInLocalStorage) {
+        this.cacheInLocalStorage = cacheInLocalStorage;
+    }
+
+    public void networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
+        this.maxReconnectTimeout = maxReconnectTimeout;
+    }
+
+    public void networkSendingEndpointCount(Integer sendingEndpointCount) {
+        this.sendingEndpointCount = sendingEndpointCount;
+    }
+
+    public void networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
+        this.latencyDetectionInterval = latencyDetectionInterval;
+    }
+
+    public void networkMaxLatency(Integer maxLatency) {
+        this.maxLatency = maxLatency;
+    }
+
+    public void networkQueryTimeout(Integer queryTimeout) {
+        this.queryTimeout = queryTimeout;
+    }
+
+    public void networkQueriesProtocol(Client.NetworkQueriesProtocol queriesProtocol) {
+        this.queriesProtocol = queriesProtocol;
+    }
+
+    public void networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
+        this.firstRempStatusTimeout = firstRempStatusTimeout;
+    }
+
+    public void networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
+        this.nextRempStatusTimeout = nextRempStatusTimeout;
     }
 
     public SdkBuilder networkEndpoints(String[] endpoints) {
@@ -47,58 +85,58 @@ public class SdkBuilder {
     }
 
     public SdkBuilder networkServerAddress(String server_address) {
-        this.server_address = server_address;
+        this.serverAddress = server_address;
         return this;
     }
 
     public SdkBuilder networkRetriesCount(Integer network_retries_count) {
-        this.network_retries_count = network_retries_count;
+        this.networkRetriesCount = network_retries_count;
         return this;
     }
 
     public SdkBuilder networkMessageRetriesCount(Integer message_retries_count) {
-        this.message_retries_count = message_retries_count;
+        this.messageRetriesCount = message_retries_count;
         return this;
     }
 
     public SdkBuilder networkMessageProcessingTimeout(Integer message_processing_timeout) {
-        this.message_processing_timeout = message_processing_timeout;
+        this.messageProcessingTimeout = message_processing_timeout;
         return this;
     }
 
     public SdkBuilder networkWaitForTimeout(Integer wait_for_timeout) {
-        this.wait_for_timeout = wait_for_timeout;
+        this.waitForTimeout = wait_for_timeout;
         return this;
     }
 
     public SdkBuilder networkOutOfSyncThreshold(Integer out_of_sync_threshold) {
-        this.out_of_sync_threshold = out_of_sync_threshold;
+        this.outOfSyncThreshold = out_of_sync_threshold;
         return this;
     }
 
     public SdkBuilder networkReconnectTimeout(Integer reconnect_timeout) {
-        this.reconnect_timeout = reconnect_timeout;
+        this.reconnectTimeout = reconnect_timeout;
         return this;
     }
 
     public SdkBuilder networkAccessKey(String access_key) {
-        this.access_key = access_key;
+        this.accessKey = access_key;
         return this;
     }
 
     //cripto
     public SdkBuilder cryptoMnemonicDictionary(Integer mnemonic_dictionary) {
-        this.mnemonic_dictionary = mnemonic_dictionary;
+        this.mnemonicDictionary = mnemonic_dictionary;
         return this;
     }
 
     public SdkBuilder cryptoMnemonicWordCount(Integer mnemonic_word_count) {
-        this.mnemonic_word_count = mnemonic_word_count;
+        this.mnemonicWordCount = mnemonic_word_count;
         return this;
     }
 
     public SdkBuilder cryptoHdkeyDerivationPath(String hdkey_derivation_path) {
-        this.hdkey_derivation_path = hdkey_derivation_path;
+        this.hdkeyDerivationPath = hdkey_derivation_path;
         return this;
     }
 
@@ -109,12 +147,12 @@ public class SdkBuilder {
     }
 
     public SdkBuilder abiMessageExpirationTimeout(Integer message_expiration_timeout) {
-        this.message_expiration_timeout = message_expiration_timeout;
+        this.messageExpirationTimeout = message_expiration_timeout;
         return this;
     }
 
     public SdkBuilder abiMessageExpirationTimeoutGrowFactor(Integer message_expiration_timeout_grow_factor) {
-        this.message_expiration_timeout_grow_factor = message_expiration_timeout_grow_factor;
+        this.messageExpirationTimeoutGrowFactor = message_expiration_timeout_grow_factor;
         return this;
     }
 
@@ -129,54 +167,42 @@ public class SdkBuilder {
     }
 
     public Sdk create(LibraryLoader loader) {
-        return Sdk.ofContextConfig(loader, new Context.Config(
-                new Context.NetworkConfig(
+        return Sdk.ofContextConfig(loader, new Client.ClientConfig(
+                new Client.NetworkConfig(
+                        this.serverAddress,
                         this.endpoints,
-                        this.server_address,
-                        this.network_retries_count,
-                        this.message_retries_count,
-                        this.message_processing_timeout,
-                        this.wait_for_timeout,
-                        this.out_of_sync_threshold,
-                        this.reconnect_timeout,
-                        this.access_key),
-                new Context.CryptoConfig(
-                        this.mnemonic_dictionary,
-                        this.mnemonic_word_count,
-                        this.hdkey_derivation_path),
-                new Context.AbiConfig(
+                        this.networkRetriesCount,
+                        this.maxReconnectTimeout,
+                        this.reconnectTimeout,
+                        this.messageRetriesCount,
+                        this.messageProcessingTimeout,
+                        this.waitForTimeout,
+                        this.outOfSyncThreshold,
+                        this.sendingEndpointCount,
+                        this.latencyDetectionInterval,
+                        this.maxLatency,
+                        this.queryTimeout,
+                        this.queriesProtocol,
+                        this.firstRempStatusTimeout,
+                        this.nextRempStatusTimeout,
+                        this.accessKey),
+                new Client.CryptoConfig(
+                        this.mnemonicDictionary,
+                        this.mnemonicWordCount,
+                        this.hdkeyDerivationPath),
+                new Client.AbiConfig(
                         this.workchain,
-                        this.message_expiration_timeout,
-                        this.message_expiration_timeout_grow_factor)
+                        this.messageExpirationTimeout,
+                        this.messageExpirationTimeoutGrowFactor),
+                new Client.BocConfig(this.cacheMaxSize),
+                new Client.ProofsConfig(this.cacheInLocalStorage),
+                this.localStoragePath
         ), this.timeout, this.mapper);
     }
 
-    public enum Network {
-
-        MAIN_NET(new String[]{
-                "https://eri01.main.everos.dev/",
-                "https://gra01.main.everos.dev/",
-                "https://gra02.main.everos.dev/",
-                "https://lim01.main.everos.dev/",
-                "https://rbx01.main.everos.dev/"
-        }),
-
-        DEV_NET(new String[]{
-                "https://eri01.net.everos.dev/",
-                "https://rbx01.net.everos.dev/",
-                "https://gra01.net.everos.dev/"
-        }),
-        LOCALHOST(new String[]{
-                "http://0.0.0.0/",
-                "http://127.0.0.1/",
-                "http://localhost/"
-        });
-
-        @Getter
-        String[] endpoints;
-
-        Network(String[] endpoints) {
-            this.endpoints = endpoints;
-        }
+    public SdkBuilder bocCacheMaxSize(Integer cacheMaxSize) {
+        this.cacheMaxSize = cacheMaxSize;
+        return this;
     }
+
 }

@@ -8,15 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
-import tech.deplant.java4ever.binding.GraphQL;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
-import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.GraphQLFilter;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.math.BigInteger;
@@ -38,33 +37,32 @@ public class TestsFeatures {
     @Test
     public void testBetterComposition() throws ExecutionException, InterruptedException, JsonProcessingException {
         final Sdk sdkDEV = new SdkBuilder()
-                .networkEndpoints(SdkBuilder.Network.DEV_NET.endpoints())
-                .create(new JavaLibraryPathLoader());
-        final Sdk sdkSE = new SdkBuilder()
-                .networkEndpoints(new String[]{"http://80.78.241.3/"})
-                .timeout(50L)
-                .create(new JavaLibraryPathLoader());
+                .networkEndpoints(Sdk.Network.DEV_NET.endpoints())
+                .create(JavaLibraryPathLoader.TON_CLIENT);
+        //final Sdk sdkSE = new SdkBuilder()
+        //       .networkEndpoints(new String[]{"http://80.78.241.3/"})
+        //        .timeout(50L)
+        //        .create(JavaLibraryPathLoader.TON_CLIENT);
 
 
-        var giver = new EverOSGiver(sdkSE);
-        var msig = MsigTemplate.SAFE_MULTISIG_TEMPLATE.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE).get(), giver, new BigInteger("2"));
+        var giver = new EverOSGiver(sdkDEV);
+        var msig = MsigTemplate.SAFE_MULTISIG_TEMPLATE.deployWithGiver(sdkDEV, 0, Credentials.RANDOM(sdkDEV), giver, new BigInteger("2"));
         //msig.get().send();
         IAbi abi = MsigTemplate.SAFE_MULTISIG_ABI;
         //IAbi abi2 = CachedABI.of("{}");
         //IAbi abi3 = ArtifactABI.ofResource("");
         //ArtifactABI abi4 = new ArtifactABI(CachedABI.of("{}"), new LocalJsonArtifact(Paths.get("")));
-
     }
 
     // test generate hashes 1000 times
     @Test
     public void testJacksonConvert() throws ExecutionException, InterruptedException {
         System.out.println("");
-        http://iui.com
+
         final Sdk sdk = new SdkBuilder()
                 .networkEndpoints(new String[]{"http://80.78.254.199/"})
                 .timeout(50L)
-                .create(new JavaLibraryPathLoader());
+                .create(new JavaLibraryPathLoader("ton_client"));
 
         ObjectMapper mapper = JsonMapper.builder()
                 .addModule(new ParameterNamesModule())
@@ -77,7 +75,7 @@ public class TestsFeatures {
 
         Map<String, Object> filter = new HashMap<>();
         filter.put("id", new GraphQLFilter.In(new String[]{"0:e2a1dcec8bebff29c207d8944aef1bc8a5a9500789096c6a83a3a9bd71dd75fa"}));
-        Object[] results = Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null).get().result();
+        Object[] results = Net.queryCollection(sdk.context(), "accounts", filter, "id acc_type balance boc last_paid", null, null).result();
         var query = mapper.convertValue(results[0], AccountQuery.class);
 
         log.debug(query.id() + ", " + query.balance());

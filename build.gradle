@@ -2,16 +2,17 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
-    id "io.freefair.lombok" version "6.4.3" // apply false
 }
 
 // Global variables for all modules
 ext {
-    lo4jVersion = "2.17.2" // <2.15="CVE-2021-44228 Log4j 2 Vulnerability"
-    junitVersion = "5.8.2"
+    slf4jVersion = "2.0.+"
+    junitVersion = "5.9.+"
+    jacksonVersion = "2.13.3"
+    v_version = "1.2.0"
+
     v_groupRepo = "deplant"
     v_groupId = "tech.deplant.java4ever"
-    v_version = "1.2.0"
     v_bindingName = "java4ever-binding"
     v_bindingRepo = "java4ever-binding"
     v_frameworkName = "java4ever-framework"
@@ -31,22 +32,26 @@ repositories {
 }
 
 dependencies {
-    // Logging
-    implementation "org.apache.logging.log4j:log4j-core:$lo4jVersion"
-    implementation "org.apache.logging.log4j:log4j-api:$lo4jVersion"
+
+    // RUNTIME **************************
+
+    // java4ever-binding
+    implementation "tech.deplant.java4ever:java4ever-binding:$v_version"
+
+    // SLF4J Logging Framework
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 
     // JSON
-    implementation "com.google.code.gson:gson:2.8.9"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2.2"
-    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
 
-    // Dependent on binding module
-    implementation "tech.deplant.java4ever:java4ever-binding:1.2.0"
+    // TESTS **************************
 
-
-    // Tests
+    // SLF4J (Tests part)
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
+    // JUnit 5
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher" // https://github.com/gradle/gradle/issues/18627
@@ -123,8 +128,6 @@ javadoc {
     options.addStringOption('-release', '19')
 }
 
-
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(19)
@@ -133,36 +136,17 @@ java {
     withSourcesJar()
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs += "--enable-preview"
-}
-tasks.withType(Test) {
-    jvmArgs += "--enable-preview"
-    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
-    jvmArgs += "--add-modules=jdk.incubator.concurrent"
-}
-tasks.withType(JavaExec) {
-    jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.concurrent"
-    jvmArgs += "--enable-native-access=java4ever.binding"
-    jvmArgs += "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(19)
-    }
-}
-
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_19
     targetCompatibility = JavaVersion.VERSION_19
-    doFirst {
-        options.compilerArgs += [
-                '--module-path', classpath.asPath
-        ]
-        classpath = files()
-    }
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += "--enable-preview"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
+    jvmArgs += "--enable-native-access=java4ever.binding"
+    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -177,12 +161,11 @@ tasks.withType(JavaExec).configureEach {
         languageVersion = JavaLanguageVersion.of(19)
     }
     jvmArgs += "--enable-preview"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
-test {
-    useJUnitPlatform()
+tasks.withType(Test) {
     jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.concurrent"
-    jvmArgs += "--enable-native-access=java4ever.binding"
     jvmArgs += "-Djava.library.path=c:/opt/sdk/"
+    jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }

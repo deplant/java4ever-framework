@@ -1,8 +1,6 @@
 module java4ever.framework {
-    requires org.apache.logging.log4j;
     requires java.scripting;
-    requires com.google.gson;
-    requires static lombok;
+    requires org.slf4j;
     requires java4ever.binding;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.module.paramnames;
@@ -13,9 +11,5 @@ module java4ever.framework {
     exports tech.deplant.java4ever.framework.contract;
     exports tech.deplant.java4ever.framework.template;
     exports tech.deplant.java4ever.framework.type;
-    opens tech.deplant.java4ever.framework to com.google.gson;
-    opens tech.deplant.java4ever.framework.artifact to com.google.gson;
-    opens tech.deplant.java4ever.framework.template to com.google.gson;
-    opens tech.deplant.java4ever.framework.contract to com.google.gson;
-    opens tech.deplant.java4ever.framework.type to com.google.gson;
+    exports tech.deplant.java4ever.framework.crypto;
 }

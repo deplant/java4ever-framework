@@ -1,6 +1,9 @@
-package tech.deplant.java4ever.framework.artifact;
+package tech.deplant.java4ever.framework.abi;
 
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.artifact.Artifact;
+import tech.deplant.java4ever.framework.artifact.LocalJsonArtifact;
+import tech.deplant.java4ever.framework.artifact.Persistable;
 
 import java.io.IOException;
 import java.nio.file.Path;

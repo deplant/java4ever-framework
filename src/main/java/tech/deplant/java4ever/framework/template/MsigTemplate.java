@@ -1,9 +1,9 @@
 package tech.deplant.java4ever.framework.template;
 
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.abi.ArtifactABI;
+import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
-import tech.deplant.java4ever.framework.artifact.IAbi;
 import tech.deplant.java4ever.framework.artifact.ITvc;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Msig;

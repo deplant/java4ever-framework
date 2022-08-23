@@ -6,14 +6,11 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.binding.Tvm;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.type.Address;
 
-import java.math.BigInteger;
-import java.time.Instant;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public record ActiveContract(Sdk sdk, Address address, IAbi abi) implements IContract {
 
@@ -31,10 +28,11 @@ public record ActiveContract(Sdk sdk, Address address, IAbi abi) implements ICon
 
     @Override
     public String encodeInternal(Address dest, String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+        var inputs = abi().convertInputs(functionName, functionInputs);
         return Abi.encodeMessageBody(
                 this.sdk.context(),
                 this.abi.ABI(),
-                new Abi.CallSet(functionName, functionHeader, convertInputs(functionName, functionInputs)),
+                new Abi.CallSet(functionName, functionHeader, inputs),
                 true,
                 Credentials.NONE.signer(),
                 null,
@@ -59,7 +57,7 @@ public record ActiveContract(Sdk sdk, Address address, IAbi abi) implements ICon
 
     @Override
     public Map<String, Object> runGetter(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
-        convertInputs(functionName, functionInputs);
+        abi().convertInputs(functionName, functionInputs);
         Abi.ResultOfEncodeMessage msg =
                 Abi.encodeMessage(
                         sdk().context(),
@@ -89,36 +87,8 @@ public record ActiveContract(Sdk sdk, Address address, IAbi abi) implements ICon
 
     @Override
     public Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
-        convertInputs(functionName, functionInputs);
+        abi().convertInputs(functionName, functionInputs);
         return processMessage(this.abi, this.address, null, credentials, functionName, null, functionInputs);
-    }
-
-    private Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs) {
-        return functionInputs.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey(), entry -> {
-                    if (this.abi.hasInput(functionName, entry.getKey())) {
-                        var type = this.abi.inputType(functionName, entry.getKey());
-                        return switch (type) {
-                            case "uint128", "uint256", "uint64", "uint32" -> switch (entry.getValue()) {
-                                case BigInteger b -> "0x" + b.toString(16);
-                                case Instant i -> "0x" + BigInteger.valueOf(i.getEpochSecond()).toString(16);
-                                case String s
-                                        when "0x".equals(s.substring(0, 2)) -> s;
-                                case String s -> "0x" + s;
-                                default -> entry.getValue();
-                            };
-                            case "address" -> switch (entry.getValue()) {
-                                case Address a -> a.makeAddrStd();
-                                default -> entry.getValue();
-                            };
-                            default -> entry.getValue();
-                        };
-                    } else {
-                        log.error("Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI of " + this.address.makeAddrStd());
-                        return null;
-                    }
-                }
-        ));
     }
 
 }

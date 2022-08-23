@@ -2,7 +2,7 @@ package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.artifact.ArtifactABI;
+import tech.deplant.java4ever.framework.abi.ArtifactABI;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.crypto.StaticCredentials;
 import tech.deplant.java4ever.framework.type.Address;

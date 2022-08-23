@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
+import tech.deplant.java4ever.framework.abi.ArtifactABI;
+import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.util.HashMap;

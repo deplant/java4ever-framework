@@ -1,10 +1,20 @@
-package tech.deplant.java4ever.framework.artifact;
+package tech.deplant.java4ever.framework.abi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.abi.type.AbiValue;
 
+import java.util.List;
 import java.util.Map;
 
 public interface IAbi {
+
+    Sdk sdk();
+
+    Map<String, Function> functions() throws JsonProcessingException;
+
+    List<String> headers() throws JsonProcessingException;
 
     String json();
 
@@ -21,6 +31,8 @@ public interface IAbi {
     String outputType(String functionName, String outputName);
 
     Abi.ABI ABI();
+
+    Map<String, AbiValue> convertInputs(String functionName, Map<String, Object> functionInputs);
 
     record Function(Map<String, String> inputs, Map<String, String> outputs) {
     }

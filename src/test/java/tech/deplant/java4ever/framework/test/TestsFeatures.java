@@ -9,12 +9,14 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.GraphQLFilter;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
-import tech.deplant.java4ever.framework.artifact.IAbi;
+import tech.deplant.java4ever.framework.abi.IAbi;
+import tech.deplant.java4ever.framework.abi.JsonAbi;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
@@ -55,9 +57,11 @@ public class TestsFeatures {
         //.send();
         //msig.get().send();
         IAbi abi = MsigTemplate.SAFE_MULTISIG_ABI;
-        //IAbi abi2 = CachedABI.of("{}");
+        IAbi abi2 = new JsonAbi(sdkDEV, "{}");
+        msig.callExternal("", new Abi.FunctionHeader(null, null, null));
         //IAbi abi3 = ArtifactABI.ofResource("");
         //ArtifactABI abi4 = new ArtifactABI(CachedABI.of("{}"), new LocalJsonArtifact(Paths.get("")));
+
     }
 
     // test generate hashes 1000 times

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.type;
+package tech.deplant.java4ever.framework.abi.type;
 
 public enum AbiValueType {
     // map(address,uint128)

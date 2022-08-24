@@ -79,7 +79,7 @@ public class SdkBuilder {
         this.nextRempStatusTimeout = nextRempStatusTimeout;
     }
 
-    public SdkBuilder networkEndpoints(String[] endpoints) {
+    public SdkBuilder networkEndpoints(String... endpoints) {
         this.endpoints = endpoints;
         return this;
     }

@@ -3,7 +3,7 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.contract.IContract;
+import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public interface ExplorerCache {
         return JSONContext.MAPPER.readValue(artifact.read(), typeRef);
     }
 
-    static void flush(IContract contract, Artifact artifact) throws IOException {
+    static void flush(OwnedContract contract, Artifact artifact) throws IOException {
         var content = JSONContext.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
                 new ContractRecord(contract.abi().json(), contract.address().makeAddrStd(), contract.tvmKey())
         );

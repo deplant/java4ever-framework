@@ -24,18 +24,22 @@ public record LocalConfigCached(String solcPath,
 
     private static Logger log = LoggerFactory.getLogger(LocalConfigCached.class);
 
-    public static LocalConfigCached of(Artifact<String> artifact) throws JsonProcessingException {
+    public static LocalConfigCached of(Sdk sdk, Artifact<String> artifact) throws JsonProcessingException {
 
         var templates = new HashMap<String, ContractTemplate>();
         JsonNode jsonRoot = Sdk.DEFAULT_MAPPER.readTree(artifact.read());
         jsonRoot.get("contracts").iterator().forEachRemaining(elem ->
                 {
-                    templates.put(elem.get("name").asText(),
-                            new ContractTemplate(
-                                    ArtifactABI.ofResource(elem.get("abiPath").asText()),
-                                    ArtifactTVC.ofResource(elem.get("tvcPath").asText())
-                            )
-                    );
+                    try {
+                        templates.put(elem.get("name").asText(),
+                                new ContractTemplate(
+                                        ArtifactABI.ofResource(sdk, elem.get("abiPath").asText()),
+                                        ArtifactTVC.ofResource(elem.get("tvcPath").asText())
+                                )
+                        );
+                    } catch (JsonProcessingException e) {
+                        log.error(e.getMessage());
+                    }
                 }
         );
 

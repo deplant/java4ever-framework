@@ -3,7 +3,6 @@ package tech.deplant.java4ever.framework.abi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.type.AbiValue;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ public interface IAbi {
 
     Abi.ABI ABI();
 
-    Map<String, AbiValue> convertInputs(String functionName, Map<String, Object> functionInputs);
+    Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs);
 
     record Function(Map<String, String> inputs, Map<String, String> outputs) {
     }

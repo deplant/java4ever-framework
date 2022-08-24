@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.GraphQLFilter;
@@ -17,6 +16,7 @@ import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.abi.JsonAbi;
+import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutionException;
 
 public class TestsFeatures {
 
+    private static Logger log = LoggerFactory.getLogger(TestsFeatures.class);
+
 //    public static Account ofAddress(Sdk sdk, tech.deplant.java4ever.framework.type.Address address, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
 //        filter.put("id", new GraphQL.Filter.In(new String[]{address.makeAddrStd()}));
@@ -36,29 +38,29 @@ public class TestsFeatures {
 //        return new Account(sdk, address, abi, collection.acc_type(), Data.hexToDec(collection.balance(), 9), collection.boc(), Instant.ofEpochSecond(collection.last_paid()));
 //    }
 
-
-    private static Logger log = LoggerFactory.getLogger(TestsFeatures.class);
+    static {
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "TRACE");
+    }
 
     @Test
     public void testBetterComposition() throws ExecutionException, InterruptedException, JsonProcessingException {
         final Sdk sdkDEV = new SdkBuilder()
                 .networkEndpoints(Sdk.Network.DEV_NET.endpoints())
                 .create(JavaLibraryPathLoader.TON_CLIENT);
-        //final Sdk sdkSE = new SdkBuilder()
-        //       .networkEndpoints(new String[]{"http://80.78.241.3/"})
-        //        .timeout(50L)
-        //        .create(JavaLibraryPathLoader.TON_CLIENT);
+        final Sdk sdkSE = new SdkBuilder()
+                .networkEndpoints(new String[]{"http://80.78.241.3"})
+                .timeout(50L)
+                .create(JavaLibraryPathLoader.TON_CLIENT);
 
 
-        var giver = new EverOSGiver(sdkDEV);
-        var msig = MsigTemplate
-                .SAFE_MULTISIG_TEMPLATE
-                .deployWithGiver(sdkDEV, 0, Credentials.RANDOM(sdkDEV), giver, new BigInteger("2"));
+        var giver = new EverOSGiver(sdkSE);
+        var msig = new MsigTemplate(sdkSE, MsigTemplate.MsigAbiSafe(sdkSE), new ArtifactTVC(MsigTemplate.SAFE_MULTISIG_TVC))
+                .deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE), giver, new BigInteger("2"));
         //.send();
         //msig.get().send();
-        IAbi abi = MsigTemplate.SAFE_MULTISIG_ABI;
-        IAbi abi2 = new JsonAbi(sdkDEV, "{}");
-        msig.callExternal("", new Abi.FunctionHeader(null, null, null));
+        IAbi abi = MsigTemplate.MsigAbiSafe(sdkSE);
+        IAbi abi2 = new JsonAbi(sdkSE, "{}");
+        //msig.callExternal("", null,);
         //IAbi abi3 = ArtifactABI.ofResource("");
         //ArtifactABI abi4 = new ArtifactABI(CachedABI.of("{}"), new LocalJsonArtifact(Paths.get("")));
 

@@ -1,6 +1,8 @@
 package tech.deplant.java4ever.framework.contract;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 import tech.deplant.java4ever.framework.type.Address;
@@ -10,16 +12,32 @@ import java.util.Map;
 
 public class Msig extends OwnedContract implements Giver {
 
-    public Msig(IContract contract) {
-        super(contract.sdk(), contract.address(), MsigTemplate.SAFE_MULTISIG_ABI, Credentials.NONE);
+    public Msig(Sdk sdk, Address address, Credentials owner, IAbi abi) {
+        super(sdk, address, abi, owner);
     }
 
-    public Msig(Sdk sdk, Address address) {
-        super(sdk, address, MsigTemplate.SAFE_MULTISIG_ABI, Credentials.NONE);
+    public static Msig ofSafe(Sdk sdk, Address address) throws JsonProcessingException {
+        return new Msig(sdk, address, Credentials.NONE, MsigTemplate.MsigAbiSafe(sdk));
     }
 
-    public Msig(Sdk sdk, Address address, Credentials owner) {
-        super(sdk, address, MsigTemplate.SAFE_MULTISIG_ABI, owner);
+    public static Msig ofSafeOwned(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+        return new Msig(sdk, address, owner, MsigTemplate.MsigAbiSafe(sdk));
+    }
+
+    public static Msig ofSetcode(Sdk sdk, Address address) throws JsonProcessingException {
+        return new Msig(sdk, address, Credentials.NONE, MsigTemplate.MsigAbiSetcode(sdk));
+    }
+
+    public static Msig ofSetcodeOwned(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+        return new Msig(sdk, address, owner, MsigTemplate.MsigAbiSetcode(sdk));
+    }
+
+    public static Msig ofSurf(Sdk sdk, Address address) throws JsonProcessingException {
+        return new Msig(sdk, address, Credentials.NONE, MsigTemplate.MsigAbiSurf(sdk));
+    }
+
+    public static Msig ofSurfOwned(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+        return new Msig(sdk, address, owner, MsigTemplate.MsigAbiSurf(sdk));
     }
 
     public void send(Address to, BigInteger amount, boolean sendBounce, int flags, String payload) throws Sdk.SdkException {

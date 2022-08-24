@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class Auction extends OwnedContract {
 
-    public Auction(Sdk sdk, Address address, Credentials owner) {
-        super(sdk, address, ArtifactABI.ofResource(""), owner);
+    public Auction(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+        super(sdk, address, ArtifactABI.ofResource(sdk, ""), owner);
     }
 
 //    public static Auction ofLocalConfig(ExplorerConfig config, Sdk sdk, boolean isBuyNever) {

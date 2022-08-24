@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.template;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
@@ -11,7 +12,6 @@ import tech.deplant.java4ever.framework.abi.ArtifactABI;
 import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
 import tech.deplant.java4ever.framework.artifact.ITvc;
-import tech.deplant.java4ever.framework.contract.ActiveContract;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -19,7 +19,9 @@ import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class ContractTemplate implements IContractTemplate {
 
@@ -32,30 +34,28 @@ public class ContractTemplate implements IContractTemplate {
         this.tvc = tvc;
     }
 
-    public static CompletableFuture<ContractTemplate> ofSoliditySource(Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) {
-        return solc.compileContract(
-                        contractName,
-                        filename,
-                        solidityPath,
-                        buildPath)
-                .thenCompose(solResult -> {
-                    if (solResult.exitValue() == 0) {
-                        return tvmLinker.assemblyContract(contractName, buildPath);
-                    } else {
-                        log.error("Solc exit code:" + solResult.exitValue());
-                        return CompletableFuture.failedFuture(new RuntimeException("Solc exit code:" + solResult.exitValue()));
-                    }
-                }).thenApply(linkerResult -> {
-                    if (linkerResult.exitValue() == 0) {
-                        return new ContractTemplate(
-                                ArtifactABI.ofAbsolute(buildPath + "/" + contractName + ".abi.json"),
-                                ArtifactTVC.ofResource(buildPath + "/" + contractName + ".tvc")
-                        );
-                    } else {
-                        log.error("TvmLinker exit code:" + linkerResult.exitValue());
-                        return null;
-                    }
-                });
+    public static ContractTemplate ofSoliditySource(Sdk sdk, Solc solc, TvmLinker tvmLinker, String solidityPath, String buildPath, String filename, String contractName) throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+        var compilerResult = solc.compileContract(
+                contractName,
+                filename,
+                solidityPath,
+                buildPath).get(60, TimeUnit.SECONDS);
+
+        if (compilerResult.exitValue() == 0) {
+            var linkerResult = tvmLinker.assemblyContract(contractName, buildPath).get(60, TimeUnit.SECONDS);
+            if (linkerResult.exitValue() == 0) {
+                return new ContractTemplate(
+                        ArtifactABI.ofAbsolute(sdk, buildPath + "/" + contractName + ".abi.json"),
+                        ArtifactTVC.ofResource(buildPath + "/" + contractName + ".tvc")
+                );
+            } else {
+                log.error("TvmLinker exit code:" + linkerResult.exitValue());
+                return null;
+            }
+        } else {
+            log.error("Solc exit code:" + compilerResult.exitValue());
+            throw new Sdk.SdkException(new Sdk.Error(105, "Solc exit code:" + compilerResult.exitValue()));
+        }
     }
 
     public IAbi abi() {
@@ -93,7 +93,7 @@ public class ContractTemplate implements IContractTemplate {
                 false,
                 null
         );
-        return new OwnedContract(new ActiveContract(sdk, address, this.abi), credentials);
+        return new OwnedContract(sdk, address, this.abi, credentials);
     }
 
     @Override

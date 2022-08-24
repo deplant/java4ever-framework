@@ -2,7 +2,6 @@ package tech.deplant.java4ever.framework;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.deplant.java4ever.framework.contract.ActiveContract;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class Solc {
     }
 
     public void compileContract(String contractName, String sourceFolder, String outputFolder) {
-        compileContract(contractName, contractName + DEFAULT_SOL_EXTENSION, sourceFolder, outputFolder);
+        compileContract(contractName, contractName + this.DEFAULT_SOL_EXTENSION, sourceFolder, outputFolder);
     }
 
     public CompletableFuture<Process> compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder) {

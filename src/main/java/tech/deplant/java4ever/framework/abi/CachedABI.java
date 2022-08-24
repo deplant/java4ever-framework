@@ -76,4 +76,9 @@ public class CachedABI implements IAbi {
     public Abi.ABI ABI() {
         return this.origin.ABI();
     }
+
+    @Override
+    public Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs) {
+        return this.origin.convertInputs(functionName, functionInputs);
+    }
 }

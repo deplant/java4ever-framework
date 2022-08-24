@@ -7,7 +7,6 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.type.AbiAddress;
 import tech.deplant.java4ever.framework.abi.type.AbiUint;
-import tech.deplant.java4ever.framework.abi.type.AbiValue;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
@@ -109,34 +108,51 @@ public record JsonAbi(Sdk sdk, String json) implements IAbi {
     }
 
     @Override
-    public Map<String, AbiValue> convertInputs(String functionName, Map<String, Object> functionInputs) {
-        functionInputs.entrySet().stream().collect(Collectors.toMap(
+    public Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs) {
+//        Map<String, Object> converted = new HashMap<>();
+//        for (Map.Entry<String, Object> entry : functionInputs.entrySet()) {
+//            if (hasInput(functionName, entry.getKey())) {
+//                switch (inputType(functionName, entry.getKey())) {
+//
+//                }
+//            }
+//        }
+
+        return functionInputs.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey(), entry -> {
                     if (this.hasInput(functionName, entry.getKey())) {
                         var type = this.inputType(functionName, entry.getKey());
                         return switch (type) {
                             case "uint128", "uint256", "uint64", "uint32" -> switch (entry.getValue()) {
-                                case BigInteger b -> new AbiUint(b);
-                                case Instant i -> new AbiUint(i);
+                                case BigInteger b -> new AbiUint(b).serialize();
+                                case Instant i -> new AbiUint(i).serialize();
                                 case String strPrefixed
                                         when"0x".equals(strPrefixed.substring(0, 2)) ->
-                                        new AbiUint(new BigInteger(strPrefixed.substring(2)));
-                                case String str -> new AbiUint(new BigInteger(str));
-                                default -> entry.getValue();
+                                        new AbiUint(new BigInteger(strPrefixed.substring(2))).serialize();
+                                case String str -> new AbiUint(new BigInteger(str)).serialize();
+                                default ->
+                                        throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                             };
                             case "address" -> switch (entry.getValue()) {
-                                case Address a -> new AbiAddress(a);
-                                default -> entry.getValue();
+                                case Address a -> new AbiAddress(a).serialize();
+                                case String s -> new AbiAddress(s).serialize();
+                                default ->
+                                        throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                             };
-                            default -> entry.getValue();
+                            case "bool" -> switch (entry.getValue()) {
+                                case Boolean b -> b;
+                                default ->
+                                        throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
+                            };
+                            default ->
+                                    throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                         };
                     } else {
                         log.error("Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI");
-                        return null;
+                        throw new Sdk.SdkException(new Sdk.Error(102, "Function " + functionName + " doesn't contain input (" + entry.getKey() + ") in ABI"));
                     }
                 }
         ));
-        return null;
     }
 
 }

@@ -8,5 +8,5 @@ module test {
     requires com.fasterxml.jackson.module.paramnames;
     requires org.junit.jupiter.api;
     exports tech.deplant.java4ever.framework.test;
-    opens tech.deplant.java4ever.framework.test to com.fasterxml.jackson.databind;
+    exports tech.deplant.java4ever.framework.test.unit;
 }

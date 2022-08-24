@@ -1,35 +1,54 @@
 package tech.deplant.java4ever.framework.abi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.LocalJsonArtifact;
 import tech.deplant.java4ever.framework.artifact.Persistable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 public record ArtifactABI(IAbi abi, Artifact<String> artifact) implements IAbi, Persistable {
 
-    public ArtifactABI(Artifact<String> artifact) {
-        this(CachedABI.of(artifact.read()), artifact);
+    public ArtifactABI(Sdk sdk, Artifact<String> artifact) throws JsonProcessingException {
+        this(new CachedABI(new JsonAbi(sdk, artifact.read())), artifact);
     }
 
-    public ArtifactABI(Path path) {
-        this(new LocalJsonArtifact(path));
+    public ArtifactABI(Sdk sdk, Path path) throws JsonProcessingException {
+        this(sdk, new LocalJsonArtifact(path));
     }
 
 
-    public static ArtifactABI ofResource(String resourcePath) {
-        return new ArtifactABI(Artifact.resourceToPath(resourcePath));
+    public static ArtifactABI ofResource(Sdk sdk, String resourcePath) throws JsonProcessingException {
+        return new ArtifactABI(sdk, Artifact.resourceToPath(resourcePath));
     }
 
-    public static ArtifactABI ofAbsolute(String absolutePath) {
-        return new ArtifactABI(Artifact.ofAbsolutePath(absolutePath));
+    public static ArtifactABI ofAbsolute(Sdk sdk, String absolutePath) throws JsonProcessingException {
+        return new ArtifactABI(sdk, Artifact.ofAbsolutePath(absolutePath));
     }
 
     @Override
     public void persist() throws IOException {
         artifact().write(json());
+    }
+
+    @Override
+    public Sdk sdk() {
+        return abi().sdk();
+    }
+
+    @Override
+    public Map<String, Function> functions() throws JsonProcessingException {
+        return abi().functions();
+    }
+
+    @Override
+    public List<String> headers() throws JsonProcessingException {
+        return abi().headers();
     }
 
     @Override
@@ -70,5 +89,10 @@ public record ArtifactABI(IAbi abi, Artifact<String> artifact) implements IAbi, 
     @Override
     public Abi.ABI ABI() {
         return abi().ABI();
+    }
+
+    @Override
+    public Map<String, Object> convertInputs(String functionName, Map<String, Object> functionInputs) {
+        return abi().convertInputs(functionName, functionInputs);
     }
 }

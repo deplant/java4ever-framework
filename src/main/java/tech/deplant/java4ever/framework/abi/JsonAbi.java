@@ -127,7 +127,7 @@ public record JsonAbi(Sdk sdk, String json) implements IAbi {
                                 case BigInteger b -> new AbiUint(b).serialize();
                                 case Instant i -> new AbiUint(i).serialize();
                                 case String strPrefixed
-                                        when"0x".equals(strPrefixed.substring(0, 2)) ->
+                                        when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
                                         new AbiUint(new BigInteger(strPrefixed.substring(2))).serialize();
                                 case String str -> new AbiUint(new BigInteger(str)).serialize();
                                 default ->

@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.contract;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Net;
@@ -26,12 +25,7 @@ public record Account(String id, int acc_type, String balance, String boc,
                 "id acc_type balance boc last_paid",
                 null,
                 null);
-        try {
-            return JSONContext.MAPPER.readValue(result.result()[0].toString(), Account.class);
-        } catch (JsonProcessingException e) {
-            log.error("JSON Parsing error! " + e.getMessage());
-            return null;
-        }
+        return JSONContext.MAPPER.convertValue(result.result()[0], Account.class);
     }
 
     public Boolean isActive() {

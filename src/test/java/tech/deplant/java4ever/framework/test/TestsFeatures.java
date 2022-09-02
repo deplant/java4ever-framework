@@ -48,7 +48,7 @@ public class TestsFeatures {
                 .networkEndpoints(Sdk.Network.DEV_NET.endpoints())
                 .create(JavaLibraryPathLoader.TON_CLIENT);
         final Sdk sdkSE = new SdkBuilder()
-                .networkEndpoints(new String[]{"http://80.78.241.3"})
+                .networkEndpoints("http://80.78.241.3")
                 .timeout(50L)
                 .create(JavaLibraryPathLoader.TON_CLIENT);
 

@@ -23,7 +23,7 @@ public record EverOSGiver(OwnedContract contract) implements Giver {
     @Override
     public void give(Address to, BigInteger amount) throws Sdk.SdkException {
         Map<String, Object> params = Map.of(
-                "dest", to.makeAddrStd(),
+                "dest", to,
                 "value", amount,
                 "bounce", false
         );

@@ -144,6 +144,11 @@ public record JsonAbi(Sdk sdk, String json) implements IAbi {
                                 default ->
                                         throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                             };
+                            case "cell" -> switch (entry.getValue()) {
+                                case String s -> s;
+                                default ->
+                                        throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
+                            };
                             default ->
                                     throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                         };

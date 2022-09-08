@@ -6,7 +6,7 @@ plugins {
 
 // Global variables for all modules
 ext {
-    slf4jVersion = "2.0.+"
+    slf4jVersion = "1.7.36"
     junitVersion = "5.9.+"
     jacksonVersion = "2.13.3"
     v_version = "1.2.0"

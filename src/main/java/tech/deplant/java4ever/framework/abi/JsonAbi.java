@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.abi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record JsonAbi(Sdk sdk, String json) implements IAbi {
+public record JsonAbi(@JsonIgnore Sdk sdk, String json) implements IAbi {
 
 
     private static Logger log = LoggerFactory.getLogger(JsonAbi.class);
@@ -129,6 +130,12 @@ public record JsonAbi(Sdk sdk, String json) implements IAbi {
                                 case String strPrefixed
                                         when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
                                         new AbiUint(new BigInteger(strPrefixed.substring(2))).serialize();
+                                case String str -> new AbiUint(new BigInteger(str)).serialize();
+                                default ->
+                                        throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
+                            };
+                            case "uint8" -> switch (entry.getValue()) {
+                                case Integer i -> new AbiUint(i.longValue()).serialize();
                                 case String str -> new AbiUint(new BigInteger(str)).serialize();
                                 default ->
                                         throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));

@@ -1,71 +1,72 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.artifact.LocalJsonArtifact;
+import tech.deplant.java4ever.framework.contract.OwnedContract;
+import tech.deplant.java4ever.framework.crypto.StaticCredentials;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ExplorerConfig {
+public record ExplorerConfig(String endpoint, Map<String, SavedContract> contracts,
+                             Map<String, StaticCredentials> credentials) implements Artifact<String> {
 
-    Map<String, ContractConfig> contracts;
+    private static Path EXPLORER_CONFIG_PATH = Paths.get(System.getProperty("user.dir") + "/.j4e/config/explorer.json");
+    private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
 
-    public ExplorerConfig() {
-        this.contracts = new HashMap<>();
+    public static ExplorerConfig EMPTY(String endpoint) throws IOException {
+        var config = new ExplorerConfig(endpoint, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+        config.sync();
+        return config;
     }
 
-    public static ExplorerConfig ofConfigFile(Artifact<String> artifact) {
-        try {
-            return Sdk.DEFAULT_MAPPER.readValue(artifact.read(), ExplorerConfig.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    public static ExplorerConfig LOAD() throws JsonProcessingException {
+        var mapper = Sdk.DEFAULT_MAPPER;//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        return mapper.readValue(new LocalJsonArtifact(EXPLORER_CONFIG_PATH).read(), ExplorerConfig.class);
     }
 
-    public void store(String path) throws IOException {
-        FileWriter file = new FileWriter(path);
+    public void add(String name, OwnedContract contract) throws IOException {
+        contracts().put(name, new SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
+        sync();
+    }
+
+    public void add(String name, StaticCredentials keys) throws IOException {
+        credentials().put(name, keys);
+        sync();
+    }
+
+    public void sync() throws IOException {
+        var mapper = Sdk.DEFAULT_MAPPER;
+        //.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        //.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
+    }
+
+    @Override
+    public void write(String content) throws IOException {
+        log.info("Writing string to path: " + EXPLORER_CONFIG_PATH.toString());
+        Files.writeString(EXPLORER_CONFIG_PATH, content, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public String read() {
         try {
-            var writer = Sdk.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter();
-            file.write(writer.writeValueAsString(this));
+            log.info("Reading string from path: " + EXPLORER_CONFIG_PATH.toString());
+            return Files.readString(EXPLORER_CONFIG_PATH).replaceAll("[\u0000-\u001f]", "");
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            file.flush();
-            file.close();
+            log.error("File access error! Path: " + EXPLORER_CONFIG_PATH.toString() + ", Error: " + e.getMessage());
+            return "";
         }
     }
 
-
-    public ExplorerConfig removeAccountController(String name) {
-        this.contracts.remove(name);
-        return this;
+    public record SavedContract(String abiJson, String address) {
     }
-
-//    public ExplorerConfig addAccountController(String name, ControllableContract controllableContract) {
-//        this.contracts.put(name, new ExplorerConfig.ContractConfig(
-//                controllableContract.account().abi().json(),
-//                controllableContract.account().address().makeAddrStd(),
-//                controllableContract.internalOwner() != null ? controllableContract.internalOwner().account().address().makeAddrStd() : null,
-//                controllableContract.tvmKey())
-//        );
-//        return this;
-//    }
-
-//    public ControllableContract accountController(String name, Sdk sdk) throws Sdk.SdkException {
-//        var acc = this.contracts.get(name);
-//        if (acc == null) {
-//            return null;
-//        } else {
-//            return ControllableContract.ofAddress(new ContractAbi(acc.abi()),
-//                    new Address(acc.address()),
-//                    sdk,
-//                    acc.externalOwner(),
-//                    null);
-//        }
-//    }
-
-    public record ContractConfig(String abi, String address, String internalOwner, Credentials externalOwner){}
 }

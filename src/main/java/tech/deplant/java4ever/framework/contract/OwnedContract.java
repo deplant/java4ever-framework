@@ -17,8 +17,11 @@ public class OwnedContract {
     private static Logger log = LoggerFactory.getLogger(OwnedContract.class);
 
     private final Sdk sdk;
+
     private final Address address;
+
     private final IAbi abi;
+
     private final Credentials tvmKey;
 
     public OwnedContract(Sdk sdk, Address address, IAbi abi, Credentials tvmKey) {
@@ -48,20 +51,20 @@ public class OwnedContract {
         return this.tvmKey;
     }
 
-    public String encodeInternalPayload(Address dest, String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
+    public String encodeInternalPayload(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader) {
         return Abi.encodeMessageBody(
-                this.sdk.context(),
-                this.abi.ABI(),
+                sdk().context(),
+                abi().ABI(),
                 new Abi.CallSet(functionName, functionHeader, abi().convertInputs(functionName, functionInputs)),
                 true,
                 Credentials.NONE.signer(),
                 null,
-                dest.makeAddrStd()
+                address().makeAddrStd()
         ).body();
     }
 
     protected Map<String, Object> processMessage(IAbi abi, Address address, Abi.DeploySet deploySet, Credentials credentials, String functionName, Abi.FunctionHeader functionHeader, Map<String, Object> functionInputs) {
-        return Processing.processMessage(this.sdk.context(),
+        return Processing.processMessage(sdk().context(),
                         abi.ABI(),
                         address.makeAddrStd(),
                         deploySet,
@@ -75,8 +78,8 @@ public class OwnedContract {
         Abi.ResultOfEncodeMessage msg =
                 Abi.encodeMessage(
                         sdk().context(),
-                        this.abi.ABI(),
-                        this.address.makeAddrStd(),
+                        abi().ABI(),
+                        address().makeAddrStd(),
                         null,
                         new Abi.CallSet(
                                 functionName,
@@ -101,8 +104,8 @@ public class OwnedContract {
 
     public Map<String, Object> callExternal(String functionName, Map<String, Object> functionInputs, Abi.FunctionHeader functionHeader, Credentials credentials) {
         return Processing.processMessage(this.sdk.context(),
-                        this.abi.ABI(),
-                        this.address.makeAddrStd(),
+                        abi().ABI(),
+                        address().makeAddrStd(),
                         null,
                         new Abi.CallSet(functionName, functionHeader, abi().convertInputs(functionName, functionInputs)),
                         credentials.signer(), null, false, null)

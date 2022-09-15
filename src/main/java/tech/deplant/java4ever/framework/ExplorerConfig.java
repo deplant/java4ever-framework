@@ -3,10 +3,14 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.framework.abi.IAbi;
+import tech.deplant.java4ever.framework.abi.JsonAbi;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.LocalJsonArtifact;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.crypto.StaticCredentials;
+import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +45,26 @@ public record ExplorerConfig(String endpoint, Map<String, SavedContract> contrac
     public void add(String name, StaticCredentials keys) throws IOException {
         credentials().put(name, keys);
         sync();
+    }
+
+    public Credentials keys(String keysName) {
+        return credentials().get(keysName);
+    }
+
+    public Address address(String contractName) {
+        return new Address(contracts().get(contractName).address());
+    }
+
+    public IAbi abi(Sdk sdk, String contractName) {
+        return new JsonAbi(sdk, contracts().get(contractName).abiJson());
+    }
+
+    public OwnedContract contract(Sdk sdk, String contractName, String keysName) {
+        return new OwnedContract(
+                sdk,
+                address(contractName),
+                abi(sdk, contractName),
+                keys(keysName));
     }
 
     public void sync() throws IOException {

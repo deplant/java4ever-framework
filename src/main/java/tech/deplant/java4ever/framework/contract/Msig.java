@@ -16,6 +16,10 @@ public class Msig extends OwnedContract implements Giver {
         super(sdk, address, abi, owner);
     }
 
+    public Msig(OwnedContract contract) {
+        super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
+    }
+
     public static Msig ofSafe(Sdk sdk, Address address) throws JsonProcessingException {
         return new Msig(sdk, address, Credentials.NONE, MsigTemplate.MsigAbiSafe(sdk));
     }

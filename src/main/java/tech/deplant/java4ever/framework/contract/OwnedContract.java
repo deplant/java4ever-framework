@@ -16,13 +16,13 @@ public class OwnedContract {
 
     private static Logger log = LoggerFactory.getLogger(OwnedContract.class);
 
-    private final Sdk sdk;
+    protected final Sdk sdk;
 
-    private final Address address;
+    protected final Address address;
 
-    private final IAbi abi;
+    protected final IAbi abi;
 
-    private final Credentials tvmKey;
+    protected final Credentials tvmKey;
 
     public OwnedContract(Sdk sdk, Address address, IAbi abi, Credentials tvmKey) {
         this.sdk = sdk;

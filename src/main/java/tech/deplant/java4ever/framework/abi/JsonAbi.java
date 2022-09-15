@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.type.AbiAddress;
+import tech.deplant.java4ever.framework.abi.type.AbiTvmCell;
 import tech.deplant.java4ever.framework.abi.type.AbiUint;
 import tech.deplant.java4ever.framework.type.Address;
 
@@ -153,6 +154,7 @@ public record JsonAbi(@JsonIgnore Sdk sdk, String json) implements IAbi {
                             };
                             case "cell" -> switch (entry.getValue()) {
                                 case String s -> s;
+                                case AbiTvmCell abiCell -> abiCell.serialize();
                                 default ->
                                         throw new Sdk.SdkException(new Sdk.Error(101, "Function " + functionName + "Unsupported type for ABI conversion"));
                             };

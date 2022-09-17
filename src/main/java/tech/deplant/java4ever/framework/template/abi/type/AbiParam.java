@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.abi.type;
+package tech.deplant.java4ever.framework.template.abi.type;
 
 import java.util.List;
 

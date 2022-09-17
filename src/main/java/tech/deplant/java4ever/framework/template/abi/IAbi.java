@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.abi;
+package tech.deplant.java4ever.framework.template.abi;
 
 import tech.deplant.java4ever.binding.Abi;
 

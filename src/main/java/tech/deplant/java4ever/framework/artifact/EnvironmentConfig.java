@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
-import tech.deplant.java4ever.framework.abi.IAbi;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
+import tech.deplant.java4ever.framework.template.abi.CachedAbi;
+import tech.deplant.java4ever.framework.template.abi.IAbi;
+import tech.deplant.java4ever.framework.template.tvc.CachedTvc;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -74,8 +76,8 @@ public record EnvironmentConfig(Solc compiler,
 			var linkerResult = tvmLinker.assemblyContract(contractName, buildPath).get(60, TimeUnit.SECONDS);
 			if (linkerResult.exitValue() == 0) {
 				return new ContractTemplate(
-						ArtifactABI.ofAbsolute(sdk, buildPath + "/" + contractName + ".abi.json"),
-						ArtifactTVC.ofResource(buildPath + "/" + contractName + ".tvc")
+						CachedAbi.ofResource(sdk, buildPath + "/" + contractName + ".abi.json"),
+						CachedTvc.ofResource(buildPath + "/" + contractName + ".tvc")
 				);
 			} else {
 				log.error("TvmLinker exit code:" + linkerResult.exitValue());

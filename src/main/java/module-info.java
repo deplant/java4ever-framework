@@ -12,7 +12,7 @@ module java4ever.framework {
 	exports tech.deplant.java4ever.framework.template;
 	exports tech.deplant.java4ever.framework.type;
 	exports tech.deplant.java4ever.framework.crypto;
-	exports tech.deplant.java4ever.framework.abi;
-	exports tech.deplant.java4ever.framework.abi.type;
-	exports tech.deplant.java4ever.framework.artifact2;
+	exports tech.deplant.java4ever.framework.template.abi;
+	exports tech.deplant.java4ever.framework.template.abi.type;
+	exports tech.deplant.java4ever.framework.template.tvc;
 }

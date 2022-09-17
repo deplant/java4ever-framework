@@ -3,13 +3,12 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.deplant.java4ever.framework.abi.IAbi;
-import tech.deplant.java4ever.framework.abi.JsonAbi;
 import tech.deplant.java4ever.framework.artifact.Artifact;
-import tech.deplant.java4ever.framework.artifact.LocalJsonArtifact;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.crypto.StaticCredentials;
+import tech.deplant.java4ever.framework.template.abi.IAbi;
+import tech.deplant.java4ever.framework.template.abi.JsonAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
@@ -23,74 +22,74 @@ import java.util.concurrent.ConcurrentHashMap;
 public record ExplorerConfig(String endpoint, Map<String, SavedContract> contracts,
                              Map<String, StaticCredentials> credentials) implements Artifact<String> {
 
-    private static Path EXPLORER_CONFIG_PATH = Paths.get(System.getProperty("user.dir") + "/.j4e/config/explorer.json");
-    private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
+	private static Path EXPLORER_CONFIG_PATH = Paths.get(System.getProperty("user.dir") + "/.j4e/config/explorer.json");
+	private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
 
-    public static ExplorerConfig EMPTY(String endpoint) throws IOException {
-        var config = new ExplorerConfig(endpoint, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
-        config.sync();
-        return config;
-    }
+	public static ExplorerConfig EMPTY(String endpoint) throws IOException {
+		var config = new ExplorerConfig(endpoint, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+		config.sync();
+		return config;
+	}
 
-    public static ExplorerConfig LOAD() throws JsonProcessingException {
-        var mapper = Sdk.DEFAULT_MAPPER;//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        return mapper.readValue(new LocalJsonArtifact(EXPLORER_CONFIG_PATH).read(), ExplorerConfig.class);
-    }
+	public static ExplorerConfig LOAD() throws JsonProcessingException {
+		var mapper = Sdk.DEFAULT_MAPPER;//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+		return mapper.readValue(new LocalJsonArtifact(EXPLORER_CONFIG_PATH).read(), ExplorerConfig.class);
+	}
 
-    public void add(String name, OwnedContract contract) throws IOException {
-        contracts().put(name, new SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
-        sync();
-    }
+	public void add(String name, OwnedContract contract) throws IOException {
+		contracts().put(name, new SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
+		sync();
+	}
 
-    public void add(String name, StaticCredentials keys) throws IOException {
-        credentials().put(name, keys);
-        sync();
-    }
+	public void add(String name, StaticCredentials keys) throws IOException {
+		credentials().put(name, keys);
+		sync();
+	}
 
-    public Credentials keys(String keysName) {
-        return credentials().get(keysName);
-    }
+	public Credentials keys(String keysName) {
+		return credentials().get(keysName);
+	}
 
-    public Address address(String contractName) {
-        return new Address(contracts().get(contractName).address());
-    }
+	public Address address(String contractName) {
+		return new Address(contracts().get(contractName).address());
+	}
 
-    public IAbi abi(Sdk sdk, String contractName) {
-        return new JsonAbi(sdk, contracts().get(contractName).abiJson());
-    }
+	public IAbi abi(String contractName) throws JsonProcessingException {
+		return JsonAbi.ofString(contracts().get(contractName).abiJson());
+	}
 
-    public OwnedContract contract(Sdk sdk, String contractName, String keysName) {
-        return new OwnedContract(
-                sdk,
-                address(contractName),
-                abi(sdk, contractName),
-                keys(keysName));
-    }
+	public OwnedContract contract(Sdk sdk, String contractName, String keysName) throws JsonProcessingException {
+		return new OwnedContract(
+				sdk,
+				address(contractName),
+				abi(contractName),
+				keys(keysName));
+	}
 
-    public void sync() throws IOException {
-        var mapper = Sdk.DEFAULT_MAPPER;
-        //.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        //.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
-    }
+	public void sync() throws IOException {
+		var mapper = Sdk.DEFAULT_MAPPER;
+		//.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+		//.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+		write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
+	}
 
-    @Override
-    public void write(String content) throws IOException {
-        log.info("Writing string to path: " + EXPLORER_CONFIG_PATH.toString());
-        Files.writeString(EXPLORER_CONFIG_PATH, content, StandardCharsets.UTF_8);
-    }
+	@Override
+	public void write(String content) throws IOException {
+		log.info("Writing string to path: " + EXPLORER_CONFIG_PATH.toString());
+		Files.writeString(EXPLORER_CONFIG_PATH, content, StandardCharsets.UTF_8);
+	}
 
-    @Override
-    public String read() {
-        try {
-            log.info("Reading string from path: " + EXPLORER_CONFIG_PATH.toString());
-            return Files.readString(EXPLORER_CONFIG_PATH).replaceAll("[\u0000-\u001f]", "");
-        } catch (IOException e) {
-            log.error("File access error! Path: " + EXPLORER_CONFIG_PATH.toString() + ", Error: " + e.getMessage());
-            return "";
-        }
-    }
+	@Override
+	public String read() {
+		try {
+			log.info("Reading string from path: " + EXPLORER_CONFIG_PATH.toString());
+			return Files.readString(EXPLORER_CONFIG_PATH).replaceAll("[\u0000-\u001f]", "");
+		} catch (IOException e) {
+			log.error("File access error! Path: " + EXPLORER_CONFIG_PATH.toString() + ", Error: " + e.getMessage());
+			return "";
+		}
+	}
 
-    public record SavedContract(String abiJson, String address) {
-    }
+	public record SavedContract(String abiJson, String address) {
+	}
 }

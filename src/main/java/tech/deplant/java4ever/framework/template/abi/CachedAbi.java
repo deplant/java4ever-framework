@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.abi;
+package tech.deplant.java4ever.framework.template.abi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;

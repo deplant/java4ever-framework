@@ -5,17 +5,17 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.IAbi;
-import tech.deplant.java4ever.framework.artifact.ITvc;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.template.abi.IAbi;
+import tech.deplant.java4ever.framework.template.tvc.ITvc;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.Map;
 
-public class ContractTemplate implements IContractTemplate {
+public class ContractTemplate {
 
 	private static Logger log = LoggerFactory.getLogger(ContractTemplate.class);
 	private final IAbi abi;
@@ -58,7 +58,6 @@ public class ContractTemplate implements IContractTemplate {
 		return new OwnedContract(sdk, address, this.abi, credentials);
 	}
 
-	@Override
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
 			credentials, Map<String, Object> constructorInputs) throws Sdk.SdkException {
 		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
@@ -66,7 +65,6 @@ public class ContractTemplate implements IContractTemplate {
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
 
-	@Override
 	public OwnedContract deployWithGiver(Sdk sdk, Giver giver, BigInteger value, int workchainId, Map<
 			String, Object> initialData, Credentials credentials, Map<String, Object> constructorInputs) throws
 			Sdk.SdkException {
@@ -76,16 +74,17 @@ public class ContractTemplate implements IContractTemplate {
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
 
-	@Override
-	public IContractTemplate insertPublicKey() {
-		//TODO return new ContractTemplate(this.abi, updated(this.tvc));
-		return insertPublicKey;
+	public Map<String, Object> decodeInitialData(Sdk sdk) {
+		return tvc().decodeInitialData(sdk, abi());
 	}
 
-	@Override
-	public IContractTemplate updateInitialData() {
-		//TODO return new ContractTemplate(this.abi, updated(this.tvc));
-		return;
+	public String decodeInitialPubkey(Sdk sdk) {
+		return tvc().decodeInitialPubkey(sdk, abi());
+	}
+
+	public ContractTemplate withUpdatedInitialData(Sdk sdk, Map<String, Object> initialData, String publicKey) {
+		return new ContractTemplate(abi(),
+		                            tvc().withUpdatedInitialData(sdk, abi(), initialData, publicKey));
 	}
 
 }

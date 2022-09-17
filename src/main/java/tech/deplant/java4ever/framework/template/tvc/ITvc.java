@@ -1,7 +1,7 @@
-package tech.deplant.java4ever.framework.artifact;
+package tech.deplant.java4ever.framework.template.tvc;
 
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.IAbi;
+import tech.deplant.java4ever.framework.template.abi.IAbi;
 
 import java.util.Map;
 
@@ -16,4 +16,6 @@ public interface ITvc {
 	public String decodeInitialPubkey(Sdk sdk, IAbi abi);
 
 	String code(Sdk sdk) throws Sdk.SdkException;
+
+	public ITvc withUpdatedInitialData(Sdk sdk, IAbi abi, Map<String, Object> initialData, String publicKey);
 }

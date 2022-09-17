@@ -7,6 +7,7 @@ import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
 import tech.deplant.java4ever.framework.abi.IAbi;
+import tech.deplant.java4ever.framework.template.ContractTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,8 +16,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public record LocalConfigCached(Solc compiler,
+public record EnvironmentConfig(Solc compiler,
                                 TvmLinker linker,
                                 String sourcePath,
                                 String buildPath,
@@ -26,14 +30,14 @@ public record LocalConfigCached(Solc compiler,
 
 	private static Path LOCAL_CONFIG_PATH = Paths.get(System.getProperty("user.dir") + "/.j4e/config/local.json");
 
-	private static Logger log = LoggerFactory.getLogger(LocalConfigCached.class);
+	private static Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
-	public static LocalConfigCached EMPTY(String solcPath,
+	public static EnvironmentConfig EMPTY(String solcPath,
 	                                      String linkerPath,
 	                                      String stdLibPath,
 	                                      String sourcePath,
 	                                      String buildPath) throws IOException {
-		var config = new LocalConfigCached(new Solc(solcPath),
+		var config = new EnvironmentConfig(new Solc(solcPath),
 		                                   new TvmLinker(linkerPath, stdLibPath),
 		                                   sourcePath,
 		                                   buildPath,
@@ -44,12 +48,42 @@ public record LocalConfigCached(Solc compiler,
 		return config;
 	}
 
-	public static LocalConfigCached LOAD() {
+	public static EnvironmentConfig LOAD() {
 		try {
 			return Sdk.DEFAULT_MAPPER.readValue(new LocalJsonArtifact(LOCAL_CONFIG_PATH).read(),
-			                                    LocalConfigCached.class);
+			                                    EnvironmentConfig.class);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static ContractTemplate ofSoliditySource(Sdk sdk,
+	                                                Solc solc,
+	                                                TvmLinker tvmLinker,
+	                                                String solidityPath,
+	                                                String buildPath,
+	                                                String filename,
+	                                                String contractName) throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+		var compilerResult = solc.compileContract(
+				contractName,
+				filename,
+				solidityPath,
+				buildPath).get(60, TimeUnit.SECONDS);
+
+		if (compilerResult.exitValue() == 0) {
+			var linkerResult = tvmLinker.assemblyContract(contractName, buildPath).get(60, TimeUnit.SECONDS);
+			if (linkerResult.exitValue() == 0) {
+				return new ContractTemplate(
+						ArtifactABI.ofAbsolute(sdk, buildPath + "/" + contractName + ".abi.json"),
+						ArtifactTVC.ofResource(buildPath + "/" + contractName + ".tvc")
+				);
+			} else {
+				log.error("TvmLinker exit code:" + linkerResult.exitValue());
+				return null;
+			}
+		} else {
+			log.error("Solc exit code:" + compilerResult.exitValue());
+			throw new Sdk.SdkException(new Sdk.Error(105, "Solc exit code:" + compilerResult.exitValue()));
 		}
 	}
 

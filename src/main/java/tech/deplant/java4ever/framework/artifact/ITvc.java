@@ -4,9 +4,9 @@ import tech.deplant.java4ever.framework.Sdk;
 
 public interface ITvc {
 
-    byte[] bytes();
+	byte[] bytes();
 
-    String base64String();
+	String base64String();
 
-    String code(Sdk sdk) throws Sdk.SdkException;
+	String code(Sdk sdk) throws Sdk.SdkException;
 }

@@ -6,16 +6,14 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Solc;
 import tech.deplant.java4ever.framework.TvmLinker;
+import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 import tech.deplant.java4ever.framework.template.abi.CachedAbi;
 import tech.deplant.java4ever.framework.template.abi.IAbi;
 import tech.deplant.java4ever.framework.template.tvc.CachedTvc;
+import tech.deplant.java4ever.framework.template.tvc.ITvc;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -27,10 +25,10 @@ public record EnvironmentConfig(Solc compiler,
                                 String sourcePath,
                                 String buildPath,
                                 Map<String, IAbi> abis,
-                                Map<String, IAbi> tvcs,
-                                Map<String, IAbi> keys) implements Artifact<String> {
+                                Map<String, ITvc> tvcs,
+                                Map<String, Credentials> keys) {
 
-	private static Path LOCAL_CONFIG_PATH = Paths.get(System.getProperty("user.dir") + "/.j4e/config/local.json");
+	private static String LOCAL_CONFIG_PATH = System.getProperty("user.dir") + "/.j4e/config/local.json";
 
 	private static Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
@@ -52,7 +50,7 @@ public record EnvironmentConfig(Solc compiler,
 
 	public static EnvironmentConfig LOAD() {
 		try {
-			return Sdk.DEFAULT_MAPPER.readValue(new LocalJsonArtifact(LOCAL_CONFIG_PATH).read(),
+			return Sdk.DEFAULT_MAPPER.readValue(new JsonFile(LOCAL_CONFIG_PATH).get(),
 			                                    EnvironmentConfig.class);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
@@ -76,8 +74,8 @@ public record EnvironmentConfig(Solc compiler,
 			var linkerResult = tvmLinker.assemblyContract(contractName, buildPath).get(60, TimeUnit.SECONDS);
 			if (linkerResult.exitValue() == 0) {
 				return new ContractTemplate(
-						CachedAbi.ofResource(sdk, buildPath + "/" + contractName + ".abi.json"),
-						CachedTvc.ofResource(buildPath + "/" + contractName + ".tvc")
+						CachedAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
+						CachedTvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);
 			} else {
 				log.error("TvmLinker exit code:" + linkerResult.exitValue());
@@ -90,38 +88,22 @@ public record EnvironmentConfig(Solc compiler,
 	}
 
 	public void addAbi(String name, String pathStr) throws IOException {
-		abis().put(name, new LocalJsonArtifact(Artifact.resourceToPath(pathStr)));
+		abis().put(name, CachedAbi.ofFile(pathStr));
 		sync();
 	}
 
 	public void addTvc(String name, String pathStr) throws IOException {
-		tvcs().put(name, new LocalJsonArtifact(Artifact.resourceToPath(pathStr)));
+		tvcs().put(name, CachedTvc.ofFile(pathStr));
 		sync();
 	}
 
 	public void addKey(String name, String pathStr) throws IOException {
-		keys().put(name, new LocalJsonArtifact(Artifact.resourceToPath(pathStr)));
+		keys().put(name, Credentials.ofFile(pathStr));
 		sync();
 	}
 
 	public void sync() throws IOException {
-		write(Sdk.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(this));
-	}
-
-	@Override
-	public void write(String content) throws IOException {
-		log.info("Writing string to path: " + LOCAL_CONFIG_PATH.toString());
-		Files.writeString(LOCAL_CONFIG_PATH, content, StandardCharsets.UTF_8);
-	}
-
-	@Override
-	public String read() {
-		try {
-			log.info("Reading string from path: " + LOCAL_CONFIG_PATH.toString());
-			return Files.readString(LOCAL_CONFIG_PATH).replaceAll("[\u0000-\u001f]", "");
-		} catch (IOException e) {
-			log.error("File access error! Path: " + LOCAL_CONFIG_PATH.toString() + ", Error: " + e.getMessage());
-			return "";
-		}
+		new JsonFile(LOCAL_CONFIG_PATH).accept(Sdk.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter()
+		                                                         .writeValueAsString(this));
 	}
 }

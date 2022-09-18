@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.abi.type.AbiAddress;
 import tech.deplant.java4ever.framework.template.abi.type.AbiString;
@@ -30,7 +31,11 @@ public record JsonAbi(JsonNode node) implements IAbi {
 	}
 
 	public static JsonAbi ofResource(String resourceName) throws JsonProcessingException {
-		return new JsonAbi(new JsonResource(resourceName).get());
+		return ofString(new JsonResource(resourceName).get());
+	}
+
+	public static JsonAbi ofFile(String filePath) throws JsonProcessingException {
+		return ofString(new JsonFile(filePath).get());
 	}
 
 	@Override

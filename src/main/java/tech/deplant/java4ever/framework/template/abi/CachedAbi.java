@@ -20,6 +20,10 @@ public record CachedAbi(IAbi origin, Map<String, Function> functions, List<Strin
 		return new CachedAbi(JsonAbi.ofResource(resourceName));
 	}
 
+	public static CachedAbi ofFile(String filePath) throws JsonProcessingException {
+		return new CachedAbi(JsonAbi.ofFile(filePath));
+	}
+
 	@Override
 	public Map<String, Function> functions() {
 		return this.functions;

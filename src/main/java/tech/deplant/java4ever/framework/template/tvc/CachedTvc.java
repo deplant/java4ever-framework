@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework.template.tvc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.ByteFile;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
 import tech.deplant.java4ever.framework.template.abi.IAbi;
 
@@ -10,6 +12,10 @@ import java.util.Base64;
 import java.util.Map;
 
 public record CachedTvc(byte[] bytes) implements ITvc {
+
+	public static CachedTvc ofFile(String filePath) throws JsonProcessingException {
+		return new CachedTvc(new ByteFile(filePath).get());
+	}
 
 	public static CachedTvc ofResource(String resourceName) {
 		return new CachedTvc(new ByteResource(resourceName).get());

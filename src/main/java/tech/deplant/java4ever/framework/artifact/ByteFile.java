@@ -3,15 +3,14 @@ package tech.deplant.java4ever.framework.artifact;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public record ByteResource(String resourceName) implements Supplier<byte[]>, Consumer<byte[]> {
+public record ByteFile(String filePath) implements Supplier<byte[]>, Consumer<byte[]> {
 	@Override
 	public byte[] get() {
-		try (var stream = getClass().getResourceAsStream(resourceName())) {
-			return stream.readAllBytes();
+		try {
+			return Files.readAllBytes(Paths.get(filePath()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -20,9 +19,8 @@ public record ByteResource(String resourceName) implements Supplier<byte[]>, Con
 	@Override
 	public void accept(byte[] bytes) {
 		try {
-			Files.write(Paths.get(getClass().getResource(resourceName()).getPath()),
-			            bytes,
-			            StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(Paths.get(filePath()),
+			            bytes);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

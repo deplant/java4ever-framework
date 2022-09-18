@@ -5,6 +5,7 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 
 import java.io.IOException;
@@ -49,7 +50,15 @@ public interface Credentials {
 
 	static Credentials ofResource(String resourceName) {
 		try {
-			return Sdk.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get().asText(), Credentials.class);
+			return Sdk.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get(), Credentials.class);
+		} catch (JsonProcessingException e) {
+			return Credentials.NONE;
+		}
+	}
+
+	static Credentials ofFile(String filePath) {
+		try {
+			return Sdk.DEFAULT_MAPPER.readValue(new JsonFile(filePath).get(), Credentials.class);
 		} catch (JsonProcessingException e) {
 			return Credentials.NONE;
 		}

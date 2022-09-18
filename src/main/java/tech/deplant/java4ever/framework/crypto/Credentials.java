@@ -1,18 +1,17 @@
 package tech.deplant.java4ever.framework.crypto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Crypto;
-import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 
-import java.io.IOException;
-import java.util.Locale;
+public record Credentials(@JsonProperty("public") String publicKey,
+                          @JsonProperty("secret") String secretKey) {
 
-public interface Credentials {
-	Credentials NONE = new StaticCredentials(
+	public static final Credentials NONE = new Credentials(
 			"0000000000000000000000000000000000000000000000000000000000000000",
 			"0000000000000000000000000000000000000000000000000000000000000000"
 	);
@@ -20,55 +19,32 @@ public interface Credentials {
 	/**
 	 * Generates new random KeyPair by using crypto.generate_random_sign_keys() method of SDK.
 	 */
-	static Credentials RANDOM(Sdk sdk) throws Sdk.SdkException {
+	public static Credentials RANDOM(Sdk sdk) throws Sdk.SdkException {
 		var pair = Crypto.generateRandomSignKeys(sdk.context());
-		return new StaticCredentials(pair.publicKey(), pair.secretKey());
+		return new Credentials(pair.publicKey(), pair.secretKey());
 	}
 
-	private static String generateEntropyWithSDK(Sdk sdk) throws Sdk.SdkException {
-		return Crypto.generateRandomBytes(sdk.context(), 512).bytes();
-	}
-
-	private static String generateSeedOfEntropy(Sdk sdk, Number words, String entropyBase64) {
-		return Crypto.mnemonicFromEntropy(sdk.context(),
-		                                  Data.base64ToHexString(entropyBase64).toUpperCase(Locale.ROOT),
-		                                  null,
-		                                  words).phrase();
-	}
-
-	private static String generateSeedOfRandom(Sdk sdk, Number words) {
-		return generateSeedOfEntropy(sdk, words, generateEntropyWithSDK(sdk));
-	}
-
-	static String generateSeed12(Sdk sdk) {
-		return generateSeedOfRandom(sdk, 12);
-	}
-
-	static String generateSeed24(Sdk sdk) {
-		return generateSeedOfRandom(sdk, 24);
-	}
-
-	static Credentials ofResource(String resourceName) {
+	public static Credentials ofResource(String resourceName) {
 		try {
 			return Sdk.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get(), Credentials.class);
 		} catch (JsonProcessingException e) {
-			return Credentials.NONE;
+			return NONE;
 		}
 	}
 
-	static Credentials ofFile(String filePath) {
+	public static Credentials ofFile(String filePath) {
 		try {
 			return Sdk.DEFAULT_MAPPER.readValue(new JsonFile(filePath).get(), Credentials.class);
 		} catch (JsonProcessingException e) {
-			return Credentials.NONE;
+			return NONE;
 		}
 	}
 
 	//TODO Convert to Async
-	private static Credentials ofSeed(Sdk sdk, String seed, Number words) throws Sdk.SdkException {
-		if (Crypto.mnemonicVerify(sdk.context(), seed, null, words).valid()) {
+	private static Credentials ofSeed(Sdk sdk, Seed seed) throws Sdk.SdkException {
+		if (Crypto.mnemonicVerify(sdk.context(), seed.phrase(), null, seed.words()).valid()) {
 			var pairFromSeed = Crypto.mnemonicDeriveSignKeys(sdk.context(), seed, null, null, words);
-			return new StaticCredentials(pairFromSeed.publicKey(), pairFromSeed.secretKey());
+			return new Credentials(pairFromSeed.publicKey(), pairFromSeed.secretKey());
 		} else {
 			throw new RuntimeException("Seed/mnemonic phrase checksum is not valid.");
 		}
@@ -76,25 +52,24 @@ public interface Credentials {
 	}
 
 	//TODO Convert to Async
-	static Credentials ofSeed12(Sdk sdk, String seed) throws Sdk.SdkException {
+	public static Credentials ofSeed12(Sdk sdk, String seed) throws Sdk.SdkException {
 		return ofSeed(sdk, seed, 12);
 	}
 
 	//TODO Convert to Async
-	static Credentials ofSeed24(Sdk sdk, String seed) throws Sdk.SdkException {
+	public static Credentials ofSeed24(Sdk sdk, String seed) throws Sdk.SdkException {
 		return ofSeed(sdk, seed, 24);
 	}
 
-	String publicKey();
+	public Abi.Signer signer() {
+		return new Abi.Signer.Keys(keyPair());
+	}
 
-	String secretKey();
+	public Crypto.KeyPair keyPair() {
+		return new Crypto.KeyPair(this.publicKey, this.secretKey);
+	}
 
-	Abi.Signer signer();
-
-	public Crypto.KeyPair keyPair();
-
-	public String publicKeyTonSafe(Sdk sdk);
-
-	public void store(String path) throws IOException;
-
+	public String publicKeyTonSafe(Sdk sdk) throws Sdk.SdkException {
+		return Crypto.convertPublicKeyToTonSafeFormat(sdk.context(), this.publicKey).tonPublicKey();
+	}
 }

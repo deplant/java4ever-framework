@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.crypto.StaticCredentials;
 import tech.deplant.java4ever.framework.template.abi.IAbi;
 import tech.deplant.java4ever.framework.template.abi.JsonAbi;
 import tech.deplant.java4ever.framework.type.Address;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public record ExplorerConfig(String endpoint, Map<String, SavedContract> contracts,
-                             Map<String, StaticCredentials> credentials) {
+                             Map<String, Credentials> credentials) {
 
 	private static String EXPLORER_CONFIG_PATH = System.getProperty("user.dir") + "/.j4e/config/explorer.json";
 	private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
@@ -37,7 +36,7 @@ public record ExplorerConfig(String endpoint, Map<String, SavedContract> contrac
 		sync();
 	}
 
-	public void add(String name, StaticCredentials keys) throws IOException {
+	public void add(String name, Credentials keys) throws IOException {
 		credentials().put(name, keys);
 		sync();
 	}

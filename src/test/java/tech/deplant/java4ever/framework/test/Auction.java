@@ -5,7 +5,7 @@ import tech.deplant.java4ever.framework.JSONContext;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.abi.CachedAbi;
+import tech.deplant.java4ever.framework.template.ContractAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
@@ -13,9 +13,9 @@ import java.util.Map;
 
 public class Auction extends OwnedContract {
 
-	public Auction(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
-		super(sdk, address, CachedAbi.ofResource(""), owner);
-	}
+    public Auction(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+        super(sdk, address, ContractAbi.ofResource(""), owner);
+    }
 
 //    public static Auction ofLocalConfig(ExplorerConfig config, Sdk sdk, boolean isBuyNever) {
 //        var str = isBuyNever ? "auctionEVERtoNEVER" : "auctionNEVERtoEVER";
@@ -40,37 +40,37 @@ public class Auction extends OwnedContract {
 //        return new Auction(ControllableContract.ofConfig(sdk, artifact, "auction"));
 //    }
 
-	public Object getBidCount() {
-		return runGetter("_bidCount", null, null).get("_bidCount");
-	}
+    public Object getBidCount() {
+        return runGetter("_bidCount", null, null).get("_bidCount");
+    }
 
-	public Object getRevealCount() {
-		return runGetter("_revealCount", null, null).get("_revealCount");
-	}
+    public Object getRevealCount() {
+        return runGetter("_revealCount", null, null).get("_revealCount");
+    }
 
-	public AuctionRules getRules() throws JsonProcessingException {
-		return JSONContext.MAPPER.readValue(
-				runGetter("_rules", null, null).get("_rules").toString(),
-				AuctionRules.class
-		);
-	}
+    public AuctionRules getRules() throws JsonProcessingException {
+        return JSONContext.MAPPER.readValue(
+                runGetter("_rules", null, null).get("_rules").toString(),
+                AuctionRules.class
+        );
+    }
 
-	public BigInteger getCommitHash(BigInteger price, BigInteger amount, BigInteger salt) {
-		var inputs = Map.<String, Object>of(
-				"priceReveal_", price,
-				"amountReveal_", amount,
-				"salt_", salt);
-		return new BigInteger(runGetter("getCommitHash", inputs, null).get("bidHash").toString());
-	}
+    public BigInteger getCommitHash(BigInteger price, BigInteger amount, BigInteger salt) {
+        var inputs = Map.<String, Object>of(
+                "priceReveal_", price,
+                "amountReveal_", amount,
+                "salt_", salt);
+        return new BigInteger(runGetter("getCommitHash", inputs, null).get("bidHash").toString());
+    }
 
-	public record AuctionRules(
-			boolean isBuyNEVER,
-			long startDate,
-			long revealDate,
-			long tradeDate,
-			long closeDate,
-			BigInteger minBid,
-			BigInteger minPrice,
-			BigInteger loserFactor) {
-	}
+    public record AuctionRules(
+            boolean isBuyNEVER,
+            long startDate,
+            long revealDate,
+            long tradeDate,
+            long closeDate,
+            BigInteger minBid,
+            BigInteger minPrice,
+            BigInteger loserFactor) {
+    }
 }

@@ -10,5 +10,7 @@ public enum AbiValueType {
     TVM_BUILDER,
     BOOLEAN, //bool
     MAP, // map(address,uint128)
-    TUPLE // tuple[]
+    TUPLE // tuple
+    // tuple[]
+    // map(address,tuple)
 }

@@ -108,11 +108,17 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
         }
     }
 
-    private Object serializeValue(String abiType, Object inputValue) {
+    private Object serializeValue(Abi.AbiParam abiType, Object inputValue) {
+        var rootType = abiType.type();
+        // if
+        // rootType.regexp("tuple");
+        // rootType.regexp("map\(,.*\)");
+        //else
+
         var errorMsg = "Type: " + abiType + " Input: " + inputValue.getClass().toString() +
                 "Unsupported type for ABI conversion";
         var exception = new Sdk.SdkException(new Sdk.Error(101, errorMsg));
-        return switch (abiType) {
+        return switch (rootType) {
             case "uint128", "uint256", "uint64", "uint32" -> switch (inputValue) {
                 case BigInteger b -> new AbiUint(b).serialize();
                 case Instant i -> new AbiUint(i).serialize();
@@ -155,7 +161,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
                 (key, value) -> {
                     if (hasInput(functionName, key)) {
                         var type = this.functionInputType(functionName, key);
-                        functionInputs.replace(key, serializeValue(null, value));
+                        functionInputs.replace(key, serializeValue(type, value));
                     } else {
                         log.error(
                                 "ABI Function " + functionName + " doesn't contain input '" + key + "'");

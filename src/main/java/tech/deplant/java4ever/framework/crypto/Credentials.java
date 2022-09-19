@@ -40,25 +40,18 @@ public record Credentials(@JsonProperty("public") String publicKey,
 		}
 	}
 
+	public static Credentials ofSeed(Sdk sdk, String seedString, int seedWords) throws Sdk.SdkException {
+		return ofSeed(sdk, new Seed(seedString, seedWords));
+	}
+
 	//TODO Convert to Async
-	private static Credentials ofSeed(Sdk sdk, Seed seed) throws Sdk.SdkException {
+	public static Credentials ofSeed(Sdk sdk, Seed seed) throws Sdk.SdkException {
 		if (Crypto.mnemonicVerify(sdk.context(), seed.phrase(), null, seed.words()).valid()) {
-			var pairFromSeed = Crypto.mnemonicDeriveSignKeys(sdk.context(), seed, null, null, words);
+			var pairFromSeed = Crypto.mnemonicDeriveSignKeys(sdk.context(), seed.phrase(), null, null, seed.words());
 			return new Credentials(pairFromSeed.publicKey(), pairFromSeed.secretKey());
 		} else {
 			throw new RuntimeException("Seed/mnemonic phrase checksum is not valid.");
 		}
-
-	}
-
-	//TODO Convert to Async
-	public static Credentials ofSeed12(Sdk sdk, String seed) throws Sdk.SdkException {
-		return ofSeed(sdk, seed, 12);
-	}
-
-	//TODO Convert to Async
-	public static Credentials ofSeed24(Sdk sdk, String seed) throws Sdk.SdkException {
-		return ofSeed(sdk, seed, 24);
 	}
 
 	public Abi.Signer signer() {

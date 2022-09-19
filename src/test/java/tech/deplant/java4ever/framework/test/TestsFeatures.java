@@ -14,7 +14,6 @@ import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
 import tech.deplant.java4ever.framework.GraphQLFilter;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
-import tech.deplant.java4ever.framework.artifact.ArtifactTVC;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
@@ -54,14 +53,12 @@ public class TestsFeatures {
 
 
 		var giver = new EverOSGiver(sdkSE);
-		var msig = new MsigTemplate(sdkSE,
-		                            MsigTemplate.MsigAbiSafe(sdkSE),
-		                            new ArtifactTVC(MsigTemplate.SAFE_MULTISIG_TVC))
-				.deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE), giver, new BigInteger("2"));
+		var msig = MsigTemplate.SAFE()
+		                       .deployWithGiver(sdkSE, 0, Credentials.RANDOM(sdkSE), giver, new BigInteger("2"));
 		//.send();
 		//msig.get().send();
-		IAbi abi = MsigTemplate.MsigAbiSafe(sdkSE);
-		IAbi abi2 = new JsonAbi(sdkSE, "{}");
+		IAbi abi = MsigTemplate.SAFE().abi();
+		IAbi abi2 = JsonAbi.ofString("{}");
 		//msig.callExternal("", null,);
 		//IAbi abi3 = ArtifactABI.ofResource("");
 		//ArtifactABI abi4 = new ArtifactABI(CachedABI.of("{}"), new LocalJsonArtifact(Paths.get("")));

@@ -1,38 +1,31 @@
 package tech.deplant.java4ever.framework.crypto;
 
 import tech.deplant.java4ever.binding.Crypto;
-import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
-
-import java.util.Locale;
 
 public record Seed(String phrase, int words) {
 
-	public static Seed ofBase64StringEntropy(Sdk sdk, int words, String entropy) {
-		return new Seed(generateSeedOfEntropy(sdk, words, entropy), words);
-	}
+    public final static int DEFAULT_WORD_COUNT = 12; //Mnemonic word count
+    public final static int DICTIONARY_ENGLISH = 1; //Dictionary identifier
 
-	private static String generateEntropyWithSDK(Sdk sdk) throws Sdk.SdkException {
-		return Crypto.generateRandomBytes(sdk.context(), 512).bytes();
-	}
+    public final static String HD_PATH = "m/44'/396'/0'/0/0";
 
-	private static String generateSeedOfEntropy(Sdk sdk, int words, String entropyBase64) {
-		return Crypto.mnemonicFromEntropy(sdk.context(),
-		                                  Data.base64ToHexString(entropyBase64).toUpperCase(Locale.ROOT),
-		                                  null,
-		                                  words).phrase();
-	}
+    private static String generateMnemonicPhraseFromRandom(Sdk sdk, int words) {
+        return Crypto.mnemonicFromRandom(sdk.context(), DICTIONARY_ENGLISH, words).phrase();
+    }
 
-	private static String generateSeedOfRandom(Sdk sdk, int words) {
-		return generateSeedOfEntropy(sdk, words, generateEntropyWithSDK(sdk));
-	}
+    /**
+     * Generates random 12-words seed phrase
+     *
+     * @param sdk
+     * @return
+     */
+    public static Seed RANDOM(Sdk sdk) {
+        return new Seed(generateMnemonicPhraseFromRandom(sdk, DEFAULT_WORD_COUNT), DEFAULT_WORD_COUNT);
+    }
 
-	public static Seed RANDOM12(Sdk sdk) {
-		return new Seed(generateSeedOfRandom(sdk, 12), 12);
-	}
-
-	public static Seed RANDOM24(Sdk sdk) {
-		return new Seed(generateSeedOfRandom(sdk, 24), 24);
-	}
+    public static Seed RANDOM24(Sdk sdk) {
+        return new Seed(generateMnemonicPhraseFromRandom(sdk, 24), 24);
+    }
 
 }

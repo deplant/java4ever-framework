@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.template;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.framework.Sdk;
@@ -12,7 +11,7 @@ import java.util.Map;
 
 public record ContractTvc(byte[] bytes) {
 
-    public static ContractTvc ofFile(String filePath) throws JsonProcessingException {
+    public static ContractTvc ofFile(String filePath) {
         return new ContractTvc(new ByteFile(filePath).get());
     }
 

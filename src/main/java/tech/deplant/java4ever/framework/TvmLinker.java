@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TvmLinker {
 
@@ -29,7 +31,7 @@ public class TvmLinker {
         }
     }
 
-    public CompletableFuture<Process> assemblyContract(String contractName, String buildFolder) {
+    public int assemblyContract(String contractName, String buildFolder) {
         return assemblyContract(
                 buildFolder + "/" + contractName + ".code",
                 buildFolder + "/" + contractName + ".abi.json",
@@ -37,7 +39,7 @@ public class TvmLinker {
         );
     }
 
-    public CompletableFuture<Process> assemblyContract(String codePath, String abiPath, String outputPath) {
+    public int assemblyContract(String codePath, String abiPath, String outputPath) {
         try {
             log.info("Begging assembly of TVM Assembly source...");
             Process p = new ProcessBuilder()
@@ -54,10 +56,16 @@ public class TvmLinker {
                             codePath
                     )
                     .start();
-            return p.onExit();
+            return p.onExit().get(30, TimeUnit.SECONDS).exitValue();
         } catch (IOException e) {
             log.error(e.getMessage());
-            return CompletableFuture.failedFuture(new RuntimeException(e.getMessage()));
+            return -1;
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
         }
     }
 

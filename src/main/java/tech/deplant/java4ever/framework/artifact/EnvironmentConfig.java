@@ -14,27 +14,24 @@ import tech.deplant.java4ever.framework.template.ContractTvc;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public record EnvironmentConfig(Solc compiler,
                                 TvmLinker linker,
                                 String sourcePath,
                                 String buildPath,
-                                Map<String, ContractAbi> abis,
-                                Map<String, ContractTvc> tvcs,
-                                Map<String, Credentials> keys) {
+                                Map<String, String> abis,
+                                Map<String, String> tvcs,
+                                Map<String, String> keys) {
 
     private static String LOCAL_CONFIG_PATH = System.getProperty("user.dir") + "/.j4e/config/local.json";
 
     private static Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
-    public static EnvironmentConfig EMPTY(String solcPath,
-                                          String linkerPath,
-                                          String stdLibPath,
-                                          String sourcePath,
-                                          String buildPath) throws IOException {
+    public static EnvironmentConfig ofPaths(String solcPath,
+                                            String linkerPath,
+                                            String stdLibPath,
+                                            String sourcePath,
+                                            String buildPath) throws IOException {
         var config = new EnvironmentConfig(new Solc(solcPath),
                 new TvmLinker(linkerPath, stdLibPath),
                 sourcePath,
@@ -46,57 +43,70 @@ public record EnvironmentConfig(Solc compiler,
         return config;
     }
 
-    public static EnvironmentConfig LOAD() {
-        try {
-            return Sdk.DEFAULT_MAPPER.readValue(new JsonFile(LOCAL_CONFIG_PATH).get(),
-                    EnvironmentConfig.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    public static EnvironmentConfig LOAD() throws JsonProcessingException {
+        return Sdk.DEFAULT_MAPPER.readValue(new JsonFile(LOCAL_CONFIG_PATH).get(),
+                EnvironmentConfig.class);
     }
 
-    public static ContractTemplate ofSoliditySource(Sdk sdk,
-                                                    Solc solc,
-                                                    TvmLinker tvmLinker,
-                                                    String solidityPath,
-                                                    String buildPath,
-                                                    String filename,
-                                                    String contractName) throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
-        var compilerResult = solc.compileContract(
+    public ContractTemplate compileTemplate(String filename,
+                                            String contractName) throws JsonProcessingException {
+        return compileTemplate(sourcePath(),
+                buildPath(),
+                filename,
+                contractName);
+    }
+
+    public ContractTemplate compileTemplate(String sourcePath,
+                                            String buildPath,
+                                            String filename,
+                                            String contractName) throws JsonProcessingException {
+        var compilerResult = compiler().compileContract(
                 contractName,
                 filename,
-                solidityPath,
-                buildPath).get(60, TimeUnit.SECONDS);
+                sourcePath,
+                buildPath);
 
-        if (compilerResult.exitValue() == 0) {
-            var linkerResult = tvmLinker.assemblyContract(contractName, buildPath).get(60, TimeUnit.SECONDS);
-            if (linkerResult.exitValue() == 0) {
+        if (compilerResult == 0) {
+            var linkerResult = linker().assemblyContract(contractName, buildPath);
+            if (linkerResult == 0) {
                 return new ContractTemplate(
                         ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
                         ContractTvc.ofFile(buildPath + "/" + contractName + ".tvc")
                 );
             } else {
-                log.error("TvmLinker exit code:" + linkerResult.exitValue());
+                log.error("TvmLinker exit code:" + linkerResult);
                 return null;
             }
         } else {
-            log.error("Solc exit code:" + compilerResult.exitValue());
-            throw new Sdk.SdkException(new Sdk.Error(105, "Solc exit code:" + compilerResult.exitValue()));
+            log.error("Solc exit code:" + compilerResult);
+            throw new Sdk.SdkException(new Sdk.Error(105, "Solc exit code:" + compilerResult));
         }
     }
 
-    public void addAbi(String name, String pathStr) throws IOException {
-        abis().put(name, ContractAbi.ofFile(pathStr));
+    public ContractAbi abi(String name) throws JsonProcessingException {
+        return ContractAbi.ofFile(abis().get(name));
+    }
+
+    public Credentials credentials(String name) throws JsonProcessingException {
+        return Credentials.ofFile(keys().get(name));
+    }
+
+    public ContractTvc tvc(String name) {
+        return ContractTvc.ofFile(tvcs().get(name));
+    }
+
+    public void addAbiPath(String name, String pathStr) throws IOException {
+        abis().put(name, pathStr);
         sync();
     }
 
-    public void addTvc(String name, String pathStr) throws IOException {
-        tvcs().put(name, ContractTvc.ofFile(pathStr));
+    public void addTvcPath(String name, String pathStr) throws IOException {
+        tvcs().put(name, pathStr);
         sync();
     }
 
-    public void addKey(String name, String pathStr) throws IOException {
-        keys().put(name, Credentials.ofFile(pathStr));
+    public void addKeypairPath(String name, String pathStr) throws IOException {
+        keys().put(name, pathStr);
         sync();
     }
 

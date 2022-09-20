@@ -7,29 +7,25 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public class Solc {
+public record Solc(String compilerPath) {
 
-    private static Logger log = LoggerFactory.getLogger(Solc.class);
+    private static final Logger log = LoggerFactory.getLogger(Solc.class);
 
-    private final String DEFAULT_SOL_EXTENSION = ".sol";
-    String compilerPath;
+    private static final String DEFAULT_SOL_EXTENSION = ".sol";
 
-    public Solc(String path) {
-        if (Files.exists(Path.of(path)) || Files.exists(Path.of(path + ".exe"))) {
-            this.compilerPath = path;
+    public Solc {
+        if (Files.exists(Path.of(compilerPath)) || Files.exists(Path.of(compilerPath + ".exe"))) {
         } else {
             log.error("ERROR! Compiler executable not found at specified path!");
             throw new RuntimeException();
         }
     }
 
-    public void compileContract(String contractName, String sourceFolder, String outputFolder) {
-        compileContract(contractName, contractName + this.DEFAULT_SOL_EXTENSION, sourceFolder, outputFolder);
-    }
-
-    public CompletableFuture<Process> compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder) {
+    public int compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder) {
 
         File sourceFolderFile = null;
         if (Files.isDirectory(Path.of(sourceFolder))) {
@@ -58,10 +54,16 @@ public class Solc {
                     )
                     .start();
             //return outputFolder + "/" + contractName + ".code";
-            return p.onExit();
+            return p.onExit().get(30, TimeUnit.SECONDS).exitValue();
         } catch (IOException e) {
             log.error(e.getMessage());
-            return CompletableFuture.failedFuture(new RuntimeException(e.getMessage()));
+            return -1;
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
         }
     }
 

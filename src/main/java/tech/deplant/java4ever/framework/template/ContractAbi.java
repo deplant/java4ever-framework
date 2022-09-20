@@ -111,6 +111,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
     private Object serializeValue(Abi.AbiParam abiType, Object inputValue) {
         var rootType = abiType.type();
         // if
+        // rootType.regexp("[]")
         // rootType.regexp("tuple");
         // rootType.regexp("map\(,.*\)");
         //else

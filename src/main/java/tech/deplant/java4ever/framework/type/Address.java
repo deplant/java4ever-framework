@@ -14,7 +14,7 @@ public record Address(int wid, BigInteger value) {
     public static final Address ZERO = new Address(0, BigInteger.ZERO);
 
     public Address(String address) {
-        this(Integer.valueOf(address.split(":")[0]),new BigInteger(address.split(":")[1], 16));
+        this(Integer.valueOf(address.split(":")[0]), new BigInteger(address.split(":")[1], 16));
     }
 
     public Address(BigInteger value) {
@@ -33,7 +33,7 @@ public record Address(int wid, BigInteger value) {
         ).address());
     }
 
-    public boolean isNone() {
+    public boolean isNull() {
         return this.value.equals(BigInteger.ZERO);
     }
 

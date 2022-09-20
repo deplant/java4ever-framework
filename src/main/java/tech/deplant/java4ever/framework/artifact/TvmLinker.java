@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework;
+package tech.deplant.java4ever.framework.artifact;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,21 +10,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class TvmLinker {
+public record TvmLinker(String linkerPath, String stdlibSolPath) {
+    private static final Logger log = LoggerFactory.getLogger(TvmLinker.class);
 
-    private static Logger log = LoggerFactory.getLogger(TvmLinker.class);
-
-    String linkerPath;
-    String stdlibSolPath;
-
-    public TvmLinker(String linkerPath, String stdlibSolPath) {
+    public TvmLinker {
         if (
                 (Files.exists(Path.of(linkerPath)) || Files.exists(Path.of(linkerPath + ".exe")))
                         &&
                         Files.exists(Path.of(stdlibSolPath))
         ) {
-            this.linkerPath = linkerPath;
-            this.stdlibSolPath = stdlibSolPath;
         } else {
             log.error("ERROR! Linker executable not found at specified path!");
             throw new RuntimeException();

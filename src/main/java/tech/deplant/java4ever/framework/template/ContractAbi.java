@@ -19,6 +19,7 @@ import tech.deplant.java4ever.framework.type.Address;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
@@ -59,6 +60,12 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
         return Arrays.stream(functions()).anyMatch(function -> name.equals(function.name()));
     }
 
+    public boolean hasInitDataParam(String initDataName) {
+        return Arrays.stream(data())
+                .anyMatch(data ->
+                        initDataName.equals(data.name()));
+    }
+
     public boolean hasInput(String functionName, String inputName) {
         return Arrays.stream(functions())
                 .anyMatch(function ->
@@ -85,6 +92,13 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 
     public Abi.AbiParam functionInputType(String functionName, String inputName) {
         return findParam(findFunction(functions(), functionName).inputs(), inputName);
+    }
+
+    public Abi.AbiParam initDataType(String initDataName) {
+        var dataParam = Arrays.stream(data())
+                .filter(data ->
+                        initDataName.equals(data.name())).findAny().orElseThrow();
+        return new Abi.AbiParam(dataParam.name(), dataParam.type(), dataParam.components());
     }
 
     public Abi.AbiParam functionOutputType(String functionName, String outputName) {
@@ -158,22 +172,50 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
     }
 
     public Map<String, Object> convertFunctionInputs(String functionName, Map<String, Object> functionInputs) {
-        functionInputs.forEach(
-                (key, value) -> {
-                    if (hasInput(functionName, key)) {
-                        var type = this.functionInputType(functionName, key);
-                        functionInputs.replace(key, serializeValue(type, value));
-                    } else {
-                        log.error(
-                                "ABI Function " + functionName + " doesn't contain input '" + key + "'");
-                        throw new Sdk.SdkException(new Sdk.Error(102,
-                                "Function " + functionName +
-                                        " doesn't contain input (" + key +
-                                        ") in ABI"));
+        if (functionInputs != null) {
+            Map<String, Object> convertedInputs = new HashMap<>();
+            functionInputs.forEach(
+                    (key, value) -> {
+                        if (hasInput(functionName, key)) {
+                            var type = this.functionInputType(functionName, key);
+                            convertedInputs.put(key, serializeValue(type, value));
+                        } else {
+                            log.error(
+                                    "ABI Function " + functionName + " doesn't contain input '" + key + "'");
+                            throw new Sdk.SdkException(new Sdk.Error(102,
+                                    "Function " + functionName +
+                                            " doesn't contain input (" + key +
+                                            ") in ABI"));
+                        }
                     }
-                }
-        );
-        return functionInputs;
+            );
+            return convertedInputs;
+        } else {
+            return null;
+        }
+    }
+
+    public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) {
+        if (initDataInputs != null) {
+            Map<String, Object> convertedInputs = new HashMap<>();
+            initDataInputs.forEach(
+                    (key, value) -> {
+                        if (hasInitDataParam(key)) {
+                            var type = initDataType(key);
+                            convertedInputs.put(key, serializeValue(type, value));
+                        } else {
+                            log.error(
+                                    "ABI doesn't contain initData parameter '" + key + "'");
+                            throw new Sdk.SdkException(new Sdk.Error(102,
+                                    "ABI doesn't contain initData parameter '" + key + "'"));
+                        }
+                    }
+            );
+            return convertedInputs;
+        } else {
+            return null;
+        }
+
     }
 
 //    @Override
@@ -181,10 +223,6 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 //    public int abiVersion() {
 //        return this.abiVersion;
 //    }
-
-    public Map<String, Object> convertInitialDataInputs(Map<String, Object> initialData) {
-        return null;
-    }
 
 
 }

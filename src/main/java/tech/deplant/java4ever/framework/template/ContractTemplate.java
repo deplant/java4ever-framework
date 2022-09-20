@@ -44,12 +44,12 @@ public class ContractTemplate {
                                      Map<String, Object> constructorInputs) throws Sdk.SdkException {
         Processing.processMessage(
                 sdk.context(),
-                this.abi.ABI(),
+                abi().ABI(),
                 null,
                 new Abi.DeploySet(
                         this.tvc.base64String(),
                         workchainId,
-                        initialData,
+                        abi().convertInitDataInputs(initialData),
                         credentials.publicKey()),
                 new Abi.CallSet(
                         "constructor",

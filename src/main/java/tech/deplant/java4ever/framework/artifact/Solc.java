@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework;
+package tech.deplant.java4ever.framework.artifact;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

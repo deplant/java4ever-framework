@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.Solc;
-import tech.deplant.java4ever.framework.TvmLinker;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractAbi;
 import tech.deplant.java4ever.framework.template.ContractTemplate;

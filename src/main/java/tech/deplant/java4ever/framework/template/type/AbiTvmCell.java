@@ -25,6 +25,6 @@ public record AbiTvmCell(Sdk sdk, AbiValue... storeList) implements AbiValue {
 
     @Override
     public Object serialize() {
-        return Boc.encodeBoc(this.sdk.context(), builder(), Boc.BocCacheType.UNPINNED).boc();
+        return Boc.encodeBoc(this.sdk.context(), builder(), null).boc();
     }
 }

@@ -10,7 +10,9 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractAbi;
 import tech.deplant.java4ever.framework.type.Address;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class OwnedContract {
 
@@ -65,24 +67,24 @@ public class OwnedContract {
         ).body();
     }
 
-    protected Map<String, Object> processMessage(ContractAbi abi,
-                                                 Address address,
-                                                 Abi.DeploySet deploySet,
-                                                 Credentials credentials,
-                                                 String functionName,
-                                                 Abi.FunctionHeader functionHeader,
-                                                 Map<String, Object> functionInputs) {
-        return Processing.processMessage(sdk().context(),
-                        abi.ABI(),
-                        address.makeAddrStd(),
-                        deploySet,
-                        new Abi.CallSet(functionName,
-                                functionHeader,
-                                abi().convertFunctionInputs(functionName, functionInputs)),
-                        credentials.signer(), null, false, null)
-                .decoded()
-                .output();
-    }
+//    protected Map<String, Object> processMessage(ContractAbi abi,
+//                                                 Address address,
+//                                                 Abi.DeploySet deploySet,
+//                                                 Credentials credentials,
+//                                                 String functionName,
+//                                                 Abi.FunctionHeader functionHeader,
+//                                                 Map<String, Object> functionInputs) {
+//        return Processing.processMessage(sdk().context(),
+//                        abi.ABI(),
+//                        address.makeAddrStd(),
+//                        deploySet,
+//                        new Abi.CallSet(functionName,
+//                                functionHeader,
+//                                abi().convertFunctionInputs(functionName, functionInputs)),
+//                        credentials.signer(), null, false, null)
+//                .decoded()
+//                .output();
+//    }
 
     public Map<String, Object> runGetter(String functionName,
                                          Map<String, Object> functionInputs,
@@ -103,7 +105,7 @@ public class OwnedContract {
                         null
                 );
 
-        return Tvm.runTvm(
+        return Optional.ofNullable(Tvm.runTvm(
                         sdk().context(),
                         msg.message(),
                         account().boc(),
@@ -112,14 +114,14 @@ public class OwnedContract {
                         null,
                         false)
                 .decoded()
-                .output();
+                .output()).orElse(new HashMap<>());
     }
 
     public Map<String, Object> callExternal(String functionName,
                                             Map<String, Object> functionInputs,
                                             Abi.FunctionHeader functionHeader,
                                             Credentials credentials) {
-        return Processing.processMessage(this.sdk.context(),
+        return Optional.ofNullable(Processing.processMessage(this.sdk.context(),
                         abi().ABI(),
                         address().makeAddrStd(),
                         null,
@@ -128,7 +130,7 @@ public class OwnedContract {
                                 abi().convertFunctionInputs(functionName, functionInputs)),
                         credentials.signer(), null, false, null)
                 .decoded()
-                .output();
+                .output()).orElse(new HashMap<>());
     }
 
     public Map<String, Object> callExternal(String functionName,

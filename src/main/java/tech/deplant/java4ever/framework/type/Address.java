@@ -21,6 +21,10 @@ public record Address(int wid, BigInteger value) {
         this(0, value);
     }
 
+    public static Address ofNullable(Object nullableObject) {
+        return (null == nullableObject) ? Address.ZERO : new Address(nullableObject.toString());
+    }
+
     public static Address ofFutureDeploy(Sdk sdk, ContractTemplate template, int workchainId, Map<String, Object> initialData, Credentials credentials) throws Sdk.SdkException {
         return new Address(Abi.encodeMessage(
                 sdk.context(),

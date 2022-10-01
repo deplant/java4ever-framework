@@ -10,17 +10,16 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.framework.template.type.AbiAddress;
-import tech.deplant.java4ever.framework.template.type.AbiString;
-import tech.deplant.java4ever.framework.template.type.AbiTvmCell;
-import tech.deplant.java4ever.framework.template.type.AbiUint;
+import tech.deplant.java4ever.framework.template.type.*;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
@@ -123,62 +122,153 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
-	private Object serializeValue(Abi.AbiParam abiType, Object inputValue) {
-		var rootType = abiType.type();
-		// type -> AbiType
-		// rootType.regexp("type[]") -> AbiType
-		// rootType.regexp("tuple") -> AbiComponent[]
-		// rootType.regexp("map(type,type)") -> Map.of(AbiType,AbiType)
-		// map(type,tuple)- > Map.of(AbiType,AbiComponent[])
-		//else
-
-		var errorMsg = "Type: " + abiType + " Input: " + inputValue.getClass().toString() +
-		               "Unsupported type for ABI conversion";
-		var exception = new Sdk.SdkException(new Sdk.Error(101, errorMsg));
-		return switch (rootType) {
-			case "uint128", "uint256", "uint64", "uint32" -> switch (inputValue) {
+	public Object serializeSingle(AbiValueType type, int size, Object inputValue) {
+		try {
+			log.info("Input value: " + Sdk.DEFAULT_MAPPER.writeValueAsString(inputValue));
+		} catch (JsonProcessingException e) {
+			log.info("Can't serialize! Input value: " + inputValue.toString());
+		}
+		return switch (type) {
+			case UINT, INT -> switch (inputValue) {
 				case BigInteger b -> new AbiUint(b).serialize();
 				case Instant i -> new AbiUint(i).serialize();
 				case String strPrefixed
 						when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
 						new AbiUint(new BigInteger(strPrefixed.substring(2))).serialize();
-				case String str -> new AbiUint(new BigInteger(str)).serialize();
-				default -> throw exception;
+				case String str -> new AbiUint(size, new BigInteger(str, 16)).serialize();
+				default -> inputValue;
 			};
-			case "uint8" -> switch (inputValue) {
-				case Integer i -> new AbiUint(i.longValue()).serialize();
-				case String str -> new AbiUint(new BigInteger(str)).serialize();
-				default -> throw exception;
-			};
-			case "string" -> switch (inputValue) {
+			case STRING, BYTES, BYTE -> switch (inputValue) {
 				case String s -> new AbiString(s).serialize();
-				default -> throw exception;
+				default -> inputValue.toString();
 			};
-			case "address" -> switch (inputValue) {
+			case ADDRESS -> switch (inputValue) {
 				case Address a -> new AbiAddress(a).serialize();
 				case String s -> new AbiAddress(s).serialize();
-				default -> throw exception;
+				default -> inputValue;
 			};
-			case "bool" -> switch (inputValue) {
+			case BOOL -> switch (inputValue) {
 				case Boolean b -> b;
-				default -> throw exception;
+				default -> inputValue;
 			};
-			case "cell" -> switch (inputValue) {
+			case CELL, SLICE, BUILDER -> switch (inputValue) {
 				case String s -> s;
 				case AbiTvmCell abiCell -> abiCell.serialize();
-				default -> throw exception;
+				default -> inputValue;
 			};
-			case "tuple" -> switch (inputValue) {
-				case Map m -> Arrays.stream(abiType.components()).collect(
-						Collectors.toMap(Abi.AbiParam::name, abiComp -> {
-							                 return serializeValue(abiComp, m.get(abiComp.name()));
-						                 }
-						));
-				default -> throw exception;
-			};
-			default -> throw new Sdk.SdkException(new Sdk.Error(101,
-			                                                    errorMsg));
+			case TUPLE -> throw new Sdk.SdkException(new Sdk.Error(101, "Shouldn't get here!"));
 		};
+	}
+
+	public TypePair typeParser(String typeString) {
+		var sizePattern = Pattern.compile("([a-zA-Z]+)(\\d{1,3})");
+		var matcher = sizePattern.matcher(typeString);
+		while (matcher.find()) {
+			return new TypePair(AbiValueType.valueOf(matcher.group(1).toUpperCase()),
+			                    Integer.parseInt(matcher.group(2)));
+		}
+		var typePattern = Pattern.compile("([a-zA-Z]+)");
+		matcher = typePattern.matcher(typeString);
+		while (matcher.find()) {
+			return new TypePair(AbiValueType.valueOf(matcher.group(1).toUpperCase()),
+			                    0);
+		}
+		throw new Sdk.SdkException(new Sdk.Error(101, "Type can't be parsed!"));
+	}
+
+	public boolean arrayMatcher(String typeString) {
+		var arrayPattern = Pattern.compile("([a-zA-Z]+\\d{0,3})(\\[\\])");
+		var matcher = arrayPattern.matcher(typeString);
+		while (matcher.find()) {
+			return true;
+		}
+		return false;
+	}
+
+	public Object serializeTree(Abi.AbiParam param, Object inputValue) {
+
+		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
+
+		var mapPattern = Pattern.compile("(map\\()" +
+		                                 typeStringPattern +
+		                                 "(,)" +
+		                                 typeStringPattern +
+		                                 "(\\))");
+		boolean rootIsMap = false;
+		String rootTypeString = param.type();
+		String keyTypeString = null;
+		String valueTypeString = null;
+
+		log.info(rootTypeString);
+		var matcher = mapPattern.matcher(rootTypeString);
+		while (matcher.find()) {
+			rootIsMap = true;
+			//log.info("Root is map: true");
+			keyTypeString = matcher.group(2);
+			//log.info("Key string: " + keyTypeString);
+			valueTypeString = matcher.group(4);
+			//log.info("Value string: " + valueTypeString);
+		}
+
+		// map = Map<String,Object> from types
+		// map(type,tuple) = Map<String,Map<String,Object>>
+		if (rootIsMap) {
+			// Key Parse
+			final boolean keyIsArray = arrayMatcher(keyTypeString);
+			var keyTypePair = typeParser(keyTypeString);
+			final AbiValueType keyType = keyTypePair.type();
+			final int keySize = keyTypePair.size();
+			//log.info("MapKey Is Array: " + keyIsArray);
+			// Value Parse
+			final boolean valueIsArray = arrayMatcher(valueTypeString);
+			var valueTypePair = typeParser(valueTypeString);
+			final AbiValueType valueType = valueTypePair.type();
+			final int valueSize = valueTypePair.size();
+			//log.info("MapValue Is Array: " + valueIsArray);
+
+			Map<Object, Object> mapValue = (Map<Object, Object>) inputValue;
+			if (mapValue.size() == 1) {
+				final Object key = mapValue.keySet().toArray()[0];
+				final Object value = mapValue.values().toArray()[0];
+				return Map.of(serializeSingle(keyType, keySize, key),
+				              // serializeTree is used for map(type,tuple) cases,
+				              // thus it will continue to serialize tuple part
+				              serializeTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
+				                            value));
+			} else {
+				// for map(type,type) we can only process single key-value pair
+				throw new Sdk.SdkException(new Sdk.Error(101, "Wrong argument"));
+			}
+		} else {
+			// Normal (not map) root types
+			final boolean rootIsArray = arrayMatcher(rootTypeString);
+			var rootTypePair = typeParser(rootTypeString);
+			final AbiValueType rootType = rootTypePair.type();
+			final int rootSize = rootTypePair.size();
+			log.info("Root Is Array: " + rootIsArray);
+			// tuples
+			if (rootType.equals(AbiValueType.TUPLE)) {
+				// tuple = Map<String,Object> from components
+				Map<String, Object> mapValue = (Map<String, Object>) inputValue;
+				return Arrays.stream(param.components()).collect(
+						Collectors.toMap(component -> component.name(),
+						                 component -> serializeTree(component, mapValue.get(component.name()))
+						));
+				// arrays
+			} else if (rootIsArray) {
+				return switch (inputValue) {
+					case String s -> new Object[]{serializeSingle(rootType, rootSize, s)};
+					case Object[] arr ->
+							Arrays.stream(arr).map(element -> serializeSingle(rootType, rootSize, element)).toArray();
+					case List list ->
+							list.stream().map(element -> serializeSingle(rootType, rootSize, element)).toArray();
+					default -> new Object[]{serializeSingle(rootType, rootSize, inputValue)};
+				};
+			} else {
+				// all others
+				return serializeSingle(rootType, rootSize, inputValue);
+			}
+		}
 	}
 
 	public Map<String, Object> convertFunctionInputs(String functionName, Map<String, Object> functionInputs) {
@@ -188,7 +278,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 					(key, value) -> {
 						if (hasInput(functionName, key)) {
 							var type = this.functionInputType(functionName, key);
-							convertedInputs.put(key, serializeValue(type, value));
+							convertedInputs.put(key, serializeTree(type, value));
 						} else {
 							log.error(
 									"ABI Function " + functionName + " doesn't contain input '" + key + "'");
@@ -212,7 +302,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 					(key, value) -> {
 						if (hasInitDataParam(key)) {
 							var type = initDataType(key);
-							convertedInputs.put(key, serializeValue(type, value));
+							convertedInputs.put(key, serializeTree(type, value));
 						} else {
 							log.error(
 									"ABI doesn't contain initData parameter '" + key + "'");
@@ -227,6 +317,9 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 			return null;
 		}
 
+	}
+
+	public record TypePair(AbiValueType type, Integer size) {
 	}
 
 //    @Override

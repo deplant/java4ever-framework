@@ -12,7 +12,7 @@ public class SdkBuilder {
 	private boolean cacheInLocalStorage = true;
 	private String localStoragePath = "~/.tonclient";
 	// JavaConfig
-	private long timeout = 30L;
+	private long timeout = 60_000L;
 	private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
 	//Context.NetworkConfig
 	private String[] endpoints = new String[]{"https://localhost"};

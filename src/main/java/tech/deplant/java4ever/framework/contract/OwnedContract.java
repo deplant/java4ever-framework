@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework.contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.binding.Tvm;
 import tech.deplant.java4ever.framework.Sdk;
@@ -47,11 +48,11 @@ public class OwnedContract {
 		return this.abi;
 	}
 
-	public BigInteger balance() {
+	public BigInteger balance() throws EverSdkException {
 		return AbiUint.deserialize(128, account().balance());
 	}
 
-	public Account account() {
+	public Account account() throws EverSdkException {
 		return Account.graphQLRequest(this.sdk, this.address);
 	}
 
@@ -61,7 +62,7 @@ public class OwnedContract {
 
 	public String encodeInternalPayload(String functionName,
 	                                    Map<String, Object> functionInputs,
-	                                    Abi.FunctionHeader functionHeader) {
+	                                    Abi.FunctionHeader functionHeader) throws EverSdkException {
 		return Abi.encodeMessageBody(
 				sdk().context(),
 				abi().ABI(),
@@ -75,29 +76,10 @@ public class OwnedContract {
 		).body();
 	}
 
-//    protected Map<String, Object> processMessage(ContractAbi abi,
-//                                                 Address address,
-//                                                 Abi.DeploySet deploySet,
-//                                                 Credentials credentials,
-//                                                 String functionName,
-//                                                 Abi.FunctionHeader functionHeader,
-//                                                 Map<String, Object> functionInputs) {
-//        return Processing.processMessage(sdk().context(),
-//                        abi.ABI(),
-//                        address.makeAddrStd(),
-//                        deploySet,
-//                        new Abi.CallSet(functionName,
-//                                functionHeader,
-//                                abi().convertFunctionInputs(functionName, functionInputs)),
-//                        credentials.signer(), null, false, null)
-//                .decoded()
-//                .output();
-//    }
-
 	public Map<String, Object> runGetter(String functionName,
 	                                     Map<String, Object> functionInputs,
 	                                     Abi.FunctionHeader functionHeader,
-	                                     Credentials credentials) {
+	                                     Credentials credentials) throws EverSdkException {
 		Abi.ResultOfEncodeMessage msg =
 				Abi.encodeMessage(
 						sdk().context(),
@@ -128,7 +110,7 @@ public class OwnedContract {
 	public Map<String, Object> callExternal(String functionName,
 	                                        Map<String, Object> functionInputs,
 	                                        Abi.FunctionHeader functionHeader,
-	                                        Credentials credentials) {
+	                                        Credentials credentials) throws EverSdkException {
 		return Optional.ofNullable(Processing.processMessage(this.sdk.context(),
 		                                                     abi().ABI(),
 		                                                     address().makeAddrStd(),
@@ -144,13 +126,13 @@ public class OwnedContract {
 
 	public Map<String, Object> callExternal(String functionName,
 	                                        Map<String, Object> functionInputs,
-	                                        Abi.FunctionHeader functionHeader) {
+	                                        Abi.FunctionHeader functionHeader) throws EverSdkException {
 		return callExternal(functionName, functionInputs, functionHeader, this.tvmKey);
 	}
 
 	public Map<String, Object> runGetter(String functionName,
 	                                     Map<String, Object> functionInputs,
-	                                     Abi.FunctionHeader functionHeader) {
+	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
 		return runGetter(functionName, functionInputs, functionHeader, this.tvmKey);
 	}
 }

@@ -9,7 +9,6 @@ import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 import tech.deplant.java4ever.framework.template.Tip31RootTemplate;
-import tech.deplant.java4ever.framework.template.type.AbiValueType;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
@@ -21,11 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AbiTests {
 
 	private static Logger log = LoggerFactory.getLogger(AbiTests.class);
-
-	public Object serializeSingle2(AbiValueType type, int size, Object inputValue) {
-		return type.name();
-	}
-
 
 	@Test
 	public void regexpAbiTypes() throws JsonProcessingException {
@@ -58,19 +52,14 @@ public class AbiTests {
 
 		//map(address,uint256[])
 		var arrayInner = new Integer[]{0, 1, 1080};
+		var arrayStringInner = "139ee9ed2b6f4ef02a074f8cc5021d44c3a3fa2c42b75c1d17dec6a8281046b6";
 		Map<Object, Object> mapOuter2 = Map.of(Address.ZERO, arrayInner);
 		log.info("Output: " + Sdk.DEFAULT_MAPPER.writeValueAsString(cachedAbiSafeMsig.serializeTree(mapAddressArrayType,
 		                                                                                            mapOuter2)));
+		mapOuter2 = Map.of(Address.ZERO, arrayStringInner);
 		log.info("Output: " +
 		         Sdk.DEFAULT_MAPPER.writeValueAsString(cachedAbiSafeMsig.serializeTree(mapAddressNoSizeArrayType,
 		                                                                               mapOuter2)));
-
-
-		//		int matches = 0;
-		//		while (matcher.find()) {
-		//			matches++;
-		//		}
-		//		return matches;
 	}
 
 	/**

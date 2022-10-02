@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.type.*;
@@ -33,7 +34,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 	private static Logger log = LoggerFactory.getLogger(ContractAbi.class);
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
-		return Sdk.DEFAULT_MAPPER.readValue(jsonString, ContractAbi.class);
+		return ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, ContractAbi.class);
 	}
 
 	public static ContractAbi ofResource(String resourceName) throws JsonProcessingException {
@@ -45,11 +46,12 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 	}
 
 	public static ContractAbi ofJsonNode(JsonNode node) throws JsonProcessingException {
-		return ofString(Sdk.DEFAULT_MAPPER.writeValueAsString(node));
+		return ofString(ContextBuilder.DEFAULT_MAPPER.writeValueAsString(node));
 	}
 
 	public String json() throws JsonProcessingException {
-		return Sdk.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(this);
+		return ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		                                    .writeValueAsString(this);
 	}
 
 	public boolean hasHeader(String name) {
@@ -122,19 +124,14 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
-	public Object serializeSingle(AbiValueType type, int size, Object inputValue) {
-		try {
-			log.info("Input value: " + Sdk.DEFAULT_MAPPER.writeValueAsString(inputValue));
-		} catch (JsonProcessingException e) {
-			log.info("Can't serialize! Input value: " + inputValue.toString());
-		}
+	public Object serializeSingle(AbiValueType type, int size, Object inputValue) throws EverSdkException {
 		return switch (type) {
 			case UINT, INT -> switch (inputValue) {
 				case BigInteger b -> new AbiUint(b).serialize();
 				case Instant i -> new AbiUint(i).serialize();
 				case String strPrefixed
 						when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
-						new AbiUint(new BigInteger(strPrefixed.substring(2))).serialize();
+						new AbiUint(new BigInteger(strPrefixed.substring(2), 16)).serialize();
 				case String str -> new AbiUint(size, new BigInteger(str, 16)).serialize();
 				default -> inputValue;
 			};
@@ -156,11 +153,17 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				case AbiTvmCell abiCell -> abiCell.serialize();
 				default -> inputValue;
 			};
-			case TUPLE -> throw new Sdk.SdkException(new Sdk.Error(101, "Shouldn't get here!"));
+			case TUPLE -> {
+				var ex = new EverSdkException(new EverSdkException.ErrorResult(-301,
+				                                                               "ABI Parsing unexpected! Shouldn't get here!"),
+				                              new RuntimeException());
+				log.warn(ex.toString());
+				throw ex;
+			}
 		};
 	}
 
-	public TypePair typeParser(String typeString) {
+	public TypePair typeParser(String typeString) throws EverSdkException {
 		var sizePattern = Pattern.compile("([a-zA-Z]+)(\\d{1,3})");
 		var matcher = sizePattern.matcher(typeString);
 		while (matcher.find()) {
@@ -173,7 +176,11 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 			return new TypePair(AbiValueType.valueOf(matcher.group(1).toUpperCase()),
 			                    0);
 		}
-		throw new Sdk.SdkException(new Sdk.Error(101, "Type can't be parsed!"));
+		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
+		                                                               "ABI Type parsing failed! Type: " + typeString),
+		                              new RuntimeException());
+		log.warn(ex.toString());
+		throw ex;
 	}
 
 	public boolean arrayMatcher(String typeString) {
@@ -185,7 +192,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		return false;
 	}
 
-	public Object serializeTree(Abi.AbiParam param, Object inputValue) {
+	public Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
@@ -236,8 +243,11 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				              serializeTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
 				                            value));
 			} else {
-				// for map(type,type) we can only process single key-value pair
-				throw new Sdk.SdkException(new Sdk.Error(101, "Wrong argument"));
+				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
+				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+				                                                               mapValue), new RuntimeException());
+				log.warn(ex.toString());
+				throw ex;
 			}
 		} else {
 			// Normal (not map) root types
@@ -252,16 +262,35 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				Map<String, Object> mapValue = (Map<String, Object>) inputValue;
 				return Arrays.stream(param.components()).collect(
 						Collectors.toMap(component -> component.name(),
-						                 component -> serializeTree(component, mapValue.get(component.name()))
+						                 component -> {
+							                 try {
+								                 return serializeTree(component, mapValue.get(component.name()));
+							                 } catch (EverSdkException e) {
+								                 // in the complex cases, if we can't serialize, we can try to put object as is
+								                 return mapValue.get(component.name());
+							                 }
+						                 }
 						));
 				// arrays
 			} else if (rootIsArray) {
 				return switch (inputValue) {
 					case String s -> new Object[]{serializeSingle(rootType, rootSize, s)};
-					case Object[] arr ->
-							Arrays.stream(arr).map(element -> serializeSingle(rootType, rootSize, element)).toArray();
-					case List list ->
-							list.stream().map(element -> serializeSingle(rootType, rootSize, element)).toArray();
+					case Object[] arr -> Arrays.stream(arr).map(element -> {
+						try {
+							return serializeSingle(rootType, rootSize, element);
+						} catch (EverSdkException e) {
+							// in the complex cases, if we can't serialize, we can try to put object as is
+							return element;
+						}
+					}).toArray();
+					case List list -> list.stream().map(element -> {
+						try {
+							return serializeSingle(rootType, rootSize, element);
+						} catch (EverSdkException e) {
+							// in the complex cases, if we can't serialize, we can try to put object as is
+							return element;
+						}
+					}).toArray();
 					default -> new Object[]{serializeSingle(rootType, rootSize, inputValue)};
 				};
 			} else {
@@ -271,47 +300,59 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
-	public Map<String, Object> convertFunctionInputs(String functionName, Map<String, Object> functionInputs) {
+	public Map<String, Object> convertFunctionInputs(String functionName,
+	                                                 Map<String, Object> functionInputs) throws EverSdkException {
 		if (functionInputs != null) {
 			Map<String, Object> convertedInputs = new HashMap<>();
-			functionInputs.forEach(
-					(key, value) -> {
-						if (hasInput(functionName, key)) {
-							var type = this.functionInputType(functionName, key);
-							convertedInputs.put(key, serializeTree(type, value));
-						} else {
-							log.error(
-									"ABI Function " + functionName + " doesn't contain input '" + key + "'");
-							throw new Sdk.SdkException(new Sdk.Error(102,
-							                                         "Function " + functionName +
-							                                         " doesn't contain input (" + key +
-							                                         ") in ABI"));
-						}
+			for (Map.Entry<String, Object> entry : functionInputs.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (hasInput(functionName, key)) {
+					var type = this.functionInputType(functionName, key);
+					try {
+						convertedInputs.put(key, serializeTree(type, value));
+					} catch (EverSdkException e) {
+						// in the complex cases, if we can't serialize, we can try to put object as is
+						convertedInputs.put(key, value);
 					}
-			);
+				} else {
+					log.error(
+							"ABI Function " + functionName + " doesn't contain input '" + key + "'");
+					throw new EverSdkException(new EverSdkException.ErrorResult(-303,
+					                                                            "Function " + functionName +
+					                                                            " doesn't contain input (" + key +
+					                                                            ") in ABI"), new Exception());
+				}
+			}
 			return convertedInputs;
 		} else {
 			return null;
 		}
 	}
 
-	public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) {
+	public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) throws EverSdkException {
 		if (initDataInputs != null) {
 			Map<String, Object> convertedInputs = new HashMap<>();
-			initDataInputs.forEach(
-					(key, value) -> {
-						if (hasInitDataParam(key)) {
-							var type = initDataType(key);
-							convertedInputs.put(key, serializeTree(type, value));
-						} else {
-							log.error(
-									"ABI doesn't contain initData parameter '" + key + "'");
-							throw new Sdk.SdkException(new Sdk.Error(102,
-							                                         "ABI doesn't contain initData parameter '" + key +
-							                                         "'"));
-						}
+			for (Map.Entry<String, Object> entry : initDataInputs.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (hasInitDataParam(key)) {
+					var type = initDataType(key);
+					try {
+						convertedInputs.put(key, serializeTree(type, value));
+					} catch (EverSdkException e) {
+						// in the complex cases, if we can't serialize, we can try to put object as is
+						convertedInputs.put(key, value);
 					}
-			);
+				} else {
+					log.error(
+							"ABI doesn't contain initData parameter '" + key + "'");
+					throw new EverSdkException(new EverSdkException.ErrorResult(-304,
+					                                                            "ABI doesn't contain initData parameter '" +
+					                                                            key +
+					                                                            "'"), new Exception());
+				}
+			}
 			return convertedInputs;
 		} else {
 			return null;

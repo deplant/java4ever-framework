@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract;
 
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractAbi;
@@ -20,11 +21,11 @@ public class Tip31Wallet extends OwnedContract {
 		super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
 	}
 
-	public Address owner() {
+	public Address owner() throws EverSdkException {
 		return AbiAddress.deserialize(runGetter("owner", new HashMap<>(), null).get("value0"));
 	}
 
-	public BigInteger tokenBalance() {
+	public BigInteger tokenBalance() throws EverSdkException {
 		return AbiUint.deserialize(128, runGetter("balance", new HashMap<>(), null).get("value0"));
 	}
 

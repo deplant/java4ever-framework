@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework.contract;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.framework.GraphQLFilter;
 import tech.deplant.java4ever.framework.JSONContext;
@@ -14,25 +15,25 @@ import java.util.Map;
 public record Account(String id, int acc_type, String balance, String boc,
                       long last_paid) {
 
-    private static Logger log = LoggerFactory.getLogger(Account.class);
+	private static Logger log = LoggerFactory.getLogger(Account.class);
 
-    protected static Account graphQLRequest(Sdk sdk, Address address) {
-        Map<String, Object> filter = new HashMap<>();
-        filter.put("id", new GraphQLFilter.In(new String[]{address.makeAddrStd()}));
-        Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
-                "accounts",
-                filter,
-                "id acc_type balance boc last_paid",
-                null,
-                null);
-        return JSONContext.MAPPER.convertValue(result.result()[0], Account.class);
-    }
+	protected static Account graphQLRequest(Sdk sdk, Address address) throws EverSdkException {
+		Map<String, Object> filter = new HashMap<>();
+		filter.put("id", new GraphQLFilter.In(new String[]{address.makeAddrStd()}));
+		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
+		                                                         "accounts",
+		                                                         filter,
+		                                                         "id acc_type balance boc last_paid",
+		                                                         null,
+		                                                         null);
+		return JSONContext.MAPPER.convertValue(result.result()[0], Account.class);
+	}
 
-    public Boolean isActive() {
-        return 1 == this.acc_type;
-    }
+	public Boolean isActive() {
+		return 1 == this.acc_type;
+	}
 
-    //    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
+	//    public static Collection<Account> ofAddressList(Sdk sdk, Iterable<Address> addresses, ContractAbi abi) throws Sdk.SdkException {
 //        Map<String, Object> filter = new HashMap<>();
 //        filter.put("id", new GraphQL.Filter.In(addresses.stream().map(tech.deplant.java4ever.framework.type.Address::makeAddrStd).toArray(String[]::new)));
 //        return Arrays

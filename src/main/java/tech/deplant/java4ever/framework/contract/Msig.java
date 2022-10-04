@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractAbi;
@@ -9,6 +10,7 @@ import tech.deplant.java4ever.framework.template.MsigTemplate;
 import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 
 public class Msig extends OwnedContract implements Giver {
@@ -45,6 +47,32 @@ public class Msig extends OwnedContract implements Giver {
 				"flags", flags,
 				"payload", payload);
 		super.callExternal("sendTransaction", params, null);
+	}
+
+	public Net.ResultOfQueryTransactionTree sendDebugTree(Address to,
+	                                                      BigInteger amount,
+	                                                      boolean sendBounce,
+	                                                      int flags,
+	                                                      String payload,
+	                                                      Long debugQueryTimeout,
+	                                                      boolean debugThrowOnInternalError,
+	                                                      Net.ResultOfQueryTransactionTree debugOutResult,
+	                                                      List<ContractAbi> debugAbisForDecode) throws EverSdkException {
+		Map<String, Object> params = Map.of(
+				"dest", to.makeAddrStd(),
+				"value", amount,
+				"bounce", sendBounce,
+				"flags", flags,
+				"payload", payload);
+		super.callExternalDebugTree("sendTransaction",
+		                            params,
+		                            null,
+		                            tvmKey(),
+		                            debugQueryTimeout,
+		                            debugThrowOnInternalError,
+		                            debugOutResult,
+		                            debugAbisForDecode);
+		return debugOutResult;
 	}
 
 	@Override

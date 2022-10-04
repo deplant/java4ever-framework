@@ -1,11 +1,16 @@
 package tech.deplant.java4ever.framework;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
+import tech.deplant.java4ever.framework.artifact.EnvironmentConfig;
+import tech.deplant.java4ever.framework.artifact.Solc;
+import tech.deplant.java4ever.framework.artifact.TvmLinker;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SdkBuilder {
 
@@ -13,6 +18,7 @@ public class SdkBuilder {
 	private String localStoragePath = "~/.tonclient";
 	// JavaConfig
 	private long timeout = 60_000L;
+	private long debugTimeout = 60_000L;
 	private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
 	//Context.NetworkConfig
 	private String[] endpoints = new String[]{"https://localhost"};
@@ -43,43 +49,96 @@ public class SdkBuilder {
 	private Integer firstRempStatusTimeout = 1000;
 	private Integer nextRempStatusTimeout = 5000;
 
+	private ExplorerConfig explorerConfig;
+
+	private EnvironmentConfig environmentConfig;
+	private String solidityCompilerPath = System.getProperty("user.dir");
+	private String tvmlinkerPath = System.getProperty("user.dir");
+	private String stdLibPath = System.getProperty("user.dir");
+	private String soliditySourcesDefaultPath = System.getProperty("user.dir");
+	private String solidityArtifactsBuildPath = System.getProperty("user.dir");
+
 	public SdkBuilder() {
 	}
 
-	public void proofsCacheInLocalStorage(boolean cacheInLocalStorage) {
+	public SdkBuilder setSolidityCompilerPath(String solidityCompilerPath) {
+		this.solidityCompilerPath = solidityCompilerPath;
+		return this;
+	}
+
+	public SdkBuilder setTvmlinkerPath(String tvmlinkerPath) {
+		this.tvmlinkerPath = tvmlinkerPath;
+		return this;
+	}
+
+	public SdkBuilder setStdLibPath(String stdLibPath) {
+		this.stdLibPath = stdLibPath;
+		return this;
+	}
+
+	public SdkBuilder setSoliditySourcesDefaultPath(String soliditySourcesDefaultPath) {
+		this.soliditySourcesDefaultPath = soliditySourcesDefaultPath;
+		return this;
+	}
+
+	public SdkBuilder setSolidityArtifactsBuildPath(String solidityArtifactsBuildPath) {
+		this.solidityArtifactsBuildPath = solidityArtifactsBuildPath;
+		return this;
+	}
+
+	public SdkBuilder environmentConfig(EnvironmentConfig environmentConfig) {
+		this.environmentConfig = environmentConfig;
+		return this;
+	}
+
+	public SdkBuilder explorerConfig(ExplorerConfig explorerConfig) {
+		this.explorerConfig = explorerConfig;
+		return this;
+	}
+
+	public SdkBuilder proofsCacheInLocalStorage(boolean cacheInLocalStorage) {
 		this.cacheInLocalStorage = cacheInLocalStorage;
+		return this;
 	}
 
-	public void networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
+	public SdkBuilder networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
 		this.maxReconnectTimeout = maxReconnectTimeout;
+		return this;
 	}
 
-	public void networkSendingEndpointCount(Integer sendingEndpointCount) {
+	public SdkBuilder networkSendingEndpointCount(Integer sendingEndpointCount) {
 		this.sendingEndpointCount = sendingEndpointCount;
+		return this;
 	}
 
-	public void networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
+	public SdkBuilder networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
 		this.latencyDetectionInterval = latencyDetectionInterval;
+		return this;
 	}
 
-	public void networkMaxLatency(Integer maxLatency) {
+	public SdkBuilder networkMaxLatency(Integer maxLatency) {
 		this.maxLatency = maxLatency;
+		return this;
 	}
 
-	public void networkQueryTimeout(Integer queryTimeout) {
+	public SdkBuilder networkQueryTimeout(Integer queryTimeout) {
 		this.queryTimeout = queryTimeout;
+		return this;
 	}
 
-	public void networkQueriesProtocol(Client.NetworkQueriesProtocol queriesProtocol) {
+	public SdkBuilder networkQueriesProtocol(Client.NetworkQueriesProtocol queriesProtocol) {
 		this.queriesProtocol = queriesProtocol;
+		return this;
 	}
 
-	public void networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
+	public SdkBuilder networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
 		this.firstRempStatusTimeout = firstRempStatusTimeout;
+		return this;
 	}
 
-	public void networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
+	public SdkBuilder networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
 		this.nextRempStatusTimeout = nextRempStatusTimeout;
+		return this;
 	}
 
 	public SdkBuilder networkEndpoints(String... endpoints) {
@@ -169,7 +228,7 @@ public class SdkBuilder {
 		return this;
 	}
 
-	public Sdk create(LibraryLoader loader) throws JsonProcessingException {
+	public Sdk create(LibraryLoader loader) throws IOException {
 		var config = new Client.ClientConfig(
 				new Client.NetworkConfig(
 						this.serverAddress,
@@ -201,24 +260,46 @@ public class SdkBuilder {
 				new Client.ProofsConfig(this.cacheInLocalStorage),
 				this.localStoragePath
 		);
+		var explorerConfig =
+				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.endpoints[0]) : this.explorerConfig;
+		var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+				new Solc(this.solidityCompilerPath),
+				new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
+				this.soliditySourcesDefaultPath,
+				this.solidityArtifactsBuildPath,
+				new ConcurrentHashMap<String, String>(),
+				new ConcurrentHashMap<String, String>(),
+				new ConcurrentHashMap<String, String>()
+		) : this.environmentConfig;
 		return new Sdk(
 				new ContextBuilder()
 						.setConfigJson(this.mapper.writeValueAsString(config))
 						.setTimeout(this.timeout)
 						.setMapper(this.mapper)
 						.buildNew(loader),
-				config
+				this.debugTimeout, config, explorerConfig, envConfig
 		);
 	}
 
-	public Sdk load(int contextId, int contextRequestCount) throws EverSdkException {
+	public Sdk load(int contextId, int contextRequestCount) throws EverSdkException, IOException {
 		var context = new ContextBuilder()
 				.setTimeout(this.timeout)
 				.setMapper(this.mapper)
 				.buildFromExisting(contextId, contextRequestCount);
 		Client.ClientConfig config = null;
+		var explorerConfig =
+				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.endpoints[0]) : this.explorerConfig;
+		var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+				new Solc(this.solidityCompilerPath),
+				new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
+				this.soliditySourcesDefaultPath,
+				this.solidityArtifactsBuildPath,
+				new ConcurrentHashMap<String, String>(),
+				new ConcurrentHashMap<String, String>(),
+				new ConcurrentHashMap<String, String>()
+		) : this.environmentConfig;
 		config = Client.config(context);
-		return new Sdk(context, config);
+		return new Sdk(context, this.debugTimeout, config, explorerConfig, envConfig);
 	}
 
 	public SdkBuilder bocCacheMaxSize(Integer cacheMaxSize) {

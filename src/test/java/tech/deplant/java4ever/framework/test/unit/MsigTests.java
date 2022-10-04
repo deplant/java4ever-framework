@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.framework.test.unit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -16,6 +15,7 @@ import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +29,7 @@ public class MsigTests {
 	static Sdk SDK;
 
 	@BeforeAll
-	public static void init_sdk_and_other_vars() throws JsonProcessingException {
+	public static void init_sdk_and_other_vars() throws IOException {
 		SDK = new SdkBuilder()
 				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
 				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));

@@ -1,10 +1,13 @@
-package tech.deplant.java4ever.framework.artifact;
+package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.framework.artifact.JsonFile;
+import tech.deplant.java4ever.framework.artifact.Solc;
+import tech.deplant.java4ever.framework.artifact.TvmLinker;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractAbi;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
@@ -14,7 +17,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record EnvironmentConfig(Solc compiler,
+public record EnvironmentConfig(String serializationPath,
+                                Solc compiler,
                                 TvmLinker linker,
                                 String sourcePath,
                                 String buildPath,
@@ -22,16 +26,17 @@ public record EnvironmentConfig(Solc compiler,
                                 Map<String, String> tvcs,
                                 Map<String, String> keys) {
 
-	private static String LOCAL_CONFIG_PATH = System.getProperty("user.dir") + "/.j4e/config/local.json";
-
 	private static Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
-	public static EnvironmentConfig ofPaths(String solcPath,
-	                                        String linkerPath,
-	                                        String stdLibPath,
-	                                        String sourcePath,
-	                                        String buildPath) throws IOException {
-		var config = new EnvironmentConfig(new Solc(solcPath),
+	public static EnvironmentConfig ofPaths(
+			String serializationPath,
+			String solcPath,
+			String linkerPath,
+			String stdLibPath,
+			String sourcePath,
+			String buildPath) throws IOException {
+		var config = new EnvironmentConfig(serializationPath,
+		                                   new Solc(solcPath),
 		                                   new TvmLinker(linkerPath, stdLibPath),
 		                                   sourcePath,
 		                                   buildPath,
@@ -42,8 +47,8 @@ public record EnvironmentConfig(Solc compiler,
 		return config;
 	}
 
-	public static EnvironmentConfig LOAD() throws JsonProcessingException {
-		return ContextBuilder.DEFAULT_MAPPER.readValue(new JsonFile(LOCAL_CONFIG_PATH).get(),
+	public static EnvironmentConfig LOAD(String serializationPath) throws JsonProcessingException {
+		return ContextBuilder.DEFAULT_MAPPER.readValue(new JsonFile(serializationPath).get(),
 		                                               EnvironmentConfig.class);
 	}
 
@@ -112,7 +117,7 @@ public record EnvironmentConfig(Solc compiler,
 	}
 
 	public void sync() throws IOException {
-		new JsonFile(LOCAL_CONFIG_PATH).accept(ContextBuilder.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter()
-		                                                                    .writeValueAsString(this));
+		new JsonFile(serializationPath()).accept(ContextBuilder.DEFAULT_MAPPER.writerWithDefaultPrettyPrinter()
+		                                                                      .writeValueAsString(this));
 	}
 }

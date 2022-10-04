@@ -38,6 +38,7 @@ public class MsigTests {
 	@Test
 	public void first_msig_deploy_passes_second_throws() throws Throwable {
 		var keys = Credentials.RANDOM(SDK);
+
 		Msig msig = MsigTemplate.SAFE()
 		                        .deploySingleSig(SDK,
 		                                         keys,

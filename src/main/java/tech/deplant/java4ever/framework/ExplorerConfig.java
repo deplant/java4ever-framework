@@ -14,31 +14,18 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ExplorerConfig(String endpoint, Map<String, SavedContract> contracts,
+public record ExplorerConfig(String serializationPath, Map<String, SavedContract> contracts,
                              Map<String, Credentials> credentials) {
 
-	private static String EXPLORER_CONFIG_PATH = System.getProperty("user.dir") + "/.j4e/config/explorer.json";
 	private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
 
-	public static ExplorerConfig EMPTY(String endpoint) throws IOException {
-		var config = new ExplorerConfig(endpoint, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
-		config.sync();
-		return config;
+	public static ExplorerConfig EMPTY(String serializationPath) throws IOException {
+		return new ExplorerConfig(serializationPath, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
 	}
 
-	public static ExplorerConfig LOAD() throws JsonProcessingException {
+	public static ExplorerConfig LOAD(String configFilePath) throws JsonProcessingException {
 		var mapper = ContextBuilder.DEFAULT_MAPPER;//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-		return mapper.readValue(new JsonFile(EXPLORER_CONFIG_PATH).get(), ExplorerConfig.class);
-	}
-
-	public void add(String name, OwnedContract contract) throws IOException {
-		contracts().put(name, new SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
-		sync();
-	}
-
-	public void add(String name, Credentials keys) throws IOException {
-		credentials().put(name, keys);
-		sync();
+		return mapper.readValue(new JsonFile(configFilePath).get(), ExplorerConfig.class);
 	}
 
 	public Credentials keys(String keysName) {
@@ -61,11 +48,22 @@ public record ExplorerConfig(String endpoint, Map<String, SavedContract> contrac
 				keys(keysName));
 	}
 
+	public void addContract(String name, OwnedContract contract) throws IOException {
+		contracts().put(name,
+		                new ExplorerConfig.SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
+		sync();
+	}
+
+	public void addKeys(String name, Credentials keys) throws IOException {
+		credentials().put(name, keys);
+		sync();
+	}
+
 	public void sync() throws IOException {
 		var mapper = ContextBuilder.DEFAULT_MAPPER;
 		//.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 		//.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-		new JsonFile(EXPLORER_CONFIG_PATH).accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
+		new JsonFile(this.serializationPath).accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
 	}
 
 	public record SavedContract(String abiJson, String address) {

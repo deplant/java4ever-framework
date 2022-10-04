@@ -5,7 +5,6 @@ import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
-import tech.deplant.java4ever.framework.artifact.EnvironmentConfig;
 import tech.deplant.java4ever.framework.artifact.Solc;
 import tech.deplant.java4ever.framework.artifact.TvmLinker;
 
@@ -52,6 +51,10 @@ public class SdkBuilder {
 	private ExplorerConfig explorerConfig;
 
 	private EnvironmentConfig environmentConfig;
+
+	private String explorerConfigPath = System.getProperty("user.dir") + "/explorer.json";
+
+	private String environmentConfigPath = System.getProperty("user.dir") + "/local.json";
 	private String solidityCompilerPath = System.getProperty("user.dir");
 	private String tvmlinkerPath = System.getProperty("user.dir");
 	private String stdLibPath = System.getProperty("user.dir");
@@ -261,8 +264,9 @@ public class SdkBuilder {
 				this.localStoragePath
 		);
 		var explorerConfig =
-				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.endpoints[0]) : this.explorerConfig;
+				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.explorerConfigPath) : this.explorerConfig;
 		var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+				this.environmentConfigPath,
 				new Solc(this.solidityCompilerPath),
 				new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
 				this.soliditySourcesDefaultPath,
@@ -288,8 +292,9 @@ public class SdkBuilder {
 				.buildFromExisting(contextId, contextRequestCount);
 		Client.ClientConfig config = null;
 		var explorerConfig =
-				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.endpoints[0]) : this.explorerConfig;
+				this.explorerConfig == null ? ExplorerConfig.EMPTY(this.explorerConfigPath) : this.explorerConfig;
 		var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+				this.environmentConfigPath,
 				new Solc(this.solidityCompilerPath),
 				new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
 				this.soliditySourcesDefaultPath,
@@ -307,4 +312,13 @@ public class SdkBuilder {
 		return this;
 	}
 
+	public SdkBuilder explorerConfigPath(String explorerConfigPath) {
+		this.explorerConfigPath = explorerConfigPath;
+		return this;
+	}
+
+	public SdkBuilder environmentConfigPath(String environmentConfigPath) {
+		this.environmentConfigPath = environmentConfigPath;
+		return this;
+	}
 }

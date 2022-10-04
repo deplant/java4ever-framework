@@ -119,3 +119,101 @@ var sdkDev = new SdkBuilder()
 	int wordsCount = seed.words();
 }
 ```
+
+### Contracts
+
+#### Describe a contract
+
+```jshelllanguage
+{
+	var keysOfContract = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
+	                                     "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
+	OwnedContract myContract = new OwnedContract(sdk,
+	                                             new Address(
+			                                             "0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0"),
+	                                             ContractAbi.ofFile("~/MyContract.abi.json"),
+	                                             keysOfContract);
+}
+```
+
+#### Run getter
+
+```jshelllanguage
+{
+	Map<String, Object> functionInputs = Map.of();
+	Abi.FunctionHeader header = null;
+	myContract.runGetter("getOwner", functionInputs, header).get("value0");
+}
+```
+
+#### Call a contract
+
+```jshelllanguage
+{
+	Map<String, Object> functionInputs = Map.of();
+	Abi.FunctionHeader header = null;
+	myContract.callExternal("getOwner", functionInputs, header).get("value0");
+}
+```
+
+#### Send internal message with Msig
+
+```jshelllanguage
+{
+	Map<String, Object> functionInputs = Map.of();
+	Abi.FunctionHeader header = null;
+	String payload = myContract.encodeInternalPayload("publishCustomTask", functionInputs, header);
+	var addressOfMsig = new Address("0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0");
+	var keysOfMsig = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
+	                                 "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
+	BigInteger sendValue = EVER.amount();
+	Msig msig = new Msig(sdk, addressOfMsig, keysOfMsig);
+	msig.send(myContract.address(), sendValue, true, 0, payload); // sends internal message with payload
+}
+```
+
+### Templates
+
+#### Describe a template
+
+```jshelllanguage
+{
+	ContractTemplate template = new ContractTemplate(ContractAbi.ofFile("~/MyContract.abi.json"),
+	                                                 ContractTvc.ofFile("~/MyContract.tvc"));
+	MsigTemplate safeTemplate = MsigTemplate.SAFE(); // msig templates are included
+}
+```
+
+#### Deploy template
+
+```jshelllanguage
+{
+	Credentials keys = Credentials.RANDOM(sdk);
+	Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
+	Map<String, Object> constructorInputs = Map.of(); // no inputs
+	OwnedContract contract = template.deploy(sdk, 0, initialData, keys, constructorInputs);
+}
+```
+
+#### Check ABI
+
+```jshelllanguage
+{
+	ContractAbi abi1 = template.abi();
+	ContractAbi abi2 = ContractAbi.ofFile("~/MyContract.abi.json");
+	boolean hasSend = abi1.hasFunction("sendTransaction");
+	String abiType = abi2.functionOutputType("getBalance", "value0").type();
+}
+```
+
+#### Encode data to TVC
+
+```jshelllanguage
+{
+	ContractTvc tvc1 = template.tvc();
+	ContractTvc tvc2 = ContractTvc.ofFile("~/MyContract.tvc");
+	Credentials keys = Credentials.RANDOM(sdk);
+	Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
+	ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk, template.abi(), initialData, keys.publicKey());
+}
+```

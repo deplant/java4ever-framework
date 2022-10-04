@@ -36,11 +36,11 @@ public class CredentialsTests {
 		var keys3 = Credentials.RANDOM(SDK);
 		var keys4 = Credentials.RANDOM(SDK);
 		var keys5 = Credentials.RANDOM(SDK);
-		assertNotEquals(keys1.secretKey(), keys2.secretKey());
-		assertNotEquals(keys2.secretKey(), keys3.secretKey());
-		assertNotEquals(keys3.secretKey(), keys4.secretKey());
-		assertNotEquals(keys4.secretKey(), keys5.secretKey());
-		assertNotEquals(keys5.secretKey(), keys1.secretKey());
+		assertNotEquals(keys1.toString(), keys2.toString());
+		assertNotEquals(keys2.toString(), keys3.toString());
+		assertNotEquals(keys3.toString(), keys4.toString());
+		assertNotEquals(keys4.toString(), keys5.toString());
+		assertNotEquals(keys5.toString(), keys1.toString());
 	}
 
 	@Test
@@ -50,11 +50,11 @@ public class CredentialsTests {
 		var seed3 = Seed.RANDOM(SDK);
 		var seed4 = Seed.RANDOM(SDK);
 		var seed5 = Seed.RANDOM(SDK);
-		assertNotEquals(seed1.phrase(), seed2.phrase());
-		assertNotEquals(seed2.phrase(), seed3.phrase());
-		assertNotEquals(seed3.phrase(), seed4.phrase());
-		assertNotEquals(seed4.phrase(), seed5.phrase());
-		assertNotEquals(seed5.phrase(), seed1.phrase());
+		assertNotEquals(seed1.toString(), seed2.toString());
+		assertNotEquals(seed2.toString(), seed3.toString());
+		assertNotEquals(seed3.toString(), seed4.toString());
+		assertNotEquals(seed4.toString(), seed5.toString());
+		assertNotEquals(seed5.toString(), seed1.toString());
 	}
 
 	@Test
@@ -62,8 +62,7 @@ public class CredentialsTests {
 		var seed = Seed.RANDOM(SDK);
 		var keys1 = Credentials.ofSeed(SDK, seed);
 		var keys2 = Credentials.ofSeed(SDK, seed);
-		assertEquals(keys1.secretKey(), keys2.secretKey());
-		assertEquals(keys1.publicKey(), keys2.publicKey());
+		assertEquals(keys1.toString(), keys2.toString());
 	}
 
 }

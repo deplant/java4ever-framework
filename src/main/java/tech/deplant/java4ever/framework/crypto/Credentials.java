@@ -10,6 +10,16 @@ import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 
+/**
+ * {@snippet :
+ *  var keys = Credentials.RANDOM(sdk);
+ * 	String sk = keys.secretKey();
+ * 	String pk = keys.publicKey();
+ *}
+ *
+ * @param publicKey
+ * @param secretKey
+ */
 public record Credentials(@JsonProperty("public") String publicKey,
                           @JsonProperty("secret") String secretKey) {
 

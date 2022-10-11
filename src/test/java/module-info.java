@@ -1,5 +1,4 @@
 module test {
-	requires java4ever.binding;
 	requires java4ever.framework;
 	requires org.slf4j;
 	requires com.fasterxml.jackson.databind;

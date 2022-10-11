@@ -60,7 +60,7 @@ dependencies {
 
 #### Add Sdk lib to your code
 
-You can add "ton_client" lib a multiply ways:
+You can add "ton_client" lib by multiple ways:
 
 * Specify absolute path to your library in code:
 
@@ -110,13 +110,16 @@ var sdkDev = new SdkBuilder()
 }
 ```
 
-#### Create a random seed
+#### Create a random seed and keys from it
 
 ```jshelllanguage
 {
-	var seed = Seed.RANDOM(SDK);
+	var seed = Seed.RANDOM(sdk);
 	String wordsPhrase = seed.phrase();
 	int wordsCount = seed.words();
+	var keys = Credentials.ofSeed(sdk, seed);
+	String sk = keys.secretKey();
+	String pk = keys.publicKey();
 }
 ```
 
@@ -192,6 +195,27 @@ var sdkDev = new SdkBuilder()
 	Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
 	Map<String, Object> constructorInputs = Map.of(); // no inputs
 	OwnedContract contract = template.deploy(sdk, 0, initialData, keys, constructorInputs);
+}
+```
+
+#### Switch giver
+
+```jshelllanguage
+{
+	MsigTemplate safeTemplate = MsigTemplate.SAFE();
+	Giver giver = null;
+	if (isEverOsNet()) {
+		Giver giver = new EverOSGiver(SDK);
+	} else {
+		Giver giver = Msig.ofSafe(SDK,
+		                          new Address("0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef"),
+		                          keysOfMsig);
+	}
+	safeTemplate.deploySingleSig(
+			SDK,
+			Credentials.RANDOM(SDK),
+			giver,
+			EVER.amount());
 }
 ```
 

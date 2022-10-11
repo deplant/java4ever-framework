@@ -6,6 +6,8 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
@@ -21,7 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @Execution(ExecutionMode.CONCURRENT)
 public class CredentialsTests {
 
+
 	static Sdk SDK;
+	private static Logger log = LoggerFactory.getLogger(CredentialsTests.class);
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
@@ -56,6 +60,16 @@ public class CredentialsTests {
 		assertNotEquals(seed4.toString(), seed5.toString());
 		assertNotEquals(seed5.toString(), seed1.toString());
 	}
+
+	@Test
+	public void make_seed_and_keys() throws Throwable {
+		log.info(Seed.RANDOM(SDK).toString());
+		log.info(Credentials.ofSeed(SDK,
+		                            new Seed(
+				                            "object burger primary dish harbor luxury morning mystery sausage wide this time",
+				                            12)).toString());
+	}
+
 
 	@Test
 	public void all_keys_from_one_seed_should_be_equal() throws Throwable {

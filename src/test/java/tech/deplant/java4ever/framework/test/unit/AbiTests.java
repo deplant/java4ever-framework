@@ -1,7 +1,11 @@
 package tech.deplant.java4ever.framework.test.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
@@ -18,13 +22,14 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@Execution(ExecutionMode.CONCURRENT)
 public class AbiTests {
 
 	private static Logger log = LoggerFactory.getLogger(AbiTests.class);
 
 	@Test
 	public void regexpAbiTypes() throws JsonProcessingException, EverSdkException {
-
 		var cachedAbiTip31 = Tip31RootTemplate.DEFAULT_ABI();
 		var cachedAbiSafeMsig = MsigTemplate.SAFE_MULTISIG_ABI();
 		var uint256ArrayType = cachedAbiSafeMsig.functionInputType("constructor", "owners");

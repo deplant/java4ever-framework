@@ -1,11 +1,10 @@
 module java4ever.framework {
-	requires java.scripting;
 	requires org.slf4j;
-	requires java4ever.binding;
-	requires com.fasterxml.jackson.databind;
-	requires com.fasterxml.jackson.module.paramnames;
-	requires com.fasterxml.jackson.datatype.jdk8;
-	requires com.fasterxml.jackson.datatype.jsr310;
+	requires transitive java4ever.binding;
+	requires transitive com.fasterxml.jackson.databind;
+	requires transitive com.fasterxml.jackson.module.paramnames;
+	requires transitive com.fasterxml.jackson.datatype.jdk8;
+	requires transitive com.fasterxml.jackson.datatype.jsr310;
 	exports tech.deplant.java4ever.framework;
 	exports tech.deplant.java4ever.framework.artifact;
 	exports tech.deplant.java4ever.framework.contract;

@@ -64,25 +64,25 @@ You can add "ton_client" lib by multiple ways:
 
 * Specify absolute path to your library in code:
 
-```jshelllanguage
+```java
 var sdk1 = new SdkBuilder().create(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
 ```
 
 * Specify absolute path in system env variables:
 
-```jshelllanguage
+```java
 var sdk2 = new SdkBuilder().create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB_PATH"));
 ```
 
 * Place it in build current dir and specify filename in code:
 
-```jshelllanguage
+```java
 var sdk3 = new SdkBuilder().create(AbsolutePathLoader.ofUserDir("ton_client.so"));
 ```
 
 * Use `-Djava.library.path` parameter to VM and then specify only lib name:
 
-```jshelllanguage
+```java
 var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
 ```
 
@@ -92,7 +92,7 @@ var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
 
 #### Specify endpoints
 
-```jshelllanguage
+```java
 var sdkDev = new SdkBuilder()
 		.networkEndpoints("https://eri01.main.everos.dev", "https://gra01.main.everos.dev")
 		.create(JavaLibraryPathLoader.TON_CLIENT);
@@ -102,142 +102,120 @@ var sdkDev = new SdkBuilder()
 
 #### Create a random keypair
 
-```jshelllanguage
-{
-	var keys = Credentials.RANDOM(sdk);
-	String sk = keys.secretKey();
-	String pk = keys.publicKey();
-}
+```java
+var keys = Credentials.RANDOM(sdk);
+String sk = keys.secretKey();
+String pk = keys.publicKey();
 ```
 
 #### Create a random seed and keys from it
 
-```jshelllanguage
-{
-	var seed = Seed.RANDOM(sdk);
-	String wordsPhrase = seed.phrase();
-	int wordsCount = seed.words();
-	var keys = Credentials.ofSeed(sdk, seed);
-	String sk = keys.secretKey();
-	String pk = keys.publicKey();
-}
+```java
+var seed = Seed.RANDOM(sdk);
+String wordsPhrase = seed.phrase();
+int wordsCount = seed.words();
+var keys = Credentials.ofSeed(sdk, seed);
+String sk = keys.secretKey();
+String pk = keys.publicKey();
 ```
 
 ### Contracts
 
 #### Describe a contract
 
-```jshelllanguage
-{
-	var keysOfContract = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
-	                                     "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
-	OwnedContract myContract = new OwnedContract(sdk,
-	                                             new Address(
-			                                             "0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0"),
-	                                             ContractAbi.ofFile("~/MyContract.abi.json"),
-	                                             keysOfContract);
-}
+```java
+var keysOfContract = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
+				     "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
+OwnedContract myContract = new OwnedContract(sdk,
+					     new Address(
+							     "0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0"),
+					     ContractAbi.ofFile("~/MyContract.abi.json"),
+					     keysOfContract);
 ```
 
 #### Run getter
 
-```jshelllanguage
-{
-	Map<String, Object> functionInputs = Map.of();
-	Abi.FunctionHeader header = null;
-	myContract.runGetter("getOwner", functionInputs, header).get("value0");
-}
+```java
+Map<String, Object> functionInputs = Map.of();
+Abi.FunctionHeader header = null;
+myContract.runGetter("getOwner", functionInputs, header).get("value0");
 ```
 
 #### Call a contract
 
-```jshelllanguage
-{
-	Map<String, Object> functionInputs = Map.of();
-	Abi.FunctionHeader header = null;
-	myContract.callExternal("getOwner", functionInputs, header).get("value0");
-}
+```java
+Map<String, Object> functionInputs = Map.of();
+Abi.FunctionHeader header = null;
+myContract.callExternal("getOwner", functionInputs, header).get("value0");
 ```
 
 #### Send internal message with Msig
 
-```jshelllanguage
-{
-	Map<String, Object> functionInputs = Map.of();
-	Abi.FunctionHeader header = null;
-	String payload = myContract.encodeInternalPayload("publishCustomTask", functionInputs, header);
-	var addressOfMsig = new Address("0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0");
-	var keysOfMsig = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
-	                                 "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
-	BigInteger sendValue = EVER.amount();
-	Msig msig = new Msig(sdk, addressOfMsig, keysOfMsig);
-	msig.send(myContract.address(), sendValue, true, 0, payload); // sends internal message with payload
-}
+```java
+Map<String, Object> functionInputs = Map.of();
+Abi.FunctionHeader header = null;
+String payload = myContract.encodeInternalPayload("publishCustomTask", functionInputs, header);
+var addressOfMsig = new Address("0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0");
+var keysOfMsig = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
+				 "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
+BigInteger sendValue = EVER.amount();
+Msig msig = new Msig(sdk, addressOfMsig, keysOfMsig);
+msig.send(myContract.address(), sendValue, true, 0, payload); // sends internal message with payload
 ```
 
 ### Templates
 
 #### Describe a template
 
-```jshelllanguage
-{
-	ContractTemplate template = new ContractTemplate(ContractAbi.ofFile("~/MyContract.abi.json"),
-	                                                 ContractTvc.ofFile("~/MyContract.tvc"));
-	MsigTemplate safeTemplate = MsigTemplate.SAFE(); // msig templates are included
-}
+```java
+ContractTemplate template = new ContractTemplate(ContractAbi.ofFile("~/MyContract.abi.json"),
+						 ContractTvc.ofFile("~/MyContract.tvc"));
+MsigTemplate safeTemplate = MsigTemplate.SAFE(); // msig templates are included
 ```
 
 #### Deploy template
 
-```jshelllanguage
-{
-	Credentials keys = Credentials.RANDOM(sdk);
-	Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
-	Map<String, Object> constructorInputs = Map.of(); // no inputs
-	OwnedContract contract = template.deploy(sdk, 0, initialData, keys, constructorInputs);
-}
+```java
+Credentials keys = Credentials.RANDOM(sdk);
+Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
+Map<String, Object> constructorInputs = Map.of(); // no inputs
+OwnedContract contract = template.deploy(sdk, 0, initialData, keys, constructorInputs);
 ```
 
 #### Switch giver
 
-```jshelllanguage
-{
-	MsigTemplate safeTemplate = MsigTemplate.SAFE();
-	Giver giver = null;
-	if (isEverOsNet()) {
-		Giver giver = new EverOSGiver(SDK);
-	} else {
-		Giver giver = Msig.ofSafe(SDK,
-		                          new Address("0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef"),
-		                          keysOfMsig);
-	}
-	safeTemplate.deploySingleSig(
-			SDK,
-			Credentials.RANDOM(SDK),
-			giver,
-			EVER.amount());
+```java
+MsigTemplate safeTemplate = MsigTemplate.SAFE();
+Giver giver = null;
+if (isEverOsNet()) {
+	Giver giver = new EverOSGiver(SDK);
+} else {
+	Giver giver = Msig.ofSafe(SDK,
+				  new Address("0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef"),
+				  keysOfMsig);
 }
+safeTemplate.deploySingleSig(
+		SDK,
+		Credentials.RANDOM(SDK),
+		giver,
+		EVER.amount());
 ```
 
 #### Check ABI
 
-```jshelllanguage
-{
-	ContractAbi abi1 = template.abi();
-	ContractAbi abi2 = ContractAbi.ofFile("~/MyContract.abi.json");
-	boolean hasSend = abi1.hasFunction("sendTransaction");
-	String abiType = abi2.functionOutputType("getBalance", "value0").type();
-}
+```java
+ContractAbi abi1 = template.abi();
+ContractAbi abi2 = ContractAbi.ofFile("~/MyContract.abi.json");
+boolean hasSend = abi1.hasFunction("sendTransaction");
+String abiType = abi2.functionOutputType("getBalance", "value0").type();
 ```
 
 #### Encode data to TVC
 
-```jshelllanguage
-{
-	ContractTvc tvc1 = template.tvc();
-	ContractTvc tvc2 = ContractTvc.ofFile("~/MyContract.tvc");
-	Credentials keys = Credentials.RANDOM(sdk);
-	Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
-	ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk, template.abi(), initialData, keys.publicKey());
-}
+```java
+ContractTvc tvc1 = template.tvc();
+ContractTvc tvc2 = ContractTvc.ofFile("~/MyContract.tvc");
+Credentials keys = Credentials.RANDOM(sdk);
+Map<String, Object> initialData = Map.of("initDataParam1", "helloWorld!"); // one static initData var
+ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk, template.abi(), initialData, keys.publicKey());
 ```

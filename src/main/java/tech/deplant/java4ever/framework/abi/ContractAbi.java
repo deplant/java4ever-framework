@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.template;
+package tech.deplant.java4ever.framework.abi;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,10 +9,9 @@ import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.framework.template.type.*;
-import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -26,10 +25,10 @@ import java.util.stream.Collectors;
 public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
                           String version,
                           String[] header,
-                          AbiDataParam[] data,
+                          Abi.AbiData[] data,
                           Abi.AbiParam[] fields,
-                          AbiFunction[] functions,
-                          AbiFunction[] events
+                          Abi.AbiFunction[] functions,
+                          Abi.AbiEvent[] events
 ) {
 	private static Logger log = LoggerFactory.getLogger(ContractAbi.class);
 
@@ -84,8 +83,12 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				                             .anyMatch(output -> outputName.equals(output.name())));
 	}
 
-	private AbiFunction findFunction(AbiFunction[] functionArr, String name) {
+	private Abi.AbiFunction findFunction(Abi.AbiFunction[] functionArr, String name) {
 		return Arrays.stream(functionArr).filter(function -> name.equals(function.name())).findAny().orElseThrow();
+	}
+
+	private Abi.AbiEvent findEvent(Abi.AbiEvent[] functionArr, String name) {
+		return Arrays.stream(functionArr).filter(event -> name.equals(event.name())).findAny().orElseThrow();
 	}
 
 	private Abi.AbiParam findParam(Abi.AbiParam[] paramArr, String name) {
@@ -108,11 +111,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 	}
 
 	public Abi.AbiParam eventInputType(String functionName, String inputName) {
-		return findParam(findFunction(events(), functionName).inputs(), inputName);
-	}
-
-	public Abi.AbiParam eventOutputType(String functionName, String outputName) {
-		return findParam(findFunction(events(), functionName).outputs(), outputName);
+		return findParam(findEvent(events(), functionName).inputs(), inputName);
 	}
 
 	public Abi.ABI ABI() {

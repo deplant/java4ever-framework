@@ -2,13 +2,17 @@ package tech.deplant.java4ever.framework.contract;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.Net;
+import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.framework.Account;
+import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Data;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.abi.AbiUint;
+import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.ContractAbi;
-import tech.deplant.java4ever.framework.template.type.AbiUint;
-import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,7 +54,7 @@ public class OwnedContract {
 	}
 
 	public Account account() throws EverSdkException {
-		return Account.graphQLRequest(this.sdk, this.address);
+		return Account.ofAddress(this.sdk, this.address);
 	}
 
 	public Credentials tvmKey() {
@@ -92,16 +96,7 @@ public class OwnedContract {
 						null
 				);
 
-		return Optional.ofNullable(Tvm.runTvm(
-				                              sdk().context(),
-				                              msg.message(),
-				                              account().boc(),
-				                              null,
-				                              this.abi.ABI(),
-				                              null,
-				                              false)
-		                              .decoded()
-		                              .output()).orElse(new HashMap<>());
+		return account().runLocally(sdk(), msg.message(), abi());
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall(String functionName,

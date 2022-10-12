@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.ContractAbi;
-import tech.deplant.java4ever.framework.type.Address;
 
 import java.io.IOException;
 import java.util.Map;

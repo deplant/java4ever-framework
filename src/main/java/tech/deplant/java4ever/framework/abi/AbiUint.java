@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.template.type;
+package tech.deplant.java4ever.framework.abi;
 
 import java.math.BigInteger;
 import java.time.Instant;

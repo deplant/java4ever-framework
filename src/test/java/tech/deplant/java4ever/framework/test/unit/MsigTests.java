@@ -20,7 +20,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.deplant.java4ever.framework.type.EVERAmount.EVER;
+import static tech.deplant.java4ever.framework.EVERAmount.EVER;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)

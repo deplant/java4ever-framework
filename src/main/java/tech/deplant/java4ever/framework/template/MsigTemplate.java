@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework.template;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -45,6 +46,12 @@ public class MsigTemplate extends ContractTemplate {
 
 	public static MsigTemplate SURF() throws JsonProcessingException {
 		return new MsigTemplate(SURF_MULTISIG_ABI(), SURF_MULTISIG_TVC);
+	}
+
+	public ContractTemplate withUpdatedInitialData(Sdk sdk, String publicKey) throws EverSdkException {
+		return super.withUpdatedInitialData(sdk,
+		                                    Map.of(),
+		                                    publicKey);
 	}
 
 	public Msig deploySingleSig(Sdk sdk,

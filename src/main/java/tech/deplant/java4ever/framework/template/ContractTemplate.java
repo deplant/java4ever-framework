@@ -3,13 +3,16 @@ package tech.deplant.java4ever.framework.template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.framework.Account;
+import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.type.Address;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -91,6 +94,14 @@ public class ContractTemplate {
 
 	public String decodeInitialPubkey(Sdk sdk) throws EverSdkException {
 		return tvc().decodeInitialPubkey(sdk, abi());
+	}
+
+	public Address calculateAddress(Sdk sdk) throws EverSdkException {
+		return new Address("0:" + Boc.getBocHash(sdk.context(), tvc().base64String()).hash());
+	}
+
+	public boolean isDeployed(Sdk sdk) throws EverSdkException {
+		return Account.ofAddress(sdk, calculateAddress(sdk)).isActive();
 	}
 
 	public ContractTemplate withUpdatedInitialData(Sdk sdk,

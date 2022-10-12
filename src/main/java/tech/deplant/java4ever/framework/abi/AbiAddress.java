@@ -1,6 +1,6 @@
-package tech.deplant.java4ever.framework.template.type;
+package tech.deplant.java4ever.framework.abi;
 
-import tech.deplant.java4ever.framework.type.Address;
+import tech.deplant.java4ever.framework.Address;
 
 public record AbiAddress(String addressString) implements AbiValue {
 

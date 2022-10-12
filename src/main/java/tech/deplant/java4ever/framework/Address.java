@@ -1,9 +1,7 @@
-package tech.deplant.java4ever.framework.type;
+package tech.deplant.java4ever.framework;
 
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Data;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.ContractTemplate;
 
@@ -15,7 +13,7 @@ public record Address(int wid, BigInteger value) {
 	public static final Address ZERO = new Address(0, BigInteger.ZERO);
 
 	public Address(String address) {
-		this(Integer.valueOf(address.split(":")[0]), new BigInteger(address.split(":")[1], 16));
+		this(Integer.parseInt(address.split(":")[0]), new BigInteger(address.split(":")[1], 16));
 	}
 
 	public Address(BigInteger value) {

@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.Context;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
@@ -13,6 +14,14 @@ public record Sdk(Context context,
                   Client.ClientConfig clientConfig,
                   ExplorerConfig explorerConfig,
                   EnvironmentConfig environmentConfig) {
+
+	public String[] endpoints() {
+		return clientConfig().network().endpoints();
+	}
+
+	public String version() throws EverSdkException {
+		return Client.version(context()).version();
+	}
 
 	public ObjectMapper mapper() {
 		return context().mapper();

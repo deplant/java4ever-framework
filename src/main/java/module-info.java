@@ -9,9 +9,10 @@ module java4ever.framework {
 	exports tech.deplant.java4ever.framework.artifact;
 	exports tech.deplant.java4ever.framework.contract;
 	exports tech.deplant.java4ever.framework.template;
-	exports tech.deplant.java4ever.framework.type;
 	exports tech.deplant.java4ever.framework.crypto;
-	exports tech.deplant.java4ever.framework.template.type;
 	opens tech.deplant.java4ever.framework.contract to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.template to com.fasterxml.jackson.databind;
+	opens tech.deplant.java4ever.framework to com.fasterxml.jackson.databind;
+	exports tech.deplant.java4ever.framework.abi;
+	opens tech.deplant.java4ever.framework.abi to com.fasterxml.jackson.databind;
 }

@@ -13,6 +13,10 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of all 3 mostly used wallet contracts in Everscale. Msig also
+ * implements Giver interface, so you can use it in deploy methods.
+ */
 public class Msig extends OwnedContract implements Giver {
 
 	public Msig(Sdk sdk, Address address, Credentials owner, ContractAbi abi) {
@@ -20,7 +24,7 @@ public class Msig extends OwnedContract implements Giver {
 	}
 
 	public Msig(OwnedContract contract) {
-		super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
+		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
 	public static Msig ofSafe(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
@@ -35,6 +39,16 @@ public class Msig extends OwnedContract implements Giver {
 		return new Msig(sdk, address, owner, MsigTemplate.SURF_MULTISIG_ABI());
 	}
 
+	/**
+	 * sendTransaction method for single-sig.
+	 *
+	 * @param to
+	 * @param amount
+	 * @param sendBounce
+	 * @param flags
+	 * @param payload
+	 * @throws EverSdkException
+	 */
 	public void send(Address to,
 	                 BigInteger amount,
 	                 boolean sendBounce,
@@ -67,7 +81,7 @@ public class Msig extends OwnedContract implements Giver {
 		super.callExternalDebugTree("sendTransaction",
 		                            params,
 		                            null,
-		                            tvmKey(),
+		                            credentials(),
 		                            debugQueryTimeout,
 		                            debugThrowOnInternalError,
 		                            debugOutResult,

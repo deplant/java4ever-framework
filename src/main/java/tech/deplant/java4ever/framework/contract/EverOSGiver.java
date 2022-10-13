@@ -10,6 +10,9 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import java.math.BigInteger;
 import java.util.Map;
 
+/**
+ * Implementation of GiverV2 contract that is included in EverNodeSE image.
+ */
 public class EverOSGiver extends OwnedContract implements Giver {
 
 	public static Credentials KEYS = new Credentials(
@@ -26,7 +29,7 @@ public class EverOSGiver extends OwnedContract implements Giver {
 	}
 
 	public EverOSGiver(OwnedContract contract) {
-		super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
+		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
 	public static ContractAbi ABI() throws JsonProcessingException {

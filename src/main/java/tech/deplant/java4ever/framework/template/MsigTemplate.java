@@ -62,7 +62,7 @@ public class MsigTemplate extends ContractTemplate {
 				"owners", new String[]{"0x" + keys.publicKey()},
 				"reqConfirms", 1);
 		var contract = super.deployWithGiver(sdk, giver, value, 0, null, keys, params);
-		return new Msig(contract.sdk(), contract.address(), contract.tvmKey(), contract.abi());
+		return new Msig(contract.sdk(), contract.address(), contract.credentials(), contract.abi());
 	}
 
 	public Msig deploy3of5(Sdk sdk,

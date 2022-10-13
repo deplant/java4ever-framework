@@ -18,7 +18,7 @@ public class Tip31Wallet extends OwnedContract {
 	}
 
 	public Tip31Wallet(OwnedContract contract) {
-		super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
+		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
 	public Address owner() throws EverSdkException {

@@ -12,7 +12,7 @@ public class Tip31Root extends OwnedContract {
 	}
 
 	public Tip31Root(OwnedContract contract) {
-		super(contract.sdk(), contract.address(), contract.abi(), contract.tvmKey());
+		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
 }

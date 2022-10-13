@@ -18,6 +18,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
+/**
+ * Class that represends deployed contract in one of the networks. It holds info about
+ * network (sdk), address and abi of contract. If you own this contract, initialize it
+ * with correct credentials. If it's foreign contract, use Credentials.NONE.
+ */
 public class OwnedContract {
 
 	private static Logger log = LoggerFactory.getLogger(OwnedContract.class);
@@ -28,13 +33,17 @@ public class OwnedContract {
 
 	protected final ContractAbi abi;
 
-	protected final Credentials tvmKey;
+	protected final Credentials credentials;
 
-	public OwnedContract(Sdk sdk, Address address, ContractAbi abi, Credentials tvmKey) {
+	public OwnedContract(Sdk sdk, Address address, ContractAbi abi, Credentials credentials) {
 		this.sdk = sdk;
 		this.address = address;
 		this.abi = abi;
-		this.tvmKey = tvmKey;
+		this.credentials = credentials;
+	}
+
+	public OwnedContract(Sdk sdk, Address address, ContractAbi abi) {
+		this(sdk, address, abi, Credentials.NONE);
 	}
 
 	public Sdk sdk() {
@@ -49,18 +58,59 @@ public class OwnedContract {
 		return this.abi;
 	}
 
+	/**
+	 * Check actual EVER balance on contract's account.
+	 *
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public BigInteger balance() throws EverSdkException {
 		return AbiUint.deserialize(128, account().balance());
 	}
 
+	/**
+	 * Downloads actual account info, including boc.
+	 * Use account().boc() to get it.
+	 *
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Account account() throws EverSdkException {
 		return Account.ofAddress(this.sdk, this.address);
 	}
 
-	public Credentials tvmKey() {
-		return this.tvmKey;
+	/**
+	 * Credentials that were provided in object constructor. They can be different from real pubkey
+	 * inside contract's inside contract's initialData. To check real pubkey in account, use
+	 * tvmPubkey() method.
+	 *
+	 * @return
+	 */
+	public Credentials credentials() {
+		return this.credentials;
 	}
 
+	/**
+	 * Returns actual tvm.pubkey() of smart contract. If you want to get Credentials specified at
+	 * OwnedContract constructor - use credentials() method.
+	 *
+	 * @return
+	 * @throws EverSdkException
+	 */
+	public String tvmPubkey() throws EverSdkException {
+		return account().tvmPubkey(sdk(), abi());
+	}
+
+	/**
+	 * Encodes internal message string. Result of this method can be used as a payload for internal transactions
+	 * to pass function calls and inputs with transfer.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public String encodeInternalPayload(String functionName,
 	                                    Map<String, Object> functionInputs,
 	                                    Abi.FunctionHeader functionHeader) throws EverSdkException {
@@ -77,27 +127,31 @@ public class OwnedContract {
 		).body();
 	}
 
+	/**
+	 * Encodes inputs and run getter method on account's boc then decodes answer.
+	 * Important! This method always downloads new boc before running getter on it.
+	 * If you need to cache boc and run multiple getters cheaply, you need to get
+	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @param credentials
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> runGetter(String functionName,
 	                                     Map<String, Object> functionInputs,
 	                                     Abi.FunctionHeader functionHeader,
 	                                     Credentials credentials) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg =
-				Abi.encodeMessage(
-						sdk().context(),
-						abi().ABI(),
-						address().makeAddrStd(),
-						null,
-						new Abi.CallSet(
-								functionName,
-								null,
-								abi().convertFunctionInputs(functionName, functionInputs)
-						),
-						credentials.signer(),
-						null
-				);
-
-		return account().runLocally(sdk(), msg.message(), abi());
+		return account().runGetter(sdk(),
+		                           abi(),
+		                           functionName,
+		                           functionInputs,
+		                           functionHeader,
+		                           credentials);
 	}
+
 
 	private Processing.ResultOfProcessMessage processExternalCall(String functionName,
 	                                                              Map<String, Object> functionInputs,
@@ -186,6 +240,16 @@ public class OwnedContract {
 				                           .output()).orElse(new HashMap<>());
 	}
 
+	/**
+	 * Calls smart contract with external message.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @param credentials
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> callExternal(String functionName,
 	                                        Map<String, Object> functionInputs,
 	                                        Abi.FunctionHeader functionHeader,
@@ -210,15 +274,38 @@ public class OwnedContract {
 				                           .output()).orElse(new HashMap<>());
 	}
 
+	/**
+	 * Calls smart contract with external message using credentials provided
+	 * on OwnedContract initialization.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> callExternal(String functionName,
 	                                        Map<String, Object> functionInputs,
 	                                        Abi.FunctionHeader functionHeader) throws EverSdkException {
-		return callExternal(functionName, functionInputs, functionHeader, this.tvmKey);
+		return callExternal(functionName, functionInputs, functionHeader, this.credentials);
 	}
 
+	/**
+	 * Encodes inputs and run getter method on account's boc then decodes answer
+	 * using credentials provided at OwnedContract initialization.
+	 * Important! This method always downloads new boc before running getter on it.
+	 * If you need to cache boc and run multiple getters cheaply, you need to get
+	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> runGetter(String functionName,
 	                                     Map<String, Object> functionInputs,
 	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
-		return runGetter(functionName, functionInputs, functionHeader, this.tvmKey);
+		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
 	}
 }

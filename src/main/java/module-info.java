@@ -6,6 +6,7 @@ module java4ever.framework {
 	requires transitive com.fasterxml.jackson.datatype.jdk8;
 	requires transitive com.fasterxml.jackson.datatype.jsr310;
 	exports tech.deplant.java4ever.framework;
+	exports tech.deplant.java4ever.framework.abi;
 	exports tech.deplant.java4ever.framework.artifact;
 	exports tech.deplant.java4ever.framework.contract;
 	exports tech.deplant.java4ever.framework.template;
@@ -13,6 +14,5 @@ module java4ever.framework {
 	opens tech.deplant.java4ever.framework.contract to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.template to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework to com.fasterxml.jackson.databind;
-	exports tech.deplant.java4ever.framework.abi;
 	opens tech.deplant.java4ever.framework.abi to com.fasterxml.jackson.databind;
 }

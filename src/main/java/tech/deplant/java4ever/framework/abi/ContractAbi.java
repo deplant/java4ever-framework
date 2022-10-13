@@ -22,7 +22,20 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Holds entire ABI structure and has helper methods to check functions availability or
+ * getting input types and so on. Use factory methods to create from File or JsonNode.
+ *
+ * @param abiVersion
+ * @param version
+ * @param header
+ * @param data
+ * @param fields
+ * @param functions
+ * @param events
+ */
 public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
+                          @JsonProperty("abi_version") Number abiVersionOld,
                           String version,
                           String[] header,
                           Abi.AbiData[] data,
@@ -123,7 +136,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
-	public Object serializeSingle(AbiValueType type, int size, Object inputValue) throws EverSdkException {
+	protected Object serializeSingle(AbiValueType type, int size, Object inputValue) throws EverSdkException {
 		return switch (type) {
 			case UINT, INT -> switch (inputValue) {
 				case BigInteger b -> new AbiUint(b).serialize();
@@ -162,7 +175,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		};
 	}
 
-	public TypePair typeParser(String typeString) throws EverSdkException {
+	protected TypePair typeParser(String typeString) throws EverSdkException {
 		var sizePattern = Pattern.compile("([a-zA-Z]+)(\\d{1,3})");
 		var matcher = sizePattern.matcher(typeString);
 		while (matcher.find()) {
@@ -182,7 +195,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		throw ex;
 	}
 
-	public boolean arrayMatcher(String typeString) {
+	protected boolean arrayMatcher(String typeString) {
 		var arrayPattern = Pattern.compile("([a-zA-Z]+\\d{0,3})(\\[\\])");
 		var matcher = arrayPattern.matcher(typeString);
 		while (matcher.find()) {
@@ -191,7 +204,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		return false;
 	}
 
-	public Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
+	protected Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
@@ -299,6 +312,17 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
+	/**
+	 * Checks and converts provided Java Map containing inputs for function call
+	 * to correct representation that will be accepted by ABI. If map doesn't meet
+	 * ABI input structure, this method will fail. If some type doesn't have conversion,
+	 * it will be serialized as is.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> convertFunctionInputs(String functionName,
 	                                                 Map<String, Object> functionInputs) throws EverSdkException {
 		if (functionInputs != null) {
@@ -329,6 +353,16 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		}
 	}
 
+	/**
+	 * Checks and converts provided Java Map containing inputs for initialData
+	 * to correct representation that will be accepted by ABI. If map doesn't meet
+	 * ABI input structure, this method will fail. If some type doesn't have conversion,
+	 * it will be serialized as is.
+	 *
+	 * @param initDataInputs
+	 * @return
+	 * @throws EverSdkException
+	 */
 	public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) throws EverSdkException {
 		if (initDataInputs != null) {
 			Map<String, Object> convertedInputs = new HashMap<>();
@@ -359,14 +393,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 
 	}
 
-	public record TypePair(AbiValueType type, Integer size) {
+	record TypePair(AbiValueType type, Integer size) {
 	}
-
-//    @Override
-//
-//    public int abiVersion() {
-//        return this.abiVersion;
-//    }
-
 
 }

@@ -9,9 +9,9 @@
 * Read full
   docs: [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-binding/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-binding)
 
-**java4ever-framework** is a Java 19 suite for smart-contracts development, testing & accesing DApps for
+**java4ever-framework** is a Java 19 suite for smart-contracts development, testing & accesing dapps for
 [Everscale](https://everscale.network/) blockchain network.
-Framework depends on [java4ever-binding](https://github.com/deplant/java4ever-framework) base library.
+Framework depends on [java4ever-binding](https://github.com/deplant/java4ever-binding) base library.
 
 With java4ever you get:
 

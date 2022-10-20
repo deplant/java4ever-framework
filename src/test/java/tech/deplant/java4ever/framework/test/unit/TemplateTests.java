@@ -7,8 +7,6 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
@@ -24,9 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @Execution(ExecutionMode.CONCURRENT)
 public class TemplateTests {
 
-
 	static Sdk SDK;
-	private static Logger log = LoggerFactory.getLogger(TemplateTests.class);
+	private static System.Logger logger = System.getLogger(TemplateTests.class.getName());
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {

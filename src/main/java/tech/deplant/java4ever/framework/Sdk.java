@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.Context;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.Tvm;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
@@ -36,4 +37,12 @@ public record Sdk(Context context,
 		explorerConfig().sync();
 	}
 
+	public Tvm.ExecutionOptions executionOptions() {
+//		return new Tvm.ExecutionOptions(blockchainConfig,
+//		                                blockTime,
+//		                                blockLt,
+//		                                transactionLt,
+//		                                false);
+		return null;
+	}
 }

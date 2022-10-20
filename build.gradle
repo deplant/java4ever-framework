@@ -7,11 +7,11 @@ plugins {
 // Global variables for all modules
 ext {
     // dependencies
-    slf4jVersion = "1.7.36"
+    slf4jVersion = "2.0.3"
     junitVersion = "5.9.1"
     jacksonVersion = "2.13.4"
     // details
-    v_version = "1.2.0"
+    v_version = "1.2.1"
     v_groupId = "tech.deplant.java4ever"
     v_artifactId = "java4ever-framework"
     v_repository = "deplant/java4ever-framework"
@@ -35,8 +35,8 @@ dependencies {
     // java4ever-binding
     implementation "tech.deplant.java4ever:java4ever-binding:$v_version"
 
-    // SLF4J Logging Framework
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    // SLF4J Bridge to JDK9 System.Logger
+    implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion"
 
     // JSON
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
@@ -46,7 +46,7 @@ dependencies {
 
     // TESTS **************************
 
-    // SLF4J (Tests part)
+    // SLF4J (Simple provider for tests)
     testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
     // JUnit 5
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

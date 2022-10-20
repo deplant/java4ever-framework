@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
+import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
@@ -17,18 +17,18 @@ import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tech.deplant.java4ever.framework.EVERAmount.EVER;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
-public class MsigTests {
+public class AccountTests {
 
 	static Sdk SDK;
 	static Sdk SDK_DEV;
-	private static System.Logger logger = System.getLogger(MsigTests.class.getName());
+	private static System.Logger logger = System.getLogger(AccountTests.class.getName());
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
@@ -41,7 +41,7 @@ public class MsigTests {
 	}
 
 	@Test
-	public void first_msig_deploy_passes_second_throws() throws Throwable {
+	public void try_local_execution() throws Throwable {
 		var keys = Credentials.RANDOM(SDK);
 
 		Msig msig = MsigTemplate.SAFE()
@@ -50,14 +50,16 @@ public class MsigTests {
 		                                         new EverOSGiver(SDK),
 		                                         EVER.amount().multiply(new BigInteger("1")));
 		assertTrue(msig.account().isActive());
-		try {
-			msig = MsigTemplate.SAFE()
-			                   .deploySingleSig(SDK,
-			                                    keys,
-			                                    new EverOSGiver(SDK),
-			                                    EVER.amount().multiply(new BigInteger("1")));
-		} catch (EverSdkException e) {
-			assertEquals(414, e.errorResponse().code());
-		}
+		Account acc = Account.ofAddress(SDK, msig.address());
+		Map<String, Object> params = Map.of(
+				"dest", msig.address(),
+				"value", EVER.amount(),
+				"bounce", true,
+				"flags", 0,
+				"payload", "");
+		var result = acc.runLocal(SDK, msig.abi(), "sendTransaction", params, null, msig.credentials(), null);
+		String newBoc = result.account();
+		Map<String, Object> outputs = result.decoded().output();
 	}
+
 }

@@ -1,8 +1,6 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
@@ -16,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public record ExplorerConfig(String serializationPath, Map<String, SavedContract> contracts,
                              Map<String, Credentials> credentials) {
 
-	private static Logger log = LoggerFactory.getLogger(ExplorerConfig.class);
+	private static System.Logger logger = System.getLogger(ExplorerConfig.class.getName());
 
 	public static ExplorerConfig EMPTY(String serializationPath) throws IOException {
 		return new ExplorerConfig(serializationPath, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());

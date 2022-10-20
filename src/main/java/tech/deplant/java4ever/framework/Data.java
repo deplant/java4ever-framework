@@ -1,8 +1,5 @@
 package tech.deplant.java4ever.framework;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -16,7 +13,8 @@ import java.util.TimeZone;
 
 public class Data {
 
-	private static Logger log = LoggerFactory.getLogger(Data.class);
+
+	private static System.Logger logger = System.getLogger(Data.class.getName());
 
 	public static String base64ToHexString(String base64string) {
 		return HexFormat.of().formatHex(Base64.getDecoder().decode(base64string));
@@ -78,7 +76,7 @@ public class Data {
 			}
 			return r.toString();
 		} catch (UnsupportedEncodingException e) {
-			log.error(e.getMessage());
+			logger.log(System.Logger.Level.ERROR, () -> e.getMessage());
 			return null;
 		}
 

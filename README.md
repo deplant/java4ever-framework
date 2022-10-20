@@ -172,7 +172,7 @@ msig.send(myContract.address(),sendValue,true,0,payload); // sends internal mess
 
 ```java
 ContractTemplate template = new ContractTemplate(ContractAbi.ofFile("~/MyContract.abi.json"),
-ContractTvc.ofFile("~/MyContract.tvc"));
+                                                 ContractTvc.ofFile("~/MyContract.tvc"));
 MsigTemplate safeTemplate = MsigTemplate.SAFE(); // msig templates are included
 ```
 

@@ -1,8 +1,6 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
@@ -26,7 +24,7 @@ public record EnvironmentConfig(String serializationPath,
                                 Map<String, String> tvcs,
                                 Map<String, String> keys) {
 
-	private static Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
+	private static System.Logger logger = System.getLogger(EnvironmentConfig.class.getName());
 
 	public static EnvironmentConfig ofPaths(
 			String serializationPath,
@@ -78,11 +76,11 @@ public record EnvironmentConfig(String serializationPath,
 						ContractTvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);
 			} else {
-				log.error("TvmLinker exit code:" + linkerResult);
+				logger.log(System.Logger.Level.ERROR, () -> "TvmLinker exit code:" + linkerResult);
 				return null;
 			}
 		} else {
-			log.error("Solc exit code:" + compilerResult);
+			logger.log(System.Logger.Level.ERROR, () -> "Solc exit code:" + compilerResult);
 			throw new EverSdkException(new EverSdkException.ErrorResult(-600,
 			                                                            "Compilation failed. Solc exit code:" +
 			                                                            compilerResult), new Exception());

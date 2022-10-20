@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework.template;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -19,7 +17,7 @@ import java.util.Map;
 
 public class ContractTemplate {
 
-	private static Logger log = LoggerFactory.getLogger(ContractTemplate.class);
+	private static System.Logger logger = System.getLogger(ContractTemplate.class.getName());
 	private final ContractAbi abi;
 	private final ContractTvc tvc;
 
@@ -70,7 +68,7 @@ public class ContractTemplate {
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
 			credentials, Map<String, Object> constructorInputs) throws EverSdkException {
 		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
-		log.debug("Future address: " + address.makeAddrStd());
+		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address.makeAddrStd());
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
 
@@ -83,7 +81,7 @@ public class ContractTemplate {
 	                                     Credentials credentials,
 	                                     Map<String, Object> constructorInputs) throws EverSdkException {
 		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
-		log.debug("Future address: " + address.makeAddrStd());
+		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address.makeAddrStd());
 		giver.give(address, value);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}

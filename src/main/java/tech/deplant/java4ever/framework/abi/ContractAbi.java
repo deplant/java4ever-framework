@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -43,7 +41,8 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
                           Abi.AbiFunction[] functions,
                           Abi.AbiEvent[] events
 ) {
-	private static Logger log = LoggerFactory.getLogger(ContractAbi.class);
+
+	private static System.Logger logger = System.getLogger(ContractAbi.class.getName());
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
 		return ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, ContractAbi.class);
@@ -131,7 +130,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		try {
 			return new Abi.ABI.Json(json());
 		} catch (JsonProcessingException e) {
-			log.error("This JsonAbi can't be strigified!" + e.getMessage());
+			logger.log(System.Logger.Level.ERROR, () -> "This JsonAbi can't be strigified!" + e.getMessage());
 			return new Abi.ABI.Json("{}");
 		}
 	}
@@ -140,6 +139,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		return switch (type) {
 			case UINT, INT -> switch (inputValue) {
 				case BigInteger b -> new AbiUint(b).serialize();
+				case Long l -> new AbiUint(l).serialize();
 				case Instant i -> new AbiUint(i).serialize();
 				case String strPrefixed
 						when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
@@ -169,7 +169,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-301,
 				                                                               "ABI Parsing unexpected! Shouldn't get here!"),
 				                              new RuntimeException());
-				log.warn(ex.toString());
+				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
 				throw ex;
 			}
 		};
@@ -191,7 +191,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
 		                                                               "ABI Type parsing failed! Type: " + typeString),
 		                              new RuntimeException());
-		log.warn(ex.toString());
+		logger.log(System.Logger.Level.WARNING, () -> ex.toString());
 		throw ex;
 	}
 
@@ -218,7 +218,9 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		String keyTypeString = null;
 		String valueTypeString = null;
 
-		log.info(rootTypeString);
+		logger.log(System.Logger.Level.TRACE,
+		           () -> "Param: " + param.name() + "Type: " + param.type() + "Parsed: " + rootTypeString + "Value: " +
+		                 inputValue);
 		var matcher = mapPattern.matcher(rootTypeString);
 		while (matcher.find()) {
 			rootIsMap = true;
@@ -258,7 +260,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
 				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
 				                                                               mapValue), new RuntimeException());
-				log.warn(ex.toString());
+				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
 				throw ex;
 			}
 		} else {
@@ -267,7 +269,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 			var rootTypePair = typeParser(rootTypeString);
 			final AbiValueType rootType = rootTypePair.type();
 			final int rootSize = rootTypePair.size();
-			log.info("Root Is Array: " + rootIsArray);
+			//log.info("Root Is Array: " + rootIsArray);
 			// tuples
 			if (rootType.equals(AbiValueType.TUPLE)) {
 				// tuple = Map<String,Object> from components
@@ -339,7 +341,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 						convertedInputs.put(key, value);
 					}
 				} else {
-					log.error(
+					logger.log(System.Logger.Level.ERROR, () ->
 							"ABI Function " + functionName + " doesn't contain input '" + key + "'");
 					throw new EverSdkException(new EverSdkException.ErrorResult(-303,
 					                                                            "Function " + functionName +
@@ -378,7 +380,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 						convertedInputs.put(key, value);
 					}
 				} else {
-					log.error(
+					logger.log(System.Logger.Level.ERROR, () ->
 							"ABI doesn't contain initData parameter '" + key + "'");
 					throw new EverSdkException(new EverSdkException.ErrorResult(-304,
 					                                                            "ABI doesn't contain initData parameter '" +

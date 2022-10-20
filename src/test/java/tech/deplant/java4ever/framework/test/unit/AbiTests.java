@@ -6,8 +6,6 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
@@ -19,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Execution(ExecutionMode.CONCURRENT)
 public class AbiTests {
 
-	private static Logger log = LoggerFactory.getLogger(AbiTests.class);
+	private static System.Logger logger = System.getLogger(AbiTests.class.getName());
 
 //	@Test
 //	public void regexpAbiTypes() throws JsonProcessingException, EverSdkException {

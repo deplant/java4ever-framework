@@ -63,6 +63,12 @@ public class Msig extends OwnedContract implements Giver {
 		super.callExternal("sendTransaction", params, null);
 	}
 
+	public void confirmTransaction(long transactionId) throws EverSdkException {
+		Map<String, Object> params = Map.of(
+				"transactionId", transactionId);
+		super.callExternal("confirmTransaction", params, null);
+	}
+
 	public Net.ResultOfQueryTransactionTree sendDebugTree(Address to,
 	                                                      BigInteger amount,
 	                                                      boolean sendBounce,

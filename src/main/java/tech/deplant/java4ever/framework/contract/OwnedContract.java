@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework.contract;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
@@ -25,7 +23,7 @@ import java.util.*;
  */
 public class OwnedContract {
 
-	private static Logger log = LoggerFactory.getLogger(OwnedContract.class);
+	private static System.Logger logger = System.getLogger(OwnedContract.class.getName());
 
 	protected final Sdk sdk;
 
@@ -225,14 +223,14 @@ public class OwnedContract {
 					"  Out Messages: [" + outMessages + "]\n" +
 					"-----------------------------------------------------------\n";
 			if (tr.aborted() && debugThrowOnTreeErrors) {
-				log.error(logBlock);
+				logger.log(System.Logger.Level.ERROR, () -> logBlock);
 				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),
 				                                                            "One of the message tree transaction was aborted!"),
 				                           new Exception());
 			} else if (tr.aborted()) {
-				log.warn(logBlock);
+				logger.log(System.Logger.Level.WARNING, () -> logBlock);
 			} else {
-				log.info(logBlock);
+				logger.log(System.Logger.Level.INFO, () -> logBlock);
 			}
 		}
 		return Optional.ofNullable(resultOfProcess
@@ -259,15 +257,18 @@ public class OwnedContract {
 		                                          functionHeader,
 		                                          credentials);
 		var balanceDeltaStr = Data.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
-		log.info("\n-----------------------------------------------------------\n" +
-		         "TRANSACTION: (" + resultOfProcess.transaction().get("id").toString() + ")\n" +
-		         //"  Result: 0 \n" +
-		         "  Message: [ext] -(0 E)-> [" + resultOfProcess.transaction().get("account_addr").toString() +
-		         "] (id: " +
-		         resultOfProcess.transaction().get("in_msg").toString() + ")\n" +
-		         "  Account: " + resultOfProcess.transaction().get("account_addr").toString() + "\n" +
-		         "  Balance change: " + balanceDeltaStr.toPlainString() + " E\n" +
-		         "-----------------------------------------------------------\n"
+		logger.log(System.Logger.Level.INFO, () -> "\n-----------------------------------------------------------\n" +
+		                                           "TRANSACTION: (" +
+		                                           resultOfProcess.transaction().get("id").toString() + ")\n" +
+		                                           //"  Result: 0 \n" +
+		                                           "  Message: [ext] -(0 E)-> [" +
+		                                           resultOfProcess.transaction().get("account_addr").toString() +
+		                                           "] (id: " +
+		                                           resultOfProcess.transaction().get("in_msg").toString() + ")\n" +
+		                                           "  Account: " +
+		                                           resultOfProcess.transaction().get("account_addr").toString() + "\n" +
+		                                           "  Balance change: " + balanceDeltaStr.toPlainString() + " E\n" +
+		                                           "-----------------------------------------------------------\n"
 		);
 		return Optional.ofNullable(resultOfProcess
 				                           .decoded()

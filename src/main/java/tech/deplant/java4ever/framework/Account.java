@@ -1,7 +1,5 @@
 package tech.deplant.java4ever.framework;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
@@ -22,7 +20,7 @@ public record Account(String id,
                       String initCodeHash,
                       long last_paid) {
 
-	private static Logger log = LoggerFactory.getLogger(Account.class);
+	private static System.Logger logger = System.getLogger(Account.class.getName());
 
 	/**
 	 * Factory method to create Account object.
@@ -122,6 +120,53 @@ public record Account(String id,
 				                              null,
 				                              false).decoded()
 		                              .output()).orElse(new HashMap<>());
+	}
+
+	/**
+	 * Encodes inputs and runs callExternal method on account's boc then decodes answer.
+	 * Important! When you run callExternal locally, directly on Account boc,
+	 * your blockchain real info remains unchanged.
+	 * If you need to make a call to actual boc, you need to use OwnedContract.callExternal() method
+	 * that sends transaction to blockchain.
+	 *
+	 * @param sdk
+	 * @param abi
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @param credentials
+	 * @return
+	 * @throws EverSdkException
+	 */
+	public Tvm.ResultOfRunExecutor runLocal(Sdk sdk,
+	                                        ContractAbi abi,
+	                                        String functionName,
+	                                        Map<String, Object> functionInputs,
+	                                        Abi.FunctionHeader functionHeader,
+	                                        Credentials credentials,
+	                                        Tvm.ExecutionOptions options) throws EverSdkException {
+		Abi.ResultOfEncodeMessage msg =
+				Abi.encodeMessage(
+						sdk.context(),
+						abi.ABI(),
+						id(),
+						null,
+						new Abi.CallSet(
+								functionName,
+								null,
+								abi.convertFunctionInputs(functionName, functionInputs)
+						),
+						credentials.signer(),
+						null
+				);
+		return Tvm.runExecutor(sdk.context(),
+		                       msg.message(),
+		                       new Tvm.AccountForExecutor.Account(boc(), true),
+		                       options,
+		                       abi.ABI(),
+		                       false,
+		                       null,
+		                       true);
 	}
 
 	/**

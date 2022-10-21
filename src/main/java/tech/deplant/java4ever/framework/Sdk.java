@@ -1,6 +1,6 @@
 package tech.deplant.java4ever.framework;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.Context;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -9,6 +9,7 @@ import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.io.IOException;
+import java.util.Map;
 
 public record Sdk(Context context,
                   long debugTreeTimeout,
@@ -24,8 +25,16 @@ public record Sdk(Context context,
 		return Client.version(context()).version();
 	}
 
-	public ObjectMapper mapper() {
-		return context().mapper();
+	public <T> T convertMap(Map<String, Object> inputMap, Class<T> outputClass) {
+		return context().mapper().convertValue(inputMap, outputClass);
+	}
+
+	public <T> T serialize(String inputString, Class<T> outputClass) throws JsonProcessingException {
+		return context().mapper().readValue(inputString, outputClass);
+	}
+
+	public String deserialize(Object inputObject) throws JsonProcessingException {
+		return context().mapper().writeValueAsString(inputObject);
 	}
 
 	public void saveContract(String name, OwnedContract contract) throws IOException {

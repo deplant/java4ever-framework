@@ -43,7 +43,7 @@ public record Account(String id,
 		                                                         null,
 		                                                         null);
 		if (result.result().length > 0) {
-			return sdk.mapper().convertValue(result.result()[0], Account.class);
+			return sdk.convertMap(result.result()[0], Account.class);
 		} else {
 			return new Account(address.makeAddrStd(), 0, "0x00", null, null, null, null, null, null, 0);
 		}
@@ -71,7 +71,7 @@ public record Account(String id,
 				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
 				                            null,
 				                            null).result())
-				.map(obj -> sdk.mapper().convertValue(obj, Account.class))
+				.map(obj -> sdk.convertMap(obj, Account.class))
 				.toList();
 	}
 

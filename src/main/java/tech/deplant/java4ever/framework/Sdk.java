@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Client;
 import tech.deplant.java4ever.binding.Context;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -29,11 +30,15 @@ public record Sdk(Context context,
 		return context().mapper().convertValue(inputMap, outputClass);
 	}
 
-	public <T> T serialize(String inputString, Class<T> outputClass) throws JsonProcessingException {
+	public JsonNode parseStruct(Object struct) throws JsonProcessingException {
+		return context().mapper().readTree(serialize(struct));
+	}
+
+	public <T> T deserialize(String inputString, Class<T> outputClass) throws JsonProcessingException {
 		return context().mapper().readValue(inputString, outputClass);
 	}
 
-	public String deserialize(Object inputObject) throws JsonProcessingException {
+	public String serialize(Object inputObject) throws JsonProcessingException {
 		return context().mapper().writeValueAsString(inputObject);
 	}
 

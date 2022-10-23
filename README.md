@@ -38,7 +38,6 @@ With java4ever you get:
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-binding:1.2.0'
     implementation 'tech.deplant.java4ever:java4ever-framework:1.2.0'
 }
 ```
@@ -47,18 +46,11 @@ dependencies {
 
 ```xml
 
-<dependencies>
-    <dependency>
-        <groupId>tech.deplant.java4ever</groupId>
-        <artifactId>java4ever-binding</artifactId>
-        <version>1.2.0</version>
-    </dependency>
-    <dependency>
-        <groupId>tech.deplant.java4ever</groupId>
-        <artifactId>java4ever-framework</artifactId>
-        <version>1.2.0</version>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>tech.deplant.java4ever</groupId>
+    <artifactId>java4ever-framework</artifactId>
+    <version>1.2.0</version>
+</dependency>
 ```
 
 #### Add Sdk lib to your code

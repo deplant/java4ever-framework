@@ -32,18 +32,9 @@ repositories {
 dependencies {
 
     // RUNTIME **************************
-
-    // java4ever-binding
-    implementation "tech.deplant.java4ever:java4ever-binding:$v_version"
-
-    // SLF4J Bridge to JDK9 System.Logger
-    implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion"
-
-    // JSON
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
-    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
+    
+    api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
+    implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
     // TESTS **************************
 
@@ -142,7 +133,6 @@ test {
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.concurrent"
     jvmArgs += "--enable-native-access=java4ever.binding"
-    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -156,6 +146,5 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Test) {
     jvmArgs += "--enable-preview"
-    jvmArgs += "-Djava.library.path=c:/opt/sdk/"
     jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }

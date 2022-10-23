@@ -38,7 +38,7 @@ With java4ever you get:
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:1.2.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:1.3.0'
 }
 ```
 
@@ -49,7 +49,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 

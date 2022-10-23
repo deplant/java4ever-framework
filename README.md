@@ -7,7 +7,7 @@
 * Discuss in
   Telegram: [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/deplant\_chat\_en)
 * Read full
-  docs: [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-binding/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-binding)
+  docs: [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
 
 **java4ever-framework** is a Java 19 suite for smart-contracts development, testing & accesing dapps for
 [Everscale](https://everscale.network/) blockchain network.
@@ -15,10 +15,11 @@ Framework depends on [java4ever-binding](https://github.com/deplant/java4ever-bi
 
 With java4ever you get:
 
+* Complete implementation of Everscale SDK's JSON-RPC API
+* All Multisig Wallets support (easy deploy & calls)
 * Any EVER-SDKs support (no rebuild needed, just plug-in SDK lib you like)
 * Maven/Gradle support (deployed
   to [Maven Central](https://mvnrepository.com/artifact/tech.deplant.java4ever/java4ever-framework))
-* Multisig Wallets helpers (easy deploy & calls)
 * TIP 3.2 helpers (easy deploy & calls)
 * EverNodeSE Giver helpers (and you can polymorph to Multisig Givers with no code change or implement custom)
 * Auto-conversion of types between Java & ABI

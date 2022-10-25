@@ -6,7 +6,7 @@ import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.Address;
-import tech.deplant.java4ever.framework.Data;
+import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.AbiUint;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
@@ -209,8 +209,8 @@ public class OwnedContract {
 			var msg = Arrays.stream(messages).filter(msgElem -> msgElem.id().equals(tr.inMsg())).findFirst().get();
 			var msgSource = msg.src().length() > 0 ? msg.src() : "ext";
 			var msgDest = msg.dst().length() > 0 ? msg.dst() : "ext";
-			BigDecimal msgValue = (msg.value() == null) ? BigDecimal.ZERO : Data.hexToDec(msg.value(), 9);
-			BigDecimal fees = Data.hexToDec(tr.totalFees(), 9);
+			BigDecimal msgValue = (msg.value() == null) ? BigDecimal.ZERO : Convert.hexToDec(msg.value(), 9);
+			BigDecimal fees = Convert.hexToDec(tr.totalFees(), 9);
 			var outMessages = "\"" + String.join("\",\"", tr.outMsgs()) + "\"";
 			var error_code = tr.exitCode();
 			String logBlock =
@@ -256,7 +256,7 @@ public class OwnedContract {
 		                                          functionInputs,
 		                                          functionHeader,
 		                                          credentials);
-		var balanceDeltaStr = Data.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
+		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
 		logger.log(System.Logger.Level.INFO, () -> "\n-----------------------------------------------------------\n" +
 		                                           "TRANSACTION: (" +
 		                                           resultOfProcess.transaction().get("id").toString() + ")\n" +

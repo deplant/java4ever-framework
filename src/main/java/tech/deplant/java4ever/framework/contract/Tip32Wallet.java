@@ -11,13 +11,13 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import java.math.BigInteger;
 import java.util.HashMap;
 
-public class Tip31Wallet extends OwnedContract {
+public class Tip32Wallet extends OwnedContract {
 
-	public Tip31Wallet(Sdk sdk, Address address, Credentials owner, ContractAbi abi) {
+	public Tip32Wallet(Sdk sdk, Address address, Credentials owner, ContractAbi abi) {
 		super(sdk, address, abi, owner);
 	}
 
-	public Tip31Wallet(OwnedContract contract) {
+	public Tip32Wallet(OwnedContract contract) {
 		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 

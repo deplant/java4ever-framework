@@ -11,10 +11,17 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
 
-public class Data {
+public class Convert {
 
+	private static System.Logger logger = System.getLogger(Convert.class.getName());
 
-	private static System.Logger logger = System.getLogger(Data.class.getName());
+	public static BigInteger toNanos(String number, CurrencyUnit unit) {
+		return toNanos(new BigDecimal(number), unit);
+	}
+
+	public static BigInteger toNanos(BigDecimal number, CurrencyUnit unit) {
+		return number.multiply(unit.factor()).toBigInteger();
+	}
 
 	public static String base64ToHexString(String base64string) {
 		return HexFormat.of().formatHex(Base64.getDecoder().decode(base64string));

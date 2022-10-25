@@ -7,20 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
-import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
+import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.deplant.java4ever.framework.EVERAmount.EVER;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -48,12 +44,12 @@ public class AccountTests {
 		                        .deploySingleSig(SDK,
 		                                         keys,
 		                                         new EverOSGiver(SDK),
-		                                         EVER.amount().multiply(new BigInteger("1")));
+		                                         Convert.toNanos("1", CurrencyUnit.Ever.EVER));
 		assertTrue(msig.account().isActive());
 		Account acc = Account.ofAddress(SDK, msig.address());
 		Map<String, Object> params = Map.of(
 				"dest", msig.address(),
-				"value", EVER.amount(),
+				"value", Convert.toNanos("1", CurrencyUnit.Ever.EVER),
 				"bounce", true,
 				"flags", 0,
 				"payload", "");

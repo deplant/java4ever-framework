@@ -1,11 +1,11 @@
 package tech.deplant.java4ever.framework.abi;
 
-import tech.deplant.java4ever.framework.Data;
+import tech.deplant.java4ever.framework.Convert;
 
 public record AbiString(String text) implements AbiValue {
 
 	@Override
 	public Object serialize() {
-		return Data.strToHex(this.text);
+		return Convert.strToHex(this.text);
 	}
 }

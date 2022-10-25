@@ -58,6 +58,6 @@ public record Address(int wid, BigInteger value) {
 		return
 				wid() +
 				":" +
-				Data.padLeftZeros(value().toString(16), 64);
+				Convert.padLeftZeros(value().toString(16), 64);
 	}
 }

@@ -6,7 +6,7 @@ import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.contract.Giver;
-import tech.deplant.java4ever.framework.contract.Tip31Root;
+import tech.deplant.java4ever.framework.contract.Tip32Root;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.math.BigInteger;
@@ -28,7 +28,7 @@ public class Tip31RootTemplate extends ContractTemplate {
 		return ContractAbi.ofResource("artifacts/tip31/TokenRoot.abi.json");
 	}
 
-	public Tip31Root deployWithGiver(Sdk sdk,
+	public Tip32Root deployWithGiver(Sdk sdk,
 	                                 Credentials keys,
 	                                 Giver giver,
 	                                 BigInteger value,
@@ -64,7 +64,7 @@ public class Tip31RootTemplate extends ContractTemplate {
 				"burnPaused", burnPaused, // "name": "burnPaused", "type": "bool"
 				"remainingGasTo", remainingGasTo); // "name": "remainingGasTo", "type": "address"
 		var contract = super.deployWithGiver(sdk, giver, value, 0, initialData, keys, constructorInputs);
-		return new Tip31Root(contract);
+		return new Tip32Root(contract);
 	}
 
 }

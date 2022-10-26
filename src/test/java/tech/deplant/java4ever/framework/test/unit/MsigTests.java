@@ -8,6 +8,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
+import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
@@ -16,11 +18,9 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.deplant.java4ever.framework.CurrencyUnit.EVER;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -48,14 +48,14 @@ public class MsigTests {
 		                        .deploySingleSig(SDK,
 		                                         keys,
 		                                         new EverOSGiver(SDK),
-		                                         EVER.amount().multiply(new BigInteger("1")));
+		                                         Convert.toNanos("1", CurrencyUnit.Ever.EVER));
 		assertTrue(msig.account().isActive());
 		try {
 			msig = MsigTemplate.SAFE()
 			                   .deploySingleSig(SDK,
 			                                    keys,
 			                                    new EverOSGiver(SDK),
-			                                    EVER.amount().multiply(new BigInteger("1")));
+			                                    Convert.toNanos("1", CurrencyUnit.Ever.EVER));
 		} catch (EverSdkException e) {
 			assertEquals(414, e.errorResponse().code());
 		}

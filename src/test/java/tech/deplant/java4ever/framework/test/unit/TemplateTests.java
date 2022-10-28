@@ -50,7 +50,6 @@ public class TemplateTests {
 				             .withUpdatedInitialData(SDK,
 				                                     "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
 				             .calculateAddress(SDK)
-				             .makeAddrStd()
 		);
 		assertFalse(
 				MsigTemplate

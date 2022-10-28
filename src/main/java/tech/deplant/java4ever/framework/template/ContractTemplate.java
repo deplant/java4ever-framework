@@ -64,7 +64,7 @@ public class ContractTemplate {
 
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
 			credentials, Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials).toJava();
+		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
 		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
@@ -77,7 +77,7 @@ public class ContractTemplate {
 			                                     String, Object> initialData,
 	                                     Credentials credentials,
 	                                     Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials).toJava();
+		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
 		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		giver.give(address, value);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);

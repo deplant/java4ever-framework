@@ -238,7 +238,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 			if (mapValue.size() == 1) {
 				final Object key = mapValue.keySet().toArray()[0];
 				final Object value = mapValue.values().toArray()[0];
-				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key),
+				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key).toABI(),
 				              // serializeTree is used for map(type,tuple) cases,
 				              // thus it will continue to serialize tuple part
 				              serializeTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
@@ -271,10 +271,11 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 				// arrays
 			} else if (rootTypeDetails.isArray()) {
 				return switch (inputValue) {
-					case String s -> new Object[]{AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), s)};
+					case String s ->
+							new Object[]{AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), s).toABI()};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), element);
+							return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), element).toABI();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -282,17 +283,19 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 					}).toArray();
 					case List list -> list.stream().map(element -> {
 						try {
-							return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), element);
+							return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), element).toABI();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
 						}
 					}).toArray();
-					default -> new Object[]{AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), inputValue)};
+					default -> new Object[]{AbiType.of(rootTypeDetails.type(),
+					                                   rootTypeDetails.size(),
+					                                   inputValue).toABI()};
 				};
 			} else {
 				// all others
-				return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), inputValue);
+				return AbiType.of(rootTypeDetails.type(), rootTypeDetails.size(), inputValue).toABI();
 			}
 		}
 	}

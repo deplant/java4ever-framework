@@ -40,12 +40,12 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 		return (null == nullableObject) ? Address.ZERO : new Address(nullableObject.toString());
 	}
 
-	public static Address ofFutureDeploy(Sdk sdk,
-	                                     ContractTemplate template,
-	                                     int workchainId,
-	                                     Map<String, Object> initialData,
-	                                     Credentials credentials) throws EverSdkException {
-		return new Address(Abi.encodeMessage(
+	public static String ofFutureDeploy(Sdk sdk,
+	                                    ContractTemplate template,
+	                                    int workchainId,
+	                                    Map<String, Object> initialData,
+	                                    Credentials credentials) throws EverSdkException {
+		return Abi.encodeMessage(
 				sdk.context(),
 				template.abi().ABI(),
 				null,
@@ -53,7 +53,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 				null,
 				credentials.signer(),
 				null
-		).address());
+		).address();
 	}
 
 	public boolean isNull() {

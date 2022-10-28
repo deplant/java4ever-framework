@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.abi.datatype;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 
@@ -10,7 +11,8 @@ public record Uint(int size, BigInteger bigInteger) implements AbiType<BigIntege
 			case Uint u -> new Uint(size, u.bigInteger());
 			case Integer i -> new Uint(size, BigInteger.valueOf(i));
 			case Long l -> new Uint(size, BigInteger.valueOf(l));
-			case BigInteger b -> new Uint(size, b);
+			case BigInteger bi -> new Uint(size, bi);
+			case BigDecimal bd -> new Uint(size, bd.toBigInteger());
 			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()));
 			case String strPrefixed
 					when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->

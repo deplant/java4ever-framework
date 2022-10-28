@@ -2,9 +2,9 @@ package tech.deplant.java4ever.framework.template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
+import tech.deplant.java4ever.framework.abi.datatype.Address;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Tip32Root;
 import tech.deplant.java4ever.framework.crypto.Credentials;

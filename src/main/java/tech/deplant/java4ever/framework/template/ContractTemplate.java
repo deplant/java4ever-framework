@@ -5,9 +5,9 @@ import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
+import tech.deplant.java4ever.framework.abi.datatype.Address;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.OwnedContract;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -26,12 +26,9 @@ public class ContractTemplate {
 		this.tvc = tvc;
 	}
 
-
 	public ContractAbi abi() {
 		return this.abi;
 	}
-
-	//TODO convertPublicKeyToTonSafeFormat(@NonNull Context context, @NonNull String publicKey)
 
 	public ContractTvc tvc() {
 		return this.tvc;
@@ -39,7 +36,7 @@ public class ContractTemplate {
 
 	protected OwnedContract doDeploy(Sdk sdk,
 	                                 int workchainId,
-	                                 Address address,
+	                                 String address,
 	                                 Map<String, Object> initialData,
 	                                 Credentials
 			                                 credentials,
@@ -67,8 +64,8 @@ public class ContractTemplate {
 
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
 			credentials, Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
-		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address.makeAddrStd());
+		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials).toJava();
+		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
 
@@ -80,8 +77,8 @@ public class ContractTemplate {
 			                                     String, Object> initialData,
 	                                     Credentials credentials,
 	                                     Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
-		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address.makeAddrStd());
+		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials).toJava();
+		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		giver.give(address, value);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
@@ -94,8 +91,8 @@ public class ContractTemplate {
 		return tvc().decodeInitialPubkey(sdk, abi());
 	}
 
-	public Address calculateAddress(Sdk sdk) throws EverSdkException {
-		return new Address("0:" + Boc.getBocHash(sdk.context(), tvc().base64String()).hash());
+	public String calculateAddress(Sdk sdk) throws EverSdkException {
+		return String.format("0:%s", Boc.getBocHash(sdk.context(), tvc().base64String()).hash());
 	}
 
 	public boolean isDeployed(Sdk sdk) throws EverSdkException {

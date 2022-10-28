@@ -36,7 +36,7 @@ public class MsigTests {
 				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
 				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 		SDK_DEV = new SdkBuilder()
-				.networkEndpoints("https://mainnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
+				.networkEndpoints(System.getenv("DEV_NET_OSIRIS_ENDPOINT"))
 				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 

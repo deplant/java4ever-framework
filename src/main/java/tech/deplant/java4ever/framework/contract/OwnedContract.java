@@ -5,11 +5,10 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.AbiUint;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
+import tech.deplant.java4ever.framework.abi.datatype.Uint;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.math.BigDecimal;
@@ -27,20 +26,20 @@ public class OwnedContract {
 
 	protected final Sdk sdk;
 
-	protected final Address address;
+	protected final String address;
 
 	protected final ContractAbi abi;
 
 	protected final Credentials credentials;
 
-	public OwnedContract(Sdk sdk, Address address, ContractAbi abi, Credentials credentials) {
+	public OwnedContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) {
 		this.sdk = sdk;
 		this.address = address;
 		this.abi = abi;
 		this.credentials = credentials;
 	}
 
-	public OwnedContract(Sdk sdk, Address address, ContractAbi abi) {
+	public OwnedContract(Sdk sdk, String address, ContractAbi abi) {
 		this(sdk, address, abi, Credentials.NONE);
 	}
 
@@ -48,7 +47,7 @@ public class OwnedContract {
 		return this.sdk;
 	}
 
-	public Address address() {
+	public String address() {
 		return this.address;
 	}
 
@@ -63,7 +62,7 @@ public class OwnedContract {
 	 * @throws EverSdkException
 	 */
 	public BigInteger balance() throws EverSdkException {
-		return AbiUint.deserialize(128, account().balance());
+		return Uint.fromJava(128, account().balance()).toJava();
 	}
 
 	/**
@@ -121,7 +120,7 @@ public class OwnedContract {
 				true,
 				Credentials.NONE.signer(),
 				null,
-				address().makeAddrStd()
+				address()
 		).body();
 	}
 
@@ -157,7 +156,7 @@ public class OwnedContract {
 	                                                              Credentials credentials) throws EverSdkException {
 		return Processing.processMessage(this.sdk.context(),
 		                                 abi().ABI(),
-		                                 address().makeAddrStd(),
+		                                 address(),
 		                                 null,
 		                                 new Abi.CallSet(functionName,
 		                                                 functionHeader,

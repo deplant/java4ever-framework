@@ -29,8 +29,8 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 		return credentials().get(keysName);
 	}
 
-	public Address address(String contractName) {
-		return new Address(contracts().get(contractName).address());
+	public String address(String contractName) {
+		return contracts().get(contractName).address();
 	}
 
 	public ContractAbi abi(String contractName) throws JsonProcessingException {
@@ -47,7 +47,7 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 
 	public void addContract(String name, OwnedContract contract) throws IOException {
 		contracts().put(name,
-		                new ExplorerConfig.SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
+		                new ExplorerConfig.SavedContract(contract.abi().json(), contract.address()));
 		sync();
 	}
 

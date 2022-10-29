@@ -49,7 +49,7 @@ public class TemplateTests {
 				             .SURF()
 				             .withUpdatedInitialData(SDK,
 				                                     "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
-				             .calculateAddress(SDK)
+				             .addressFromEncodedTvc(SDK)
 		);
 		assertFalse(
 				MsigTemplate
@@ -58,6 +58,17 @@ public class TemplateTests {
 						                        "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
 						.isDeployed(SDK)
 		);
+	}
+
+	@Test
+	public void template_updated_and_hashed_address_equal_to_deployset_message_address() {
+//		assertEquals("0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
+//		             MsigTemplate
+//				             .SURF()
+//				             .withUpdatedInitialData(SDK,
+//				                                     "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
+//				             .calculateAddress(SDK)
+//		);
 	}
 
 

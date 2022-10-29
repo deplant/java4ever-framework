@@ -64,21 +64,30 @@ public class ContractTemplate {
 
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials
 			credentials, Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
+		return doDeploy(sdk,
+		                workchainId,
+		                calculateAddress(sdk, initialData, credentials),
+		                initialData,
+		                credentials,
+		                constructorInputs);
+	}
+
+	public String calculateAddress(Sdk sdk,
+	                               Map<String, Object> initialData,
+	                               Credentials credentials) throws EverSdkException {
+		String address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
 		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
-		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
+		return address;
 	}
 
 	public OwnedContract deployWithGiver(Sdk sdk,
 	                                     Giver giver,
 	                                     BigInteger value,
 	                                     int workchainId,
-	                                     Map<
-			                                     String, Object> initialData,
+	                                     Map<String, Object> initialData,
 	                                     Credentials credentials,
 	                                     Map<String, Object> constructorInputs) throws EverSdkException {
-		var address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
-		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
+		var address = calculateAddress(sdk, initialData, credentials);
 		giver.give(address, value);
 		return doDeploy(sdk, workchainId, address, initialData, credentials, constructorInputs);
 	}
@@ -91,12 +100,12 @@ public class ContractTemplate {
 		return tvc().decodeInitialPubkey(sdk, abi());
 	}
 
-	public String calculateAddress(Sdk sdk) throws EverSdkException {
+	public String addressFromEncodedTvc(Sdk sdk) throws EverSdkException {
 		return String.format("0:%s", Boc.getBocHash(sdk.context(), tvc().base64String()).hash());
 	}
 
 	public boolean isDeployed(Sdk sdk) throws EverSdkException {
-		return Account.ofAddress(sdk, calculateAddress(sdk)).isActive();
+		return Account.ofAddress(sdk, addressFromEncodedTvc(sdk)).isActive();
 	}
 
 	public ContractTemplate withUpdatedInitialData(Sdk sdk,

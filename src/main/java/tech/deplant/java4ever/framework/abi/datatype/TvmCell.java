@@ -2,6 +2,10 @@ package tech.deplant.java4ever.framework.abi.datatype;
 
 public record TvmCell(String cellBoc) implements AbiType<String, String> {
 
+	public static TvmBuilder builder() {
+		return new TvmBuilder();
+	}
+
 	public static TvmCell fromJava(Object input) {
 		return switch (input) {
 			case TvmCell cell -> cell;

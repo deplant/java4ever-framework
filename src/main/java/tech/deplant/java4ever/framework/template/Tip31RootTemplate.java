@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
 import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.contract.Tip32Root;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -35,17 +34,17 @@ public class Tip31RootTemplate extends ContractTemplate {
 	                                 String tokenName,
 	                                 String tokenTicker,
 	                                 int tokenDecimalPoints,
-	                                 Address rootOwner,
+	                                 String rootOwner,
 	                                 BigInteger totalSupply,
-	                                 Address deployer,
-	                                 Address initialSupplyTo,
+	                                 String deployer,
+	                                 String initialSupplyTo,
 	                                 BigInteger initialSupply,
 	                                 BigInteger initialWalletValue,
 	                                 boolean mintDisabled,
 	                                 boolean burnByRootDisabled,
 	                                 boolean burnPaused,
-	                                 Address remainingGasTo) throws EverSdkException {
-		var initialData = Map.of(
+	                                 String remainingGasTo) throws EverSdkException {
+		Map<String, Object> initialData = Map.of(
 				"name_", tokenName,
 				"symbol_", tokenTicker,
 				"decimals_", tokenDecimalPoints,

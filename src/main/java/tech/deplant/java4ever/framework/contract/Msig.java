@@ -5,7 +5,6 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
@@ -69,7 +68,7 @@ public class Msig extends OwnedContract implements Giver {
 		super.callExternal("confirmTransaction", params, null);
 	}
 
-	public Net.ResultOfQueryTransactionTree sendDebugTree(Address to,
+	public Net.ResultOfQueryTransactionTree sendDebugTree(String to,
 	                                                      BigInteger amount,
 	                                                      boolean sendBounce,
 	                                                      int flags,
@@ -79,7 +78,7 @@ public class Msig extends OwnedContract implements Giver {
 	                                                      Net.ResultOfQueryTransactionTree debugOutResult,
 	                                                      List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 		Map<String, Object> params = Map.of(
-				"dest", to.makeAddrStd(),
+				"dest", to,
 				"value", amount,
 				"bounce", sendBounce,
 				"flags", flags,

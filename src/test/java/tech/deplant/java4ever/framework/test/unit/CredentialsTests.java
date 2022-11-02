@@ -9,7 +9,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 import tech.deplant.java4ever.framework.crypto.Seed;
 
@@ -27,8 +26,8 @@ public class CredentialsTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = new SdkBuilder()
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK = Sdk.builder()
+		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 
 	@Test

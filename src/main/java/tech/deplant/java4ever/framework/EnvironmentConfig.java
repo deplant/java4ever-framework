@@ -26,7 +26,7 @@ public record EnvironmentConfig(String serializationPath,
 
 	private static System.Logger logger = System.getLogger(EnvironmentConfig.class.getName());
 
-	public static EnvironmentConfig ofPaths(
+	public static EnvironmentConfig EMPTY(
 			String serializationPath,
 			String solcPath,
 			String linkerPath,

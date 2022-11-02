@@ -11,7 +11,6 @@ import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -32,12 +31,12 @@ public class MsigTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = new SdkBuilder()
-				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
-		SDK_DEV = new SdkBuilder()
-				.networkEndpoints(System.getenv("DEV_NET_OSIRIS_ENDPOINT"))
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK = Sdk.builder()
+		         .networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
+		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK_DEV = Sdk.builder()
+		             .networkEndpoints(System.getenv("DEV_NET_OSIRIS_ENDPOINT"))
+		             .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 
 	@Test

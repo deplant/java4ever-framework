@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.Account;
+import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.CurrencyUnit;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.Msig;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -28,12 +31,12 @@ public class AccountTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = new SdkBuilder()
-				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
-		SDK_DEV = new SdkBuilder()
-				.networkEndpoints("https://mainnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK = Sdk.builder()
+		         .networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
+		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK_DEV = Sdk.builder()
+		             .networkEndpoints("https://mainnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
+		             .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 
 	@Test

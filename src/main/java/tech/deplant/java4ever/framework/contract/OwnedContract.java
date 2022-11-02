@@ -177,19 +177,17 @@ public class OwnedContract {
 	 * @param credentials
 	 * @param debugQueryTimeout      Transaction tree query will fail if exceeds this timeout. Useful if you query large trees.
 	 * @param debugThrowOnTreeErrors If 'true' method will throw on any internal non-0 exit_code encountered in tree.
-	 * @param debugOutResult         Result of transaction tree query will be returned here
 	 * @param debugAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
-	public Map<String, Object> callExternalDebugTree(String functionName,
-	                                                 Map<String, Object> functionInputs,
-	                                                 Abi.FunctionHeader functionHeader,
-	                                                 Credentials credentials,
-	                                                 Long debugQueryTimeout,
-	                                                 boolean debugThrowOnTreeErrors,
-	                                                 Net.ResultOfQueryTransactionTree debugOutResult,
-	                                                 List<ContractAbi> debugAbisForDecode) throws EverSdkException {
+	public ResultOfQueryTransactionTreeAndCallOutput callExternalDebugTree(String functionName,
+	                                                                       Map<String, Object> functionInputs,
+	                                                                       Abi.FunctionHeader functionHeader,
+	                                                                       Credentials credentials,
+	                                                                       Long debugQueryTimeout,
+	                                                                       boolean debugThrowOnTreeErrors,
+	                                                                       List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 		debugAbisForDecode.add(abi()); // adding this contract abi to decode list
 		var abis = debugAbisForDecode.stream().map(ContractAbi::ABI).toArray(Abi.ABI[]::new);
 		long debugTimeout = Optional.ofNullable(debugQueryTimeout).orElse(30_000L); // default is 30 sec
@@ -198,14 +196,15 @@ public class OwnedContract {
 		                                          functionHeader,
 		                                          credentials);
 		var msgId = resultOfProcess.transaction().get("in_msg").toString();
-		debugOutResult = Net.queryTransactionTree(sdk().context(),
-		                                          msgId,
-		                                          abis,
-		                                          debugTimeout);
-		var messages = debugOutResult.messages();
-		var transactions = debugOutResult.transactions();
-		for (Net.TransactionNode tr : transactions) {
-			var msg = Arrays.stream(messages).filter(msgElem -> msgElem.id().equals(tr.inMsg())).findFirst().get();
+		var debugOutResult = Net.queryTransactionTree(sdk().context(),
+		                                              msgId,
+		                                              abis,
+		                                              debugTimeout);
+		for (Net.TransactionNode tr : debugOutResult.transactions()) {
+			var msg = Arrays.stream(debugOutResult.messages())
+			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
+			                .findFirst()
+			                .get();
 			var msgSource = msg.src().length() > 0 ? msg.src() : "ext";
 			var msgDest = msg.dst().length() > 0 ? msg.dst() : "ext";
 			BigDecimal msgValue = (msg.value() == null) ? BigDecimal.ZERO : Convert.hexToDec(msg.value(), 9);
@@ -232,9 +231,7 @@ public class OwnedContract {
 				logger.log(System.Logger.Level.INFO, () -> logBlock);
 			}
 		}
-		return Optional.ofNullable(resultOfProcess
-				                           .decoded()
-				                           .output()).orElse(new HashMap<>());
+		return new ResultOfQueryTransactionTreeAndCallOutput(debugOutResult, resultOfProcess.decoded().output());
 	}
 
 	/**
@@ -307,5 +304,9 @@ public class OwnedContract {
 	                                     Map<String, Object> functionInputs,
 	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
 		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
+	}
+
+	public record ResultOfQueryTransactionTreeAndCallOutput(Net.ResultOfQueryTransactionTree queryTree,
+	                                                        Map<String, Object> decodedOutuput) {
 	}
 }

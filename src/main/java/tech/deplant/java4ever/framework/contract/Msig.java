@@ -68,30 +68,29 @@ public class Msig extends OwnedContract implements Giver {
 		super.callExternal("confirmTransaction", params, null);
 	}
 
-	public Net.ResultOfQueryTransactionTree sendDebugTree(String to,
-	                                                      BigInteger amount,
-	                                                      boolean sendBounce,
-	                                                      int flags,
-	                                                      String payload,
-	                                                      Long debugQueryTimeout,
-	                                                      boolean debugThrowOnInternalError,
-	                                                      Net.ResultOfQueryTransactionTree debugOutResult,
-	                                                      List<ContractAbi> debugAbisForDecode) throws EverSdkException {
+	public ResultOfQueryTransactionTreeAndCallOutput sendDebugTree(String to,
+	                                                               BigInteger amount,
+	                                                               boolean sendBounce,
+	                                                               int flags,
+	                                                               String payload,
+	                                                               Long debugQueryTimeout,
+	                                                               boolean debugThrowOnInternalError,
+	                                                               Net.ResultOfQueryTransactionTree debugOutResult,
+	                                                               List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 		Map<String, Object> params = Map.of(
 				"dest", to,
 				"value", amount,
 				"bounce", sendBounce,
 				"flags", flags,
 				"payload", payload);
-		super.callExternalDebugTree("sendTransaction",
-		                            params,
-		                            null,
-		                            credentials(),
-		                            debugQueryTimeout,
-		                            debugThrowOnInternalError,
-		                            debugOutResult,
-		                            debugAbisForDecode);
-		return debugOutResult;
+
+		return super.callExternalDebugTree("sendTransaction",
+		                                   params,
+		                                   null,
+		                                   credentials(),
+		                                   debugQueryTimeout,
+		                                   debugThrowOnInternalError,
+		                                   debugAbisForDecode);
 	}
 
 	@Override

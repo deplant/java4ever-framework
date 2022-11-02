@@ -10,7 +10,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.io.IOException;
@@ -27,9 +26,9 @@ public class TemplateTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = new SdkBuilder()
-				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK = Sdk.builder()
+		         .networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
+		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 
 	@Test

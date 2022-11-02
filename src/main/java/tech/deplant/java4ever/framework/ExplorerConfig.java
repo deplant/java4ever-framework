@@ -17,7 +17,9 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 	private static System.Logger logger = System.getLogger(ExplorerConfig.class.getName());
 
 	public static ExplorerConfig EMPTY(String serializationPath) throws IOException {
-		return new ExplorerConfig(serializationPath, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+		var config = new ExplorerConfig(serializationPath, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+		config.sync();
+		return config;
 	}
 
 	public static ExplorerConfig LOAD(String configFilePath) throws JsonProcessingException {
@@ -45,22 +47,37 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 				keys(keysName));
 	}
 
-	public void addContract(String name, OwnedContract contract) throws IOException {
+	/**
+	 * Adds OwnedContract object to config with a given name as a key.
+	 *
+	 * @param name     key for finding contract in config later
+	 * @param contract contract object
+	 * @return OwnedContract that we successfully putted to config
+	 * @throws IOException can be thrown by the call of sync() method
+	 */
+	public OwnedContract addContract(String name, OwnedContract contract) throws IOException {
 		contracts().put(name,
 		                new ExplorerConfig.SavedContract(contract.abi().json(), contract.address()));
 		sync();
+		return contract;
 	}
 
-	public void addKeys(String name, Credentials keys) throws IOException {
+	public Credentials addKeys(String name, Credentials keys) throws IOException {
 		credentials().put(name, keys);
 		sync();
+		return keys;
 	}
 
+	/**
+	 * Flushes this config to file on serializationPath()
+	 *
+	 * @throws IOException can be thrown by work with File
+	 */
 	public void sync() throws IOException {
 		var mapper = ContextBuilder.DEFAULT_MAPPER;
 		//.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 		//.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-		new JsonFile(this.serializationPath).accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
+		new JsonFile(serializationPath()).accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this));
 	}
 
 	public record SavedContract(String abiJson, String address) {

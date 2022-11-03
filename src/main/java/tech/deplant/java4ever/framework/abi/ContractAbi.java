@@ -135,15 +135,15 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 	}
 
 	protected AbiTypeDetails typeParser(String typeString) throws EverSdkException {
-		var sizePattern = Pattern.compile("([a-zA-Z]+)(\\d{1,3})");
-		var matcher = sizePattern.matcher(typeString);
+		// Size pattern matching
+		var matcher = Pattern.compile("([a-zA-Z]+)(\\d{1,3})").matcher(typeString);
 		while (matcher.find()) {
 			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
 			                          Integer.parseInt(matcher.group(2))
 					, arrayMatcher(typeString));
 		}
-		var typePattern = Pattern.compile("([a-zA-Z]+)");
-		matcher = typePattern.matcher(typeString);
+		// Type pattern  matching
+		matcher = Pattern.compile("([a-zA-Z]+)").matcher(typeString);
 		while (matcher.find()) {
 			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
 			                          0, arrayMatcher(typeString));

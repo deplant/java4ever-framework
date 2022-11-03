@@ -32,7 +32,7 @@ repositories {
 dependencies {
 
     // RUNTIME **************************
-
+    
     api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
     implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
@@ -137,6 +137,7 @@ test {
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += "--enable-preview"
+    options.compilerArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
 tasks.withType(JavaExec).configureEach {

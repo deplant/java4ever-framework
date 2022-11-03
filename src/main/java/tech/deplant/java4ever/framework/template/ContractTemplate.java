@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.template;
 
+import jdk.incubator.concurrent.StructuredTaskScope;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -14,6 +15,7 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class ContractTemplate {
 
@@ -36,30 +38,42 @@ public class ContractTemplate {
 
 	protected OwnedContract doDeploy(Sdk sdk,
 	                                 int workchainId,
-	                                 String address,
-	                                 Map<String, Object> initialData,
-	                                 Credentials
+	                                 final String address,
+	                                 final Map<String, Object> initialData,
+	                                 final Credentials
 			                                 credentials,
-	                                 Map<String, Object> constructorInputs) throws EverSdkException {
-		Processing.processMessage(
-				sdk.context(),
-				abi().ABI(),
-				null,
-				new Abi.DeploySet(
-						this.tvc.base64String(),
-						workchainId,
-						abi().convertInitDataInputs(initialData),
-						credentials.publicKey()),
-				new Abi.CallSet(
-						"constructor",
-						null,
-						abi().convertFunctionInputs("constructor", constructorInputs)),
-				credentials.signer(),
-				null,
-				false,
-				null
-		);
-		return new OwnedContract(sdk, address, this.abi, credentials);
+	                                 final Map<String, Object> constructorInputs) throws EverSdkException {
+
+		try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+			final Future<Map<String, Object>> initDataConverted = scope.fork(() -> abi().convertInitDataInputs(
+					initialData));
+			final Future<Map<String, Object>> constructorParamsConverted = scope.fork(() -> abi().convertFunctionInputs(
+					"constructor",
+					constructorInputs));
+			scope.join();
+			Processing.processMessage(
+					sdk.context(),
+					abi().ABI(),
+					address,
+					new Abi.DeploySet(
+							this.tvc.base64String(),
+							workchainId,
+							initDataConverted.resultNow(),
+							credentials.publicKey()),
+					new Abi.CallSet(
+							"constructor",
+							null,
+							constructorParamsConverted.resultNow()),
+					credentials.signer(),
+					null,
+					false,
+					null
+			);
+			return new OwnedContract(sdk, address, this.abi, credentials);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	public OwnedContract deploy(Sdk sdk, int workchainId, Map<String, Object> initialData, Credentials

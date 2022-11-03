@@ -211,15 +211,44 @@ public class OwnedContract {
 			BigDecimal fees = Convert.hexToDec(tr.totalFees(), 9);
 			var outMessages = "\"" + String.join("\",\"", tr.outMsgs()) + "\"";
 			var error_code = tr.exitCode();
+			String trType = null;
+			if (msgSource == "ext") {
+				trType = "EXTERNAL CALL";
+			} else if (msgDest == "ext") {
+				trType = "EVENT";
+			} else {
+				trType = "INTERNAL MSG";
+			}
+			String msgName;
+			if (msg.decodedBody() == null || msg.decodedBody().name() == null) {
+				msgName = "Unknown";
+			} else {
+				msgName = msg.decodedBody().name();
+			}
 			String logBlock =
-					"\n-----------------------------------------------------------\n" +
-					"TRANSACTION: {\"id\":\"" + tr.id() + "\"" + ",\"msg_id\":\"" + msg.id() + "\"}\n" +
-					"  [" + msgSource + "] -(" + msgValue.toPlainString() + " E)-> [" + msgDest + "]\n" +
-					"  Result: " + error_code + "\n" +
-//					"  Account: " + tr.accountAddr() + "\n" +
-					"  Fees: " + fees.toPlainString() + " E\n" +
-					"  Out Messages: [" + outMessages + "]\n" +
-					"-----------------------------------------------------------\n";
+					String.format("""
+							              |-----------------------------------------------------------
+							              |%s (%s): 
+							              |  TR_ID: %s
+							              |  MSG_ID: %s
+							              |  (%s)--{%s E}-->(%s)
+							              |  Result: %d (%s)
+							              |  Fees: %s E
+							              |  Out Messages: [%s]
+							              |-----------------------------------------------------------
+							              """,
+					              trType,
+					              msgName,
+					              tr.id(),
+					              msg.id(),
+					              msgSource,
+					              msgValue.toPlainString(),
+					              msgDest,
+					              error_code.intValue(),
+					              msgName,
+					              fees.toPlainString(),
+					              outMessages
+					);
 			if (tr.aborted() && debugThrowOnTreeErrors) {
 				logger.log(System.Logger.Level.ERROR, () -> logBlock);
 				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),

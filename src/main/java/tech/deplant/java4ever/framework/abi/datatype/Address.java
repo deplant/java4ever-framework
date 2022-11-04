@@ -10,6 +10,8 @@ import tech.deplant.java4ever.framework.template.ContractTemplate;
 import java.math.BigInteger;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNullElse;
+
 public record Address(int wid, BigInteger value) implements AbiType<String, String> {
 
 	public static final Address ZERO = new Address(0, BigInteger.ZERO);
@@ -49,9 +51,12 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 				sdk.context(),
 				template.abi().ABI(),
 				null,
-				new Abi.DeploySet(template.tvc().base64String(), workchainId, initialData, credentials.publicKey()),
+				new Abi.DeploySet(template.tvc().base64String(),
+				                  workchainId,
+				                  initialData,
+				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
 				null,
-				credentials.signer(),
+				requireNonNullElse(credentials, Credentials.NONE).signer(),
 				null
 		).address();
 	}

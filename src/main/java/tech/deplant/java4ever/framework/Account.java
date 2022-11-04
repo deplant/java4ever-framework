@@ -9,6 +9,8 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.util.*;
 
+import static java.util.Objects.requireNonNullElse;
+
 public record Account(String id,
                       int accType,
                       String balance,
@@ -106,7 +108,7 @@ public record Account(String id,
 								null,
 								abi.convertFunctionInputs(functionName, functionInputs)
 						),
-						credentials.signer(),
+						requireNonNullElse(credentials, Credentials.NONE).signer(),
 						null
 				);
 		return Optional.ofNullable(Tvm.runTvm(
@@ -154,7 +156,7 @@ public record Account(String id,
 								null,
 								abi.convertFunctionInputs(functionName, functionInputs)
 						),
-						credentials.signer(),
+						requireNonNullElse(credentials, Credentials.NONE).signer(),
 						null
 				);
 		return Tvm.runExecutor(sdk.context(),

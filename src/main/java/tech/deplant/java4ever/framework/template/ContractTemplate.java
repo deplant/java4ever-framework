@@ -40,36 +40,36 @@ public class ContractTemplate {
 	                                 int workchainId,
 	                                 final String address,
 	                                 final Map<String, Object> initialData,
-	                                 final Credentials
-			                                 credentials,
+	                                 final Credentials credentials,
 	                                 final Map<String, Object> constructorInputs) throws EverSdkException {
 
 		try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-			final Future<Map<String, Object>> initDataConverted = scope.fork(() -> abi().convertInitDataInputs(
-					initialData));
-			final Future<Map<String, Object>> constructorParamsConverted = scope.fork(() -> abi().convertFunctionInputs(
+			final Future<Abi.DeploySet> deploySetFuture = scope.fork(() -> new Abi.DeploySet(
+					this.tvc.base64String(),
+					workchainId,
+					abi().convertInitDataInputs(
+							initialData),
+					credentials.publicKey())
+			);
+			final Future<Abi.CallSet> callSetFuture = scope.fork(() -> new Abi.CallSet(
 					"constructor",
-					constructorInputs));
+					null,
+					abi().convertFunctionInputs(
+							"constructor",
+							constructorInputs)));
 			scope.join();
 			Processing.processMessage(
 					sdk.context(),
 					abi().ABI(),
 					address,
-					new Abi.DeploySet(
-							this.tvc.base64String(),
-							workchainId,
-							initDataConverted.resultNow(),
-							credentials.publicKey()),
-					new Abi.CallSet(
-							"constructor",
-							null,
-							constructorParamsConverted.resultNow()),
+					deploySetFuture.resultNow(),
+					callSetFuture.resultNow(),
 					credentials.signer(),
 					null,
 					false,
 					null
 			);
-			return new OwnedContract(sdk, address, this.abi, credentials);
+			return new OwnedContract(sdk, address, abi(), credentials);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

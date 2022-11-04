@@ -14,6 +14,9 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNullElse;
 
 /**
  * Class that represends deployed contract in one of the networks. It holds info about
@@ -162,7 +165,7 @@ public class OwnedContract {
 		                                                 functionHeader,
 		                                                 abi().convertFunctionInputs(functionName,
 		                                                                             functionInputs)),
-		                                 credentials.signer(), null, false, null);
+		                                 requireNonNullElse(credentials, Credentials.NONE).signer(), null, false, null);
 	}
 
 	/**
@@ -188,8 +191,11 @@ public class OwnedContract {
 	                                                                       Long debugQueryTimeout,
 	                                                                       boolean debugThrowOnTreeErrors,
 	                                                                       List<ContractAbi> debugAbisForDecode) throws EverSdkException {
-		debugAbisForDecode.add(abi()); // adding this contract abi to decode list
-		var abis = debugAbisForDecode.stream().map(ContractAbi::ABI).toArray(Abi.ABI[]::new);
+
+		Abi.ABI[] abiArray = Stream
+				.concat(Stream.of(abi()), debugAbisForDecode.stream()) // adding THIS contract abi to decode list
+				.map(ContractAbi::ABI).
+				toArray(Abi.ABI[]::new);
 		long debugTimeout = Optional.ofNullable(debugQueryTimeout).orElse(30_000L); // default is 30 sec
 		var resultOfProcess = processExternalCall(functionName,
 		                                          functionInputs,
@@ -198,7 +204,7 @@ public class OwnedContract {
 		var msgId = resultOfProcess.transaction().get("in_msg").toString();
 		var debugOutResult = Net.queryTransactionTree(sdk().context(),
 		                                              msgId,
-		                                              abis,
+		                                              abiArray,
 		                                              debugTimeout);
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())

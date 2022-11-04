@@ -8,16 +8,16 @@ public record Uint(int size, BigInteger bigInteger) implements AbiType<BigIntege
 
 	public static Uint fromJava(int size, Object input) {
 		return switch (input) {
-			case Uint u -> new Uint(size, u.bigInteger());
-			case Integer i -> new Uint(size, BigInteger.valueOf(i));
-			case Long l -> new Uint(size, BigInteger.valueOf(l));
-			case BigInteger bi -> new Uint(size, bi);
-			case BigDecimal bd -> new Uint(size, bd.toBigInteger());
-			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()));
+			case Uint u -> new Uint(size, u.bigInteger().abs());
+			case Integer i -> new Uint(size, BigInteger.valueOf(i).abs());
+			case Long l -> new Uint(size, BigInteger.valueOf(l).abs());
+			case BigInteger bi -> new Uint(size, bi.abs());
+			case BigDecimal bd -> new Uint(size, bd.toBigInteger().abs());
+			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()).abs());
 			case String strPrefixed
 					when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
-					new Uint(size, new BigInteger(strPrefixed.substring(2), 16));
-			case String str -> new Uint(size, new BigInteger(str, 16));
+					new Uint(size, new BigInteger(strPrefixed.substring(2), 16).abs());
+			case String str -> new Uint(size, new BigInteger(str, 16).abs());
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + input + " class: " + input.getClass().getName());
 		};

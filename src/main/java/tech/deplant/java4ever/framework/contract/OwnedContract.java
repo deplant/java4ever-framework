@@ -6,6 +6,7 @@ import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.LogUtils;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.abi.datatype.Uint;
@@ -14,9 +15,11 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNullElse;
+import static tech.deplant.java4ever.framework.LogUtils.*;
 
 /**
  * Class that represends deployed contract in one of the networks. It holds info about
@@ -26,13 +29,9 @@ import static java.util.Objects.requireNonNullElse;
 public class OwnedContract {
 
 	private static System.Logger logger = System.getLogger(OwnedContract.class.getName());
-
 	protected final Sdk sdk;
-
 	protected final String address;
-
 	protected final ContractAbi abi;
-
 	protected final Credentials credentials;
 
 	public OwnedContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) {
@@ -211,59 +210,29 @@ public class OwnedContract {
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
 			                .findFirst()
 			                .get();
-			var msgSource = msg.src().length() > 0 ? msg.src() : "ext";
-			var msgDest = msg.dst().length() > 0 ? msg.dst() : "ext";
-			BigDecimal msgValue = (msg.value() == null) ? BigDecimal.ZERO : Convert.hexToDec(msg.value(), 9);
-			BigDecimal fees = Convert.hexToDec(tr.totalFees(), 9);
-			var outMessages = "\"" + String.join("\",\"", tr.outMsgs()) + "\"";
-			var error_code = tr.exitCode();
-			String trType = null;
-			if (msgSource == "ext") {
-				trType = "EXTERNAL CALL";
-			} else if (msgDest == "ext") {
-				trType = "EVENT";
-			} else {
-				trType = "INTERNAL MSG";
-			}
-			String msgName;
-			if (msg.decodedBody() == null || msg.decodedBody().name() == null) {
-				msgName = "Unknown";
-			} else {
-				msgName = msg.decodedBody().name();
-			}
-			String logBlock =
-					String.format("""
-							              |-----------------------------------------------------------
-							              |%s (%s): 
-							              |  TR_ID: %s
-							              |  MSG_ID: %s
-							              |  (%s)--{%s E}-->(%s)
-							              |  Result: %d (%s)
-							              |  Fees: %s E
-							              |  Out Messages: [%s]
-							              |-----------------------------------------------------------
-							              """,
-					              trType,
-					              msgName,
-					              tr.id(),
-					              msg.id(),
-					              msgSource,
-					              msgValue.toPlainString(),
-					              msgDest,
-					              error_code.intValue(),
-					              msgName,
-					              fees.toPlainString(),
-					              outMessages
-					);
+			Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
+			                                                            LogUtils.typeOfMessage(msg),
+			                                                            LogUtils.nameOfMessage(msg),
+			                                                            tr.id(),
+			                                                            msg.id(),
+			                                                            LogUtils.sourceOfMessage(msg),
+			                                                            Convert.hexToDecOrZero(msg.value(), 9)
+			                                                                   .toPlainString(),
+			                                                            LogUtils.destOfMessage(msg),
+			                                                            tr.exitCode().intValue(),
+			                                                            LogUtils.nameOfMessage(msg),
+			                                                            Convert.hexToDecOrZero(tr.totalFees(), 9)
+			                                                                   .toPlainString(),
+			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
 			if (tr.aborted() && debugThrowOnTreeErrors) {
-				logger.log(System.Logger.Level.ERROR, () -> logBlock);
+				error(logger, lazyFormatLogMessage);
 				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),
 				                                                            "One of the message tree transaction was aborted!"),
 				                           new Exception());
 			} else if (tr.aborted()) {
-				logger.log(System.Logger.Level.WARNING, () -> logBlock);
+				warn(logger, lazyFormatLogMessage);
 			} else {
-				logger.log(System.Logger.Level.INFO, () -> logBlock);
+				info(logger, lazyFormatLogMessage);
 			}
 		}
 		return new ResultOfQueryTransactionTreeAndCallOutput(debugOutResult, resultOfProcess.decoded().output());
@@ -288,19 +257,31 @@ public class OwnedContract {
 		                                          functionHeader,
 		                                          credentials);
 		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
-		logger.log(System.Logger.Level.INFO, () -> "\n-----------------------------------------------------------\n" +
-		                                           "TRANSACTION: (" +
-		                                           resultOfProcess.transaction().get("id").toString() + ")\n" +
-		                                           //"  Result: 0 \n" +
-		                                           "  Message: [ext] -(0 E)-> [" +
-		                                           resultOfProcess.transaction().get("account_addr").toString() +
-		                                           "] (id: " +
-		                                           resultOfProcess.transaction().get("in_msg").toString() + ")\n" +
-		                                           "  Account: " +
-		                                           resultOfProcess.transaction().get("account_addr").toString() + "\n" +
-		                                           "  Balance change: " + balanceDeltaStr.toPlainString() + " E\n" +
-		                                           "-----------------------------------------------------------\n"
-		);
+		Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
+		                                                            "EXTERNAL CALL",
+		                                                            functionName,
+		                                                            resultOfProcess.transaction().get("id").toString(),
+		                                                            resultOfProcess.transaction()
+		                                                                           .get("in_msg")
+		                                                                           .toString(),
+		                                                            "ext",
+		                                                            new BigDecimal(Uint.fromJava(128,
+		                                                                                         resultOfProcess.fees()
+		                                                                                                        .totalFwdFees())
+		                                                                               .toJava(), 9)
+				                                                            .toPlainString(),
+		                                                            resultOfProcess.transaction()
+		                                                                           .get("account_addr")
+		                                                                           .toString(),
+		                                                            0,
+		                                                            functionName,
+		                                                            new BigDecimal(Uint.fromJava(128,
+		                                                                                         resultOfProcess.fees()
+		                                                                                                        .totalAccountFees())
+		                                                                               .toJava(), 9)
+				                                                            .toPlainString(),
+		                                                            "");
+		info(logger, lazyFormatLogMessage);
 		return Optional.ofNullable(resultOfProcess
 				                           .decoded()
 				                           .output()).orElse(new HashMap<>());

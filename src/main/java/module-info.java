@@ -1,6 +1,7 @@
 module java4ever.framework {
 	requires jdk.incubator.concurrent;
 	requires transitive java4ever.binding;
+	requires transitive java4ever.utils;
 	//requires transitive com.fasterxml.jackson.databind;
 	exports tech.deplant.java4ever.framework;
 	exports tech.deplant.java4ever.framework.abi;

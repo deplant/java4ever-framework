@@ -11,6 +11,8 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
 
+import static tech.deplant.java4ever.utils.ObjectUtils.notEmpty;
+
 public class Convert {
 
 	private static System.Logger logger = System.getLogger(Convert.class.getName());
@@ -54,6 +56,15 @@ public class Convert {
 			stringAmount = stringAmount.substring(2);
 		}
 		return stringToDecimal(stringAmount, scale, 16);
+	}
+
+
+	public static BigDecimal hexToDecOrZero(String stringAmount, int scale) {
+		if (notEmpty(stringAmount)) {
+			return hexToDec(stringAmount, scale);
+		} else {
+			return BigDecimal.ZERO;
+		}
 	}
 
 	public static BigDecimal strToDec(String stringAmount, int scale) {

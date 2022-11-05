@@ -32,8 +32,9 @@ repositories {
 dependencies {
 
     // RUNTIME **************************
-    
+
     api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
+    api "tech.deplant.java4ever:java4ever-utils:1.0.0-SNAPSHOT" // java4ever-binding
     implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
     // TESTS **************************

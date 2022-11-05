@@ -41,7 +41,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
                           Abi.AbiEvent[] events
 ) {
 
-	private static System.Logger logger = System.getLogger(ContractAbi.class.getName());
+	private final static System.Logger logger = System.getLogger(ContractAbi.class.getName());
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
 		return ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, ContractAbi.class);

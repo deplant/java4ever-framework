@@ -177,7 +177,6 @@ public class OwnedContract {
 	 * @param functionInputs
 	 * @param functionHeader
 	 * @param credentials
-	 * @param debugQueryTimeout      Transaction tree query will fail if exceeds this timeout. Useful if you query large trees.
 	 * @param debugThrowOnTreeErrors If 'true' method will throw on any internal non-0 exit_code encountered in tree.
 	 * @param debugAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
@@ -187,7 +186,6 @@ public class OwnedContract {
 	                                                                       Map<String, Object> functionInputs,
 	                                                                       Abi.FunctionHeader functionHeader,
 	                                                                       Credentials credentials,
-	                                                                       Long debugQueryTimeout,
 	                                                                       boolean debugThrowOnTreeErrors,
 	                                                                       List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 
@@ -195,7 +193,6 @@ public class OwnedContract {
 				.concat(Stream.of(abi()), debugAbisForDecode.stream()) // adding THIS contract abi to decode list
 				.map(ContractAbi::ABI).
 				toArray(Abi.ABI[]::new);
-		long debugTimeout = Optional.ofNullable(debugQueryTimeout).orElse(30_000L); // default is 30 sec
 		var resultOfProcess = processExternalCall(functionName,
 		                                          functionInputs,
 		                                          functionHeader,
@@ -204,7 +201,7 @@ public class OwnedContract {
 		var debugOutResult = Net.queryTransactionTree(sdk().context(),
 		                                              msgId,
 		                                              abiArray,
-		                                              debugTimeout);
+		                                              sdk().debugTreeTimeout());
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))

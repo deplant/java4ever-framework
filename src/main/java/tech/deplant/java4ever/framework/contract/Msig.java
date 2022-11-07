@@ -2,7 +2,6 @@ package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -73,9 +72,7 @@ public class Msig extends OwnedContract implements Giver {
 	                                                               boolean sendBounce,
 	                                                               int flags,
 	                                                               String payload,
-	                                                               Long debugQueryTimeout,
 	                                                               boolean debugThrowOnInternalError,
-	                                                               Net.ResultOfQueryTransactionTree debugOutResult,
 	                                                               List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 		Map<String, Object> params = Map.of(
 				"dest", to,
@@ -88,7 +85,6 @@ public class Msig extends OwnedContract implements Giver {
 		                                   params,
 		                                   null,
 		                                   credentials(),
-		                                   debugQueryTimeout,
 		                                   debugThrowOnInternalError,
 		                                   debugAbisForDecode);
 	}

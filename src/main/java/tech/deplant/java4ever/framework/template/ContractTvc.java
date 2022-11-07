@@ -93,4 +93,95 @@ public record ContractTvc(byte[] bytes) {
 		                                 null).tvc();
 		return ContractTvc.ofBase64String(newTvcString);
 	}
+
+	public Builder toBuilder(Sdk sdk) throws EverSdkException {
+		var decoded = decode(sdk);
+		return new Builder(decoded.code(),
+		                   decoded.data(),
+		                   decoded.library(),
+		                   decoded.tick(),
+		                   decoded.tock(),
+		                   decoded.splitDepth(),
+		                   decoded.compilerVersion());
+	}
+
+	public static class Builder {
+
+		private String code;
+		//String codeHash;
+		//Number codeDepth;
+		private String data;
+		//String dataHash;
+		//Number dataDepth;
+		private String library;
+		private Boolean tick;
+		private Boolean tock;
+		private Number splitDepth;
+		private String compilerVersion;
+
+		public Builder() {
+		}
+
+		private Builder(String code,
+		                String data,
+		                String library,
+		                Boolean tick,
+		                Boolean tock,
+		                Number splitDepth,
+		                String compilerVersion) {
+			this.code = code;
+			this.data = data;
+			this.library = library;
+			this.tick = tick;
+			this.tock = tock;
+			this.splitDepth = splitDepth;
+			this.compilerVersion = compilerVersion;
+		}
+
+		public Builder code(String code) {
+			this.code = code;
+			return this;
+		}
+
+		private Builder data(String data) {
+			this.data = data;
+			return this;
+		}
+
+		private Builder library(String library) {
+			this.library = library;
+			return this;
+		}
+
+		private Builder tick(boolean tick) {
+			this.tick = tick;
+			return this;
+		}
+
+		private Builder tock(boolean tock) {
+			this.tock = tock;
+			return this;
+		}
+
+		private Builder splitDepth(Number splitDepth) {
+			this.splitDepth = splitDepth;
+			return this;
+		}
+
+		private Builder compilerVersion(String compilerVersion) {
+			this.compilerVersion = compilerVersion;
+			return this;
+		}
+
+		public ContractTvc build(Sdk sdk) throws EverSdkException {
+			return ContractTvc.ofBase64String(Boc.encodeTvc(sdk.context(),
+			                                                this.code,
+			                                                this.data,
+			                                                this.library,
+			                                                this.tick,
+			                                                this.tock,
+			                                                this.splitDepth,
+			                                                null).tvc());
+		}
+	}
 }

@@ -20,8 +20,8 @@ public record Sdk(Context context,
                   ExplorerConfig explorerConfig,
                   EnvironmentConfig environmentConfig) {
 
-	public static SdkBuilder builder() {
-		return new SdkBuilder();
+	public static Builder builder() {
+		return new Builder();
 	}
 
 	public String[] endpoints() {
@@ -66,7 +66,7 @@ public record Sdk(Context context,
 		return null;
 	}
 
-	public static class SdkBuilder {
+	public static class Builder {
 
 		private boolean cacheInLocalStorage = true;
 		private String localStoragePath = "~/.tonclient";
@@ -116,172 +116,172 @@ public record Sdk(Context context,
 		private String soliditySourcesDefaultPath = System.getProperty("user.dir");
 		private String solidityArtifactsBuildPath = System.getProperty("user.dir");
 
-		public SdkBuilder() {
+		public Builder() {
 		}
 
-		public SdkBuilder setSolidityCompilerPath(String solidityCompilerPath) {
+		public Builder setSolidityCompilerPath(String solidityCompilerPath) {
 			this.solidityCompilerPath = solidityCompilerPath;
 			return this;
 		}
 
-		public SdkBuilder setTvmlinkerPath(String tvmlinkerPath) {
+		public Builder setTvmlinkerPath(String tvmlinkerPath) {
 			this.tvmlinkerPath = tvmlinkerPath;
 			return this;
 		}
 
-		public SdkBuilder setStdLibPath(String stdLibPath) {
+		public Builder setStdLibPath(String stdLibPath) {
 			this.stdLibPath = stdLibPath;
 			return this;
 		}
 
-		public SdkBuilder setSoliditySourcesDefaultPath(String soliditySourcesDefaultPath) {
+		public Builder setSoliditySourcesDefaultPath(String soliditySourcesDefaultPath) {
 			this.soliditySourcesDefaultPath = soliditySourcesDefaultPath;
 			return this;
 		}
 
-		public SdkBuilder setSolidityArtifactsBuildPath(String solidityArtifactsBuildPath) {
+		public Builder setSolidityArtifactsBuildPath(String solidityArtifactsBuildPath) {
 			this.solidityArtifactsBuildPath = solidityArtifactsBuildPath;
 			return this;
 		}
 
-		public SdkBuilder environmentConfig(EnvironmentConfig environmentConfig) {
+		public Builder environmentConfig(EnvironmentConfig environmentConfig) {
 			this.environmentConfig = environmentConfig;
 			return this;
 		}
 
-		public SdkBuilder explorerConfig(ExplorerConfig explorerConfig) {
+		public Builder explorerConfig(ExplorerConfig explorerConfig) {
 			this.explorerConfig = explorerConfig;
 			return this;
 		}
 
-		public SdkBuilder proofsCacheInLocalStorage(boolean cacheInLocalStorage) {
+		public Builder proofsCacheInLocalStorage(boolean cacheInLocalStorage) {
 			this.cacheInLocalStorage = cacheInLocalStorage;
 			return this;
 		}
 
-		public SdkBuilder networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
+		public Builder networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
 			this.maxReconnectTimeout = maxReconnectTimeout;
 			return this;
 		}
 
-		public SdkBuilder networkSendingEndpointCount(Integer sendingEndpointCount) {
+		public Builder networkSendingEndpointCount(Integer sendingEndpointCount) {
 			this.sendingEndpointCount = sendingEndpointCount;
 			return this;
 		}
 
-		public SdkBuilder networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
+		public Builder networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
 			this.latencyDetectionInterval = latencyDetectionInterval;
 			return this;
 		}
 
-		public SdkBuilder networkMaxLatency(Integer maxLatency) {
+		public Builder networkMaxLatency(Integer maxLatency) {
 			this.maxLatency = maxLatency;
 			return this;
 		}
 
-		public SdkBuilder networkQueryTimeout(Integer queryTimeout) {
+		public Builder networkQueryTimeout(Integer queryTimeout) {
 			this.queryTimeout = queryTimeout;
 			return this;
 		}
 
-		public SdkBuilder networkQueriesProtocol(Client.NetworkQueriesProtocol queriesProtocol) {
+		public Builder networkQueriesProtocol(Client.NetworkQueriesProtocol queriesProtocol) {
 			this.queriesProtocol = queriesProtocol;
 			return this;
 		}
 
-		public SdkBuilder networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
+		public Builder networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
 			this.firstRempStatusTimeout = firstRempStatusTimeout;
 			return this;
 		}
 
-		public SdkBuilder networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
+		public Builder networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
 			this.nextRempStatusTimeout = nextRempStatusTimeout;
 			return this;
 		}
 
-		public SdkBuilder networkEndpoints(String... endpoints) {
+		public Builder networkEndpoints(String... endpoints) {
 			this.endpoints = endpoints;
 			return this;
 		}
 
-		public SdkBuilder networkServerAddress(String server_address) {
+		public Builder networkServerAddress(String server_address) {
 			this.serverAddress = server_address;
 			return this;
 		}
 
-		public SdkBuilder networkRetriesCount(Integer network_retries_count) {
+		public Builder networkRetriesCount(Integer network_retries_count) {
 			this.networkRetriesCount = network_retries_count;
 			return this;
 		}
 
-		public SdkBuilder networkMessageRetriesCount(Integer message_retries_count) {
+		public Builder networkMessageRetriesCount(Integer message_retries_count) {
 			this.messageRetriesCount = message_retries_count;
 			return this;
 		}
 
-		public SdkBuilder networkMessageProcessingTimeout(Integer message_processing_timeout) {
+		public Builder networkMessageProcessingTimeout(Integer message_processing_timeout) {
 			this.messageProcessingTimeout = message_processing_timeout;
 			return this;
 		}
 
-		public SdkBuilder networkWaitForTimeout(Integer wait_for_timeout) {
+		public Builder networkWaitForTimeout(Integer wait_for_timeout) {
 			this.waitForTimeout = wait_for_timeout;
 			return this;
 		}
 
-		public SdkBuilder networkOutOfSyncThreshold(Integer out_of_sync_threshold) {
+		public Builder networkOutOfSyncThreshold(Integer out_of_sync_threshold) {
 			this.outOfSyncThreshold = out_of_sync_threshold;
 			return this;
 		}
 
-		public SdkBuilder networkReconnectTimeout(Integer reconnect_timeout) {
+		public Builder networkReconnectTimeout(Integer reconnect_timeout) {
 			this.reconnectTimeout = reconnect_timeout;
 			return this;
 		}
 
-		public SdkBuilder networkAccessKey(String access_key) {
+		public Builder networkAccessKey(String access_key) {
 			this.accessKey = access_key;
 			return this;
 		}
 
 		//cripto
-		public SdkBuilder cryptoMnemonicDictionary(Integer mnemonic_dictionary) {
+		public Builder cryptoMnemonicDictionary(Integer mnemonic_dictionary) {
 			this.mnemonicDictionary = mnemonic_dictionary;
 			return this;
 		}
 
-		public SdkBuilder cryptoMnemonicWordCount(Integer mnemonic_word_count) {
+		public Builder cryptoMnemonicWordCount(Integer mnemonic_word_count) {
 			this.mnemonicWordCount = mnemonic_word_count;
 			return this;
 		}
 
-		public SdkBuilder cryptoHdkeyDerivationPath(String hdkey_derivation_path) {
+		public Builder cryptoHdkeyDerivationPath(String hdkey_derivation_path) {
 			this.hdkeyDerivationPath = hdkey_derivation_path;
 			return this;
 		}
 
 		//abi
-		public SdkBuilder abiWorkchain(Integer workchain) {
+		public Builder abiWorkchain(Integer workchain) {
 			this.workchain = workchain;
 			return this;
 		}
 
-		public SdkBuilder abiMessageExpirationTimeout(Integer message_expiration_timeout) {
+		public Builder abiMessageExpirationTimeout(Integer message_expiration_timeout) {
 			this.messageExpirationTimeout = message_expiration_timeout;
 			return this;
 		}
 
-		public SdkBuilder abiMessageExpirationTimeoutGrowFactor(Integer message_expiration_timeout_grow_factor) {
+		public Builder abiMessageExpirationTimeoutGrowFactor(Integer message_expiration_timeout_grow_factor) {
 			this.messageExpirationTimeoutGrowFactor = message_expiration_timeout_grow_factor;
 			return this;
 		}
 
-		public SdkBuilder timeout(long timeout) {
+		public Builder timeout(long timeout) {
 			this.timeout = timeout;
 			return this;
 		}
 
-		public SdkBuilder mapper(ObjectMapper mapper) {
+		public Builder mapper(ObjectMapper mapper) {
 			this.mapper = mapper;
 			return this;
 		}
@@ -362,17 +362,17 @@ public record Sdk(Context context,
 			return new Sdk(context, this.debugTimeout, config, explorerConfig, envConfig);
 		}
 
-		public SdkBuilder bocCacheMaxSize(Integer cacheMaxSize) {
+		public Builder bocCacheMaxSize(Integer cacheMaxSize) {
 			this.cacheMaxSize = cacheMaxSize;
 			return this;
 		}
 
-		public SdkBuilder explorerConfigPath(String explorerConfigPath) {
+		public Builder explorerConfigPath(String explorerConfigPath) {
 			this.explorerConfigPath = explorerConfigPath;
 			return this;
 		}
 
-		public SdkBuilder environmentConfigPath(String environmentConfigPath) {
+		public Builder environmentConfigPath(String environmentConfigPath) {
 			this.environmentConfigPath = environmentConfigPath;
 			return this;
 		}

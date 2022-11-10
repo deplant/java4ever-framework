@@ -37,12 +37,12 @@ public record TvmLinker(String linkerPath, String stdlibSolPath) {
 			Process p = new ProcessBuilder()
 					.inheritIO()
 					.command(
-							this.linkerPath,
+							linkerPath(),
 							"compile",
 							"-o",
 							outputPath,
 							"--lib",
-							this.stdlibSolPath,
+							stdlibSolPath(),
 							"--abi-json",
 							abiPath,
 							codePath

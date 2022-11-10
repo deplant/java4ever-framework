@@ -20,7 +20,7 @@ public class EverOSGiver extends OwnedContract implements Giver {
 	public final static String ADDRESS = "0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415";
 
 	public EverOSGiver(Sdk sdk) throws JsonProcessingException {
-		super(sdk, ADDRESS, ABI(), KEYS);
+		super(sdk, ADDRESS, DEFAULT_ABI(), KEYS);
 	}
 
 	public EverOSGiver(Sdk sdk, String address, Credentials owner, ContractAbi abi) {
@@ -31,7 +31,7 @@ public class EverOSGiver extends OwnedContract implements Giver {
 		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
-	public static ContractAbi ABI() throws JsonProcessingException {
+	public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {
 		return ContractAbi.ofResource("artifacts/giver/GiverV2.abi.json");
 	}
 

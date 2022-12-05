@@ -11,7 +11,8 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
 
-import static tech.deplant.java4ever.utils.ObjectUtils.notEmpty;
+import static tech.deplant.java4ever.utils.StringUtils.isEmpty;
+
 
 public class Convert {
 
@@ -60,11 +61,10 @@ public class Convert {
 
 
 	public static BigDecimal hexToDecOrZero(String stringAmount, int scale) {
-		if (notEmpty(stringAmount)) {
-			return hexToDec(stringAmount, scale);
-		} else {
+		if (isEmpty(stringAmount)) {
 			return BigDecimal.ZERO;
 		}
+		return hexToDec(stringAmount, scale);
 	}
 
 	public static BigDecimal strToDec(String stringAmount, int scale) {

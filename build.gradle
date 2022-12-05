@@ -9,8 +9,7 @@ ext {
     // dependencies
     slf4jVersion = "2.0.3"
     junitVersion = "5.9.1"
-    jacksonVersion = "2.13.4"
-    jacksonDatabindVersion = "2.13.4.2"
+
     // details
     v_version = "1.4.0"
     v_groupId = "tech.deplant.java4ever"
@@ -34,7 +33,7 @@ dependencies {
     // RUNTIME **************************
 
     api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
-    api "tech.deplant.java4ever:java4ever-utils:1.0.0-SNAPSHOT" // java4ever-binding
+    api "tech.deplant.java4ever:java4ever-utils:1.4.0" // java4ever-binding
     implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
     // TESTS **************************

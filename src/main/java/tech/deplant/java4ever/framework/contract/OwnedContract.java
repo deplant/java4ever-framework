@@ -151,6 +151,38 @@ public class OwnedContract {
 		                           credentials);
 	}
 
+	/**
+	 * Encodes inputs and run getter method on account's boc then decodes answer
+	 * using credentials provided at OwnedContract initialization.
+	 * Important! This method always downloads new boc before running getter on it.
+	 * If you need to cache boc and run multiple getters cheaply, you need to get
+	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @return
+	 * @throws EverSdkException
+	 */
+	public Map<String, Object> runGetter(String functionName,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
+	}
+
+	public Map<String, Object> runGetter(Integer functionId,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader,
+	                                     Credentials credentials) throws EverSdkException {
+		return runGetter(Uint.fromJava(32, functionId).toABI(), functionInputs, functionHeader, credentials);
+	}
+
+	public Map<String, Object> runGetter(Integer functionId,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return runGetter(functionId, functionInputs, functionHeader, this.credentials);
+	}
+
 
 	private Processing.ResultOfProcessMessage processExternalCall(String functionName,
 	                                                              Map<String, Object> functionInputs,
@@ -300,23 +332,17 @@ public class OwnedContract {
 		return callExternal(functionName, functionInputs, functionHeader, this.credentials);
 	}
 
-	/**
-	 * Encodes inputs and run getter method on account's boc then decodes answer
-	 * using credentials provided at OwnedContract initialization.
-	 * Important! This method always downloads new boc before running getter on it.
-	 * If you need to cache boc and run multiple getters cheaply, you need to get
-	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
-	 *
-	 * @param functionName
-	 * @param functionInputs
-	 * @param functionHeader
-	 * @return
-	 * @throws EverSdkException
-	 */
-	public Map<String, Object> runGetter(String functionName,
-	                                     Map<String, Object> functionInputs,
-	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
-		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
+	public Map<String, Object> callExternal(Integer functionId,
+	                                        Map<String, Object> functionInputs,
+	                                        Abi.FunctionHeader functionHeader,
+	                                        Credentials credentials) throws EverSdkException {
+		return callExternal(Uint.fromJava(32, functionId).toABI(), functionInputs, functionHeader, credentials);
+	}
+
+	public Map<String, Object> callExternal(Integer functionId,
+	                                        Map<String, Object> functionInputs,
+	                                        Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return callExternal(functionId, functionInputs, functionHeader, this.credentials);
 	}
 
 	public record ResultOfQueryTransactionTreeAndCallOutput(Net.ResultOfQueryTransactionTree queryTree,

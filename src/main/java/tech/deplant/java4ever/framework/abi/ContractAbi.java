@@ -7,8 +7,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.datatype.AbiType;
 import tech.deplant.java4ever.framework.abi.datatype.TypePrefix;
+import tech.deplant.java4ever.framework.abi.datatype.Uint;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 
@@ -62,6 +64,10 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 	public String json() throws JsonProcessingException {
 		return ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 		                                    .writeValueAsString(this);
+	}
+
+	public String functionId(Sdk sdk, String name) throws EverSdkException {
+		return Uint.fromJava(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).toABI();
 	}
 
 	public boolean hasHeader(String name) {

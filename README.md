@@ -1,7 +1,7 @@
 # java4ever-framework
 
 [![JDK version](https://img.shields.io/badge/Java-19+-green.svg)](https://shields.io/)
-[![SDK version](https://img.shields.io/badge/TON%20SDK-v1.37+-orange)](https://github.com/tonlabs/TON-SDK/tree/1.28.0)
+[![SDK version](https://img.shields.io/badge/TON%20SDK-v1.40+-orange)](https://github.com/tonlabs/ever-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 
 * Discuss in

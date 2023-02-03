@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public record Sdk(Context context,
-                  long debugTreeTimeout,
+                  Integer debugTreeTimeout,
                   Client.ClientConfig clientConfig,
                   ExplorerConfig explorerConfig,
                   EnvironmentConfig environmentConfig) {
@@ -71,8 +71,8 @@ public record Sdk(Context context,
 		private boolean cacheInLocalStorage = true;
 		private String localStoragePath = "~/.tonclient";
 		// JavaConfig
-		private long timeout = 60_000L;
-		private long debugTimeout = 60_000L;
+		private Integer timeout = 60_000;
+		private Integer debugTimeout = 60_000;
 		private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
 		//Context.NetworkConfig
 		private String[] endpoints = new String[]{"https://localhost"};
@@ -276,7 +276,7 @@ public record Sdk(Context context,
 			return this;
 		}
 
-		public Builder timeout(long timeout) {
+		public Builder timeout(Integer timeout) {
 			this.timeout = timeout;
 			return this;
 		}

@@ -116,7 +116,7 @@ public record ContractTvc(byte[] bytes) {
 		private String library;
 		private Boolean tick;
 		private Boolean tock;
-		private Number splitDepth;
+		private Integer splitDepth;
 		private String compilerVersion;
 
 		public Builder() {
@@ -127,7 +127,7 @@ public record ContractTvc(byte[] bytes) {
 		                String library,
 		                Boolean tick,
 		                Boolean tock,
-		                Number splitDepth,
+		                Integer splitDepth,
 		                String compilerVersion) {
 			this.code = code;
 			this.data = data;
@@ -163,7 +163,7 @@ public record ContractTvc(byte[] bytes) {
 			return this;
 		}
 
-		private Builder splitDepth(Number splitDepth) {
+		private Builder splitDepth(Integer splitDepth) {
 			this.splitDepth = splitDepth;
 			return this;
 		}

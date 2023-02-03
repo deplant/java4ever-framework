@@ -196,7 +196,7 @@ public class OwnedContract {
 		                                                 functionHeader,
 		                                                 abi().convertFunctionInputs(functionName,
 		                                                                             functionInputs)),
-		                                 requireNonNullElse(credentials, Credentials.NONE).signer(), null, false, null);
+		                                 requireNonNullElse(credentials, Credentials.NONE).signer(), null, false);
 	}
 
 	/**
@@ -233,7 +233,8 @@ public class OwnedContract {
 		var debugOutResult = Net.queryTransactionTree(sdk().context(),
 		                                              msgId,
 		                                              abiArray,
-		                                              sdk().debugTreeTimeout());
+		                                              sdk().debugTreeTimeout(),
+		                                              0);
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))

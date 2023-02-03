@@ -66,8 +66,7 @@ public class ContractTemplate {
 					callSetFuture.resultNow(),
 					credentials.signer(),
 					null,
-					false,
-					null
+					false
 			);
 			return new OwnedContract(sdk, address, abi(), credentials);
 		} catch (InterruptedException e) {

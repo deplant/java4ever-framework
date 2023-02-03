@@ -1,5 +1,7 @@
 package tech.deplant.java4ever.framework;
 
+import tech.deplant.java4ever.utils.Strings;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,8 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
-
-import static tech.deplant.java4ever.utils.StringUtils.isEmpty;
 
 
 public class Convert {
@@ -61,7 +61,7 @@ public class Convert {
 
 
 	public static BigDecimal hexToDecOrZero(String stringAmount, int scale) {
-		if (isEmpty(stringAmount)) {
+		if (Strings.isEmpty(stringAmount)) {
 			return BigDecimal.ZERO;
 		}
 		return hexToDec(stringAmount, scale);

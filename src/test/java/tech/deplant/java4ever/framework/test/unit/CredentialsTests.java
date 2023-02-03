@@ -79,7 +79,7 @@ public class CredentialsTests {
 	@Test
 	public void no_credentials_means_signer_type_none() throws Throwable {
 		var keys1 = Credentials.NONE;
-		assertEquals(keys1.signer(), Abi.Signer.NONE);
+		assertEquals(keys1.signer(), new Abi.Signer.None());
 	}
 
 }

@@ -9,6 +9,8 @@ import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.util.*;
 
+import static java.util.Objects.requireNonNullElse;
+
 public record Account(String id,
                       int accType,
                       String balance,
@@ -33,9 +35,9 @@ public record Account(String id,
 	 * @return GraphQL result with fields (id acc_type balance boc data data_hash code code_hash init_code_hash last_paid) as Account object
 	 * @throws EverSdkException
 	 */
-	public static Account ofAddress(Sdk sdk, Address address) throws EverSdkException {
+	public static Account ofAddress(Sdk sdk, String address) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
-		filter.put("id", new GraphQLFilter.In(new String[]{address.makeAddrStd()}));
+		filter.put("id", new GraphQLFilter.In(new String[]{address}));
 		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
 		                                                         "accounts",
 		                                                         filter,
@@ -45,7 +47,7 @@ public record Account(String id,
 		if (result.result().length > 0) {
 			return sdk.convertMap(result.result()[0], Account.class);
 		} else {
-			return new Account(address.makeAddrStd(), 0, "0x00", null, null, null, null, null, null, 0);
+			return new Account(address, 0, "0x00", null, null, null, null, null, null, 0);
 		}
 	}
 
@@ -58,12 +60,10 @@ public record Account(String id,
 	 * @throws EverSdkException
 	 */
 	public static List<Account> ofAddressList(Sdk sdk,
-	                                          Address... addresses) throws EverSdkException {
+	                                          String... addresses) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id",
-		           new GraphQLFilter.In(Arrays.stream(addresses)
-		                                      .map(Address::makeAddrStd)
-		                                      .toArray(String[]::new)));
+		           new GraphQLFilter.In(addresses));
 		return Arrays
 				.stream(Net.queryCollection(sdk.context(),
 				                            "accounts",
@@ -108,7 +108,7 @@ public record Account(String id,
 								null,
 								abi.convertFunctionInputs(functionName, functionInputs)
 						),
-						credentials.signer(),
+						requireNonNullElse(credentials, Credentials.NONE).signer(),
 						null
 				);
 		return Optional.ofNullable(Tvm.runTvm(
@@ -156,7 +156,7 @@ public record Account(String id,
 								null,
 								abi.convertFunctionInputs(functionName, functionInputs)
 						),
-						credentials.signer(),
+						requireNonNullElse(credentials, Credentials.NONE).signer(),
 						null
 				);
 		return Tvm.runExecutor(sdk.context(),

@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static tech.deplant.java4ever.framework.LogUtils.error;
+
 public record EnvironmentConfig(String serializationPath,
                                 Solc compiler,
                                 TvmLinker linker,
@@ -26,7 +28,7 @@ public record EnvironmentConfig(String serializationPath,
 
 	private static System.Logger logger = System.getLogger(EnvironmentConfig.class.getName());
 
-	public static EnvironmentConfig ofPaths(
+	public static EnvironmentConfig EMPTY(
 			String serializationPath,
 			String solcPath,
 			String linkerPath,
@@ -76,11 +78,11 @@ public record EnvironmentConfig(String serializationPath,
 						ContractTvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);
 			} else {
-				logger.log(System.Logger.Level.ERROR, () -> "TvmLinker exit code:" + linkerResult);
+				error(logger, () -> "TvmLinker exit code:" + linkerResult);
 				return null;
 			}
 		} else {
-			logger.log(System.Logger.Level.ERROR, () -> "Solc exit code:" + compilerResult);
+			error(logger, () -> "Solc exit code:" + compilerResult);
 			throw new EverSdkException(new EverSdkException.ErrorResult(-600,
 			                                                            "Compilation failed. Solc exit code:" +
 			                                                            compilerResult), new Exception());

@@ -2,8 +2,6 @@ package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.Net;
-import tech.deplant.java4ever.framework.Address;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.crypto.Credentials;
@@ -19,7 +17,7 @@ import java.util.Map;
  */
 public class Msig extends OwnedContract implements Giver {
 
-	public Msig(Sdk sdk, Address address, Credentials owner, ContractAbi abi) {
+	public Msig(Sdk sdk, String address, Credentials owner, ContractAbi abi) {
 		super(sdk, address, abi, owner);
 	}
 
@@ -27,15 +25,15 @@ public class Msig extends OwnedContract implements Giver {
 		super(contract.sdk(), contract.address(), contract.abi(), contract.credentials());
 	}
 
-	public static Msig ofSafe(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+	public static Msig ofSafe(Sdk sdk, String address, Credentials owner) throws JsonProcessingException {
 		return new Msig(sdk, address, owner, MsigTemplate.SAFE_MULTISIG_ABI());
 	}
 
-	public static Msig ofSetcode(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+	public static Msig ofSetcode(Sdk sdk, String address, Credentials owner) throws JsonProcessingException {
 		return new Msig(sdk, address, owner, MsigTemplate.SETCODE_MULTISIG_ABI());
 	}
 
-	public static Msig ofSurf(Sdk sdk, Address address, Credentials owner) throws JsonProcessingException {
+	public static Msig ofSurf(Sdk sdk, String address, Credentials owner) throws JsonProcessingException {
 		return new Msig(sdk, address, owner, MsigTemplate.SURF_MULTISIG_ABI());
 	}
 
@@ -49,13 +47,13 @@ public class Msig extends OwnedContract implements Giver {
 	 * @param payload
 	 * @throws EverSdkException
 	 */
-	public void send(Address to,
+	public void send(String to,
 	                 BigInteger amount,
 	                 boolean sendBounce,
 	                 int flags,
 	                 String payload) throws EverSdkException {
 		Map<String, Object> params = Map.of(
-				"dest", to.makeAddrStd(),
+				"dest", to,
 				"value", amount,
 				"bounce", sendBounce,
 				"flags", flags,
@@ -69,34 +67,30 @@ public class Msig extends OwnedContract implements Giver {
 		super.callExternal("confirmTransaction", params, null);
 	}
 
-	public Net.ResultOfQueryTransactionTree sendDebugTree(Address to,
-	                                                      BigInteger amount,
-	                                                      boolean sendBounce,
-	                                                      int flags,
-	                                                      String payload,
-	                                                      Long debugQueryTimeout,
-	                                                      boolean debugThrowOnInternalError,
-	                                                      Net.ResultOfQueryTransactionTree debugOutResult,
-	                                                      List<ContractAbi> debugAbisForDecode) throws EverSdkException {
+	public ResultOfQueryTransactionTreeAndCallOutput sendDebugTree(String to,
+	                                                               BigInteger amount,
+	                                                               boolean sendBounce,
+	                                                               int flags,
+	                                                               String payload,
+	                                                               boolean debugThrowOnInternalError,
+	                                                               List<ContractAbi> debugAbisForDecode) throws EverSdkException {
 		Map<String, Object> params = Map.of(
-				"dest", to.makeAddrStd(),
+				"dest", to,
 				"value", amount,
 				"bounce", sendBounce,
 				"flags", flags,
 				"payload", payload);
-		super.callExternalDebugTree("sendTransaction",
-		                            params,
-		                            null,
-		                            credentials(),
-		                            debugQueryTimeout,
-		                            debugThrowOnInternalError,
-		                            debugOutResult,
-		                            debugAbisForDecode);
-		return debugOutResult;
+
+		return super.callExternalDebugTree("sendTransaction",
+		                                   params,
+		                                   null,
+		                                   credentials(),
+		                                   debugThrowOnInternalError,
+		                                   debugAbisForDecode);
 	}
 
 	@Override
-	public void give(Address to, BigInteger amount) throws EverSdkException {
+	public void give(String to, BigInteger amount) throws EverSdkException {
 		send(to, amount, false, 1, "");
 	}
 }

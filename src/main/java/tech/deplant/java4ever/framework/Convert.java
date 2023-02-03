@@ -11,10 +11,20 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.TimeZone;
 
-public class Data {
+import static tech.deplant.java4ever.utils.StringUtils.isEmpty;
 
 
-	private static System.Logger logger = System.getLogger(Data.class.getName());
+public class Convert {
+
+	private static System.Logger logger = System.getLogger(Convert.class.getName());
+
+	public static BigInteger toNanos(String number, CurrencyUnit unit) {
+		return toNanos(new BigDecimal(number), unit);
+	}
+
+	public static BigInteger toNanos(BigDecimal number, CurrencyUnit unit) {
+		return number.multiply(unit.factor()).toBigInteger();
+	}
 
 	public static String base64ToHexString(String base64string) {
 		return HexFormat.of().formatHex(Base64.getDecoder().decode(base64string));
@@ -47,6 +57,14 @@ public class Data {
 			stringAmount = stringAmount.substring(2);
 		}
 		return stringToDecimal(stringAmount, scale, 16);
+	}
+
+
+	public static BigDecimal hexToDecOrZero(String stringAmount, int scale) {
+		if (isEmpty(stringAmount)) {
+			return BigDecimal.ZERO;
+		}
+		return hexToDec(stringAmount, scale);
 	}
 
 	public static BigDecimal strToDec(String stringAmount, int scale) {

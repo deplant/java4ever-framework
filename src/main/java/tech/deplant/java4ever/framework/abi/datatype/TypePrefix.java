@@ -1,6 +1,6 @@
-package tech.deplant.java4ever.framework.abi;
+package tech.deplant.java4ever.framework.abi.datatype;
 
-public enum AbiValueType {
+public enum TypePrefix {
 	INT,
 	UINT,
 	STRING,

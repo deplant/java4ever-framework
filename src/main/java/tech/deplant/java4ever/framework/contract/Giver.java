@@ -1,7 +1,6 @@
 package tech.deplant.java4ever.framework.contract;
 
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Address;
 
 import java.math.BigInteger;
 
@@ -21,5 +20,5 @@ public interface Giver {
 	 * @param amount Amount to send (in nanoevers)
 	 * @throws EverSdkException
 	 */
-	public void give(Address to, BigInteger amount) throws EverSdkException;
+	public void give(String to, BigInteger amount) throws EverSdkException;
 }

@@ -5,16 +5,21 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Address;
-import tech.deplant.java4ever.framework.Data;
+import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.LogUtils;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.AbiUint;
 import tech.deplant.java4ever.framework.abi.ContractAbi;
+import tech.deplant.java4ever.framework.abi.datatype.Uint;
 import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNullElse;
+import static tech.deplant.java4ever.framework.LogUtils.*;
 
 /**
  * Class that represends deployed contract in one of the networks. It holds info about
@@ -24,23 +29,19 @@ import java.util.*;
 public class OwnedContract {
 
 	private static System.Logger logger = System.getLogger(OwnedContract.class.getName());
-
 	protected final Sdk sdk;
-
-	protected final Address address;
-
+	protected final String address;
 	protected final ContractAbi abi;
-
 	protected final Credentials credentials;
 
-	public OwnedContract(Sdk sdk, Address address, ContractAbi abi, Credentials credentials) {
+	public OwnedContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) {
 		this.sdk = sdk;
 		this.address = address;
 		this.abi = abi;
 		this.credentials = credentials;
 	}
 
-	public OwnedContract(Sdk sdk, Address address, ContractAbi abi) {
+	public OwnedContract(Sdk sdk, String address, ContractAbi abi) {
 		this(sdk, address, abi, Credentials.NONE);
 	}
 
@@ -48,7 +49,7 @@ public class OwnedContract {
 		return this.sdk;
 	}
 
-	public Address address() {
+	public String address() {
 		return this.address;
 	}
 
@@ -63,7 +64,7 @@ public class OwnedContract {
 	 * @throws EverSdkException
 	 */
 	public BigInteger balance() throws EverSdkException {
-		return AbiUint.deserialize(128, account().balance());
+		return Uint.fromJava(128, account().balance()).toJava();
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class OwnedContract {
 				true,
 				Credentials.NONE.signer(),
 				null,
-				address().makeAddrStd()
+				address()
 		).body();
 	}
 
@@ -150,6 +151,38 @@ public class OwnedContract {
 		                           credentials);
 	}
 
+	/**
+	 * Encodes inputs and run getter method on account's boc then decodes answer
+	 * using credentials provided at OwnedContract initialization.
+	 * Important! This method always downloads new boc before running getter on it.
+	 * If you need to cache boc and run multiple getters cheaply, you need to get
+	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
+	 *
+	 * @param functionName
+	 * @param functionInputs
+	 * @param functionHeader
+	 * @return
+	 * @throws EverSdkException
+	 */
+	public Map<String, Object> runGetter(String functionName,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
+	}
+
+	public Map<String, Object> runGetter(Integer functionId,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader,
+	                                     Credentials credentials) throws EverSdkException {
+		return runGetter(Uint.fromJava(32, functionId).toABI(), functionInputs, functionHeader, credentials);
+	}
+
+	public Map<String, Object> runGetter(Integer functionId,
+	                                     Map<String, Object> functionInputs,
+	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return runGetter(functionId, functionInputs, functionHeader, this.credentials);
+	}
+
 
 	private Processing.ResultOfProcessMessage processExternalCall(String functionName,
 	                                                              Map<String, Object> functionInputs,
@@ -157,13 +190,13 @@ public class OwnedContract {
 	                                                              Credentials credentials) throws EverSdkException {
 		return Processing.processMessage(this.sdk.context(),
 		                                 abi().ABI(),
-		                                 address().makeAddrStd(),
+		                                 address(),
 		                                 null,
 		                                 new Abi.CallSet(functionName,
 		                                                 functionHeader,
 		                                                 abi().convertFunctionInputs(functionName,
 		                                                                             functionInputs)),
-		                                 credentials.signer(), null, false, null);
+		                                 requireNonNullElse(credentials, Credentials.NONE).signer(), null, false, null);
 	}
 
 	/**
@@ -176,66 +209,62 @@ public class OwnedContract {
 	 * @param functionInputs
 	 * @param functionHeader
 	 * @param credentials
-	 * @param debugQueryTimeout      Transaction tree query will fail if exceeds this timeout. Useful if you query large trees.
 	 * @param debugThrowOnTreeErrors If 'true' method will throw on any internal non-0 exit_code encountered in tree.
-	 * @param debugOutResult         Result of transaction tree query will be returned here
 	 * @param debugAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
-	public Map<String, Object> callExternalDebugTree(String functionName,
-	                                                 Map<String, Object> functionInputs,
-	                                                 Abi.FunctionHeader functionHeader,
-	                                                 Credentials credentials,
-	                                                 Long debugQueryTimeout,
-	                                                 boolean debugThrowOnTreeErrors,
-	                                                 Net.ResultOfQueryTransactionTree debugOutResult,
-	                                                 List<ContractAbi> debugAbisForDecode) throws EverSdkException {
-		debugAbisForDecode.add(abi()); // adding this contract abi to decode list
-		var abis = debugAbisForDecode.stream().map(ContractAbi::ABI).toArray(Abi.ABI[]::new);
-		long debugTimeout = Optional.ofNullable(debugQueryTimeout).orElse(30_000L); // default is 30 sec
+	public ResultOfQueryTransactionTreeAndCallOutput callExternalDebugTree(String functionName,
+	                                                                       Map<String, Object> functionInputs,
+	                                                                       Abi.FunctionHeader functionHeader,
+	                                                                       Credentials credentials,
+	                                                                       boolean debugThrowOnTreeErrors,
+	                                                                       List<ContractAbi> debugAbisForDecode) throws EverSdkException {
+
+		Abi.ABI[] abiArray = Stream
+				.concat(Stream.of(abi()), debugAbisForDecode.stream()) // adding THIS contract abi to decode list
+				.map(ContractAbi::ABI).
+				toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall(functionName,
 		                                          functionInputs,
 		                                          functionHeader,
 		                                          credentials);
 		var msgId = resultOfProcess.transaction().get("in_msg").toString();
-		debugOutResult = Net.queryTransactionTree(sdk().context(),
-		                                          msgId,
-		                                          abis,
-		                                          debugTimeout);
-		var messages = debugOutResult.messages();
-		var transactions = debugOutResult.transactions();
-		for (Net.TransactionNode tr : transactions) {
-			var msg = Arrays.stream(messages).filter(msgElem -> msgElem.id().equals(tr.inMsg())).findFirst().get();
-			var msgSource = msg.src().length() > 0 ? msg.src() : "ext";
-			var msgDest = msg.dst().length() > 0 ? msg.dst() : "ext";
-			BigDecimal msgValue = (msg.value() == null) ? BigDecimal.ZERO : Data.hexToDec(msg.value(), 9);
-			BigDecimal fees = Data.hexToDec(tr.totalFees(), 9);
-			var outMessages = "\"" + String.join("\",\"", tr.outMsgs()) + "\"";
-			var error_code = tr.exitCode();
-			String logBlock =
-					"\n-----------------------------------------------------------\n" +
-					"TRANSACTION: {\"id\":\"" + tr.id() + "\"" + ",\"msg_id\":\"" + msg.id() + "\"}\n" +
-					"  [" + msgSource + "] -(" + msgValue.toPlainString() + " E)-> [" + msgDest + "]\n" +
-					"  Result: " + error_code + "\n" +
-//					"  Account: " + tr.accountAddr() + "\n" +
-					"  Fees: " + fees.toPlainString() + " E\n" +
-					"  Out Messages: [" + outMessages + "]\n" +
-					"-----------------------------------------------------------\n";
+		var debugOutResult = Net.queryTransactionTree(sdk().context(),
+		                                              msgId,
+		                                              abiArray,
+		                                              sdk().debugTreeTimeout());
+		for (Net.TransactionNode tr : debugOutResult.transactions()) {
+			var msg = Arrays.stream(debugOutResult.messages())
+			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
+			                .findFirst()
+			                .get();
+			Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
+			                                                            LogUtils.typeOfMessage(msg),
+			                                                            LogUtils.nameOfMessage(msg),
+			                                                            tr.id(),
+			                                                            msg.id(),
+			                                                            LogUtils.sourceOfMessage(msg),
+			                                                            Convert.hexToDecOrZero(msg.value(), 9)
+			                                                                   .toPlainString(),
+			                                                            LogUtils.destOfMessage(msg),
+			                                                            tr.exitCode().intValue(),
+			                                                            LogUtils.nameOfMessage(msg),
+			                                                            Convert.hexToDecOrZero(tr.totalFees(), 9)
+			                                                                   .toPlainString(),
+			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
 			if (tr.aborted() && debugThrowOnTreeErrors) {
-				logger.log(System.Logger.Level.ERROR, () -> logBlock);
+				error(logger, lazyFormatLogMessage);
 				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),
 				                                                            "One of the message tree transaction was aborted!"),
 				                           new Exception());
 			} else if (tr.aborted()) {
-				logger.log(System.Logger.Level.WARNING, () -> logBlock);
+				warn(logger, lazyFormatLogMessage);
 			} else {
-				logger.log(System.Logger.Level.INFO, () -> logBlock);
+				info(logger, lazyFormatLogMessage);
 			}
 		}
-		return Optional.ofNullable(resultOfProcess
-				                           .decoded()
-				                           .output()).orElse(new HashMap<>());
+		return new ResultOfQueryTransactionTreeAndCallOutput(debugOutResult, resultOfProcess.decoded().output());
 	}
 
 	/**
@@ -256,20 +285,32 @@ public class OwnedContract {
 		                                          functionInputs,
 		                                          functionHeader,
 		                                          credentials);
-		var balanceDeltaStr = Data.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
-		logger.log(System.Logger.Level.INFO, () -> "\n-----------------------------------------------------------\n" +
-		                                           "TRANSACTION: (" +
-		                                           resultOfProcess.transaction().get("id").toString() + ")\n" +
-		                                           //"  Result: 0 \n" +
-		                                           "  Message: [ext] -(0 E)-> [" +
-		                                           resultOfProcess.transaction().get("account_addr").toString() +
-		                                           "] (id: " +
-		                                           resultOfProcess.transaction().get("in_msg").toString() + ")\n" +
-		                                           "  Account: " +
-		                                           resultOfProcess.transaction().get("account_addr").toString() + "\n" +
-		                                           "  Balance change: " + balanceDeltaStr.toPlainString() + " E\n" +
-		                                           "-----------------------------------------------------------\n"
-		);
+		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
+		Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
+		                                                            "EXTERNAL CALL",
+		                                                            functionName,
+		                                                            resultOfProcess.transaction().get("id").toString(),
+		                                                            resultOfProcess.transaction()
+		                                                                           .get("in_msg")
+		                                                                           .toString(),
+		                                                            "ext",
+		                                                            new BigDecimal(Uint.fromJava(128,
+		                                                                                         resultOfProcess.fees()
+		                                                                                                        .totalFwdFees())
+		                                                                               .toJava(), 9)
+				                                                            .toPlainString(),
+		                                                            resultOfProcess.transaction()
+		                                                                           .get("account_addr")
+		                                                                           .toString(),
+		                                                            0,
+		                                                            functionName,
+		                                                            new BigDecimal(Uint.fromJava(128,
+		                                                                                         resultOfProcess.fees()
+		                                                                                                        .totalAccountFees())
+		                                                                               .toJava(), 9)
+				                                                            .toPlainString(),
+		                                                            "");
+		info(logger, lazyFormatLogMessage);
 		return Optional.ofNullable(resultOfProcess
 				                           .decoded()
 				                           .output()).orElse(new HashMap<>());
@@ -291,22 +332,20 @@ public class OwnedContract {
 		return callExternal(functionName, functionInputs, functionHeader, this.credentials);
 	}
 
-	/**
-	 * Encodes inputs and run getter method on account's boc then decodes answer
-	 * using credentials provided at OwnedContract initialization.
-	 * Important! This method always downloads new boc before running getter on it.
-	 * If you need to cache boc and run multiple getters cheaply, you need to get
-	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
-	 *
-	 * @param functionName
-	 * @param functionInputs
-	 * @param functionHeader
-	 * @return
-	 * @throws EverSdkException
-	 */
-	public Map<String, Object> runGetter(String functionName,
-	                                     Map<String, Object> functionInputs,
-	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
-		return runGetter(functionName, functionInputs, functionHeader, this.credentials);
+	public Map<String, Object> callExternal(Integer functionId,
+	                                        Map<String, Object> functionInputs,
+	                                        Abi.FunctionHeader functionHeader,
+	                                        Credentials credentials) throws EverSdkException {
+		return callExternal(Uint.fromJava(32, functionId).toABI(), functionInputs, functionHeader, credentials);
+	}
+
+	public Map<String, Object> callExternal(Integer functionId,
+	                                        Map<String, Object> functionInputs,
+	                                        Abi.FunctionHeader functionHeader) throws EverSdkException {
+		return callExternal(functionId, functionInputs, functionHeader, this.credentials);
+	}
+
+	public record ResultOfQueryTransactionTreeAndCallOutput(Net.ResultOfQueryTransactionTree queryTree,
+	                                                        Map<String, Object> decodedOutuput) {
 	}
 }

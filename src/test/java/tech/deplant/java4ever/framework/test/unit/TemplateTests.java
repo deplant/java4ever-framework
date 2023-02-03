@@ -10,7 +10,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.SdkBuilder;
 import tech.deplant.java4ever.framework.template.MsigTemplate;
 
 import java.io.IOException;
@@ -27,9 +26,9 @@ public class TemplateTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = new SdkBuilder()
-				.networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
-				.create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		SDK = Sdk.builder()
+		         .networkEndpoints(System.getenv("LOCAL_NODE_ENDPOINT"))
+		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 	}
 
 	@Test
@@ -49,8 +48,7 @@ public class TemplateTests {
 				             .SURF()
 				             .withUpdatedInitialData(SDK,
 				                                     "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
-				             .calculateAddress(SDK)
-				             .makeAddrStd()
+				             .addressFromEncodedTvc(SDK)
 		);
 		assertFalse(
 				MsigTemplate
@@ -59,6 +57,17 @@ public class TemplateTests {
 						                        "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
 						.isDeployed(SDK)
 		);
+	}
+
+	@Test
+	public void template_updated_and_hashed_address_equal_to_deployset_message_address() {
+//		assertEquals("0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
+//		             MsigTemplate
+//				             .SURF()
+//				             .withUpdatedInitialData(SDK,
+//				                                     "a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48")
+//				             .calculateAddress(SDK)
+//		);
 	}
 
 

@@ -9,21 +9,31 @@
 * Read full
   docs: [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
 
-**java4ever-framework** is a Java 19 suite for smart-contracts development, testing & accesing dapps for
-[Everscale](https://everscale.network/) blockchain network.
-Framework depends on [java4ever-binding](https://github.com/deplant/java4ever-binding) base library.
+**java4ever** is a Java 19 suite for smart-contracts development, testing & accessing DApps for
+[Everscale](https://everscale.network/) blockchain network much like [web3j](https://github.com/web3j/web3j) for
+Ethereum and close to Truffle, Hardhat & [locklift](https://github.com/broxus/locklift).
+
+With **java4ever** you can connect your enterprise services on **Java** to
+most scalable smart-contract network. It is also suitable for any Everscale forks like GOSH or Venom.
 
 With java4ever you get:
 
-* Complete implementation of Everscale SDK's JSON-RPC API
-* All Multisig Wallets support (easy deploy & calls)
-* Any EVER-SDKs support (no rebuild needed, just plug-in SDK lib you like)
+* Complete implementation of
+  Everscale [EVER-SDK JSON-RPC API](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md)
+* All main Multisig Wallets variations support (easy deploy & calls)
+* Pluggable EVER-SDK client library support (no rebuild needed, just plug-in SDK lib you like)
 * Maven/Gradle support (deployed
   to [Maven Central](https://mvnrepository.com/artifact/tech.deplant.java4ever/java4ever-framework))
-* TIP 3.2 helpers (easy deploy & calls)
+* TIP 3.2 Fungible Tokens helpers (easy deploy & calls)
 * EverNodeSE Giver helpers (and you can polymorph to Multisig Givers with no code change or implement custom)
-* Auto-conversion of types between Java & ABI
-* Transaction tree of calls can be accessed
+* Powerful auto-conversion between Java types & ABI expectations
+* Transaction tree of a complex call can be accessed
+
+**java4ever** uses blocking code (that is now
+a [best practice](https://github.com/alexcheng1982/jdk-loom-faq#structured-concurrency)
+due to Loom [Structured Concurrency](https://openjdk.org/jeps/428)).
+Framework internally uses JSON-RPC connection to native EVER-SDK library binded to
+Java ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
 
 ## Quick start
 
@@ -39,7 +49,7 @@ With java4ever you get:
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:1.3.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:1.4.0'
 }
 ```
 
@@ -50,7 +60,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
@@ -90,7 +100,7 @@ var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
 
 ```java
 var sdkDev = new SdkBuilder()
-                  .networkEndpoints("https://eri01.main.everos.dev","https://gra01.main.everos.dev")
+                  .networkEndpoints("https://devnet-sandbox.evercloud.dev/graphql")
                   .create(JavaLibraryPathLoader.TON_CLIENT);
 ```
 
@@ -217,4 +227,5 @@ ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk,template.abi(),initialD
 
 ## Logging
 
-java4ever-binding uses the [SLF4J](https://www.slf4j.org/) logging facade.
+java4ever-framework uses the JDK Platform Loggging (JEP 264: Platform Logging API and Service),
+so can be easily bridged to any logging framework.

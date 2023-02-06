@@ -28,6 +28,15 @@ repositories {
     mavenLocal()
 }
 
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/gen/java']
+        }
+    }
+}
+
 dependencies {
 
     // RUNTIME **************************

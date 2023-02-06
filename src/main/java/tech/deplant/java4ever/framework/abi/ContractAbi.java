@@ -13,6 +13,7 @@ import tech.deplant.java4ever.framework.abi.datatype.TypePrefix;
 import tech.deplant.java4ever.framework.abi.datatype.Uint;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.utils.regex.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * @param events
  */
 public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
-                          @JsonProperty("abi_version") Number abiVersionOld,
+                          @JsonProperty("abi_version") Integer abiVersionOld,
                           String version,
                           String[] header,
                           Abi.AbiData[] data,
@@ -59,6 +60,48 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 
 	public static ContractAbi ofJsonNode(JsonNode node) throws JsonProcessingException {
 		return ofString(ContextBuilder.DEFAULT_MAPPER.writeValueAsString(node));
+	}
+
+	public static AbiTypeDetails typeParser(String typeString) throws EverSdkException {
+		// Size pattern matching
+		var expr = new Then(
+				new GroupOf(new Occurences(new AnyOf(new Word("a-zA-Z")), 1)),
+				new GroupOf(new Occurences(Special.DIGIT, 1, 3)))
+				.toPattern();
+		var matcher = expr.matcher(typeString);
+		while (matcher.find()) {
+			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
+			                          Integer.parseInt(matcher.group(2))
+					, arrayMatcher(typeString));
+		}
+		// Type pattern  matching
+		matcher = Pattern.compile("([a-zA-Z]+)").matcher(typeString);
+		while (matcher.find()) {
+			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
+			                          0, arrayMatcher(typeString));
+		}
+		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
+		                                                               "ABI Type parsing failed! Type: " + typeString),
+		                              new RuntimeException());
+		logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+		throw ex;
+	}
+
+	public static boolean arrayMatcher(String typeString) {
+		var arrayPattern = new Then(
+				new GroupOf(
+						new Then(
+								new Occurences(new AnyOf(new Word("a-zA-Z")), 1),
+								new Occurences(Special.DIGIT, 0, 3)
+						)
+				),
+				new GroupOf(new Then(new Symbol('['), new Symbol(']'))))
+				.toPattern();
+		var matcher = arrayPattern.matcher(typeString);
+		while (matcher.find()) {
+			return true;
+		}
+		return false;
 	}
 
 	public String json() throws JsonProcessingException {
@@ -138,36 +181,6 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 			logger.log(System.Logger.Level.ERROR, () -> "This JsonAbi can't be stringified!" + e.getMessage());
 			return new Abi.ABI.Json("{}");
 		}
-	}
-
-	protected AbiTypeDetails typeParser(String typeString) throws EverSdkException {
-		// Size pattern matching
-		var matcher = Pattern.compile("([a-zA-Z]+)(\\d{1,3})").matcher(typeString);
-		while (matcher.find()) {
-			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
-			                          Integer.parseInt(matcher.group(2))
-					, arrayMatcher(typeString));
-		}
-		// Type pattern  matching
-		matcher = Pattern.compile("([a-zA-Z]+)").matcher(typeString);
-		while (matcher.find()) {
-			return new AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
-			                          0, arrayMatcher(typeString));
-		}
-		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
-		                                                               "ABI Type parsing failed! Type: " + typeString),
-		                              new RuntimeException());
-		logger.log(System.Logger.Level.WARNING, () -> ex.toString());
-		throw ex;
-	}
-
-	protected boolean arrayMatcher(String typeString) {
-		var arrayPattern = Pattern.compile("([a-zA-Z]+\\d{0,3})(\\[\\])");
-		var matcher = arrayPattern.matcher(typeString);
-		while (matcher.find()) {
-			return true;
-		}
-		return false;
 	}
 
 	protected Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
@@ -346,7 +359,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 
 	}
 
-	record AbiTypeDetails(TypePrefix type, int size, boolean isArray) {
+	public record AbiTypeDetails(TypePrefix type, int size, boolean isArray) {
 	}
 
 }

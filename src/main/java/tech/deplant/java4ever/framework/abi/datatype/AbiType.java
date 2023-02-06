@@ -21,8 +21,8 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 		};
 	}
 
-	public JAVA_TYPE toJava();
+	JAVA_TYPE toJava();
 
-	public JSON_TYPE toABI();
+	JSON_TYPE toABI();
 
 }

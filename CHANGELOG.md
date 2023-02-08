@@ -1,3 +1,11 @@
+### 1.4.0
+
+- Added EVER-SDK 1.40.0 support
+- Added easy functionId helpers
+- Added builder for creating TVCs from scratch
+- Improved type conversion between ABI and Java
+- Added transaction tree logging and exception handling
+
 ### 1.3.0
 
 - Removed SLF4J facade

@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.*;
@@ -34,6 +35,10 @@ public record Sdk(Context context,
 
 	public <T> T convertMap(Map<String, Object> inputMap, Class<T> outputClass) {
 		return context().mapper().convertValue(inputMap, outputClass);
+	}
+
+	public <T> T convertMap(Map<String, Object> inputMap, TypeReference<T> outputType) {
+		return context().mapper().convertValue(inputMap, outputType);
 	}
 
 	public JsonNode parseStruct(Object struct) throws JsonProcessingException {

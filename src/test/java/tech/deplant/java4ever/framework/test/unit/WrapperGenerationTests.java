@@ -20,6 +20,7 @@ import tech.deplant.java4ever.framework.contract.CallHandle;
 import tech.deplant.java4ever.framework.contract.ContractHandle;
 import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
 import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.utils.Objs;
 import tech.deplant.java4ever.utils.Strings;
 
 import javax.lang.model.element.Modifier;
@@ -36,7 +37,7 @@ public class WrapperGenerationTests {
 	private static System.Logger logger = System.getLogger(CredentialsTests.class.getName());
 
 	@Test
-	public void first_msig_deploy_passes_second_throws() throws IOException, EverSdkException {
+	public void generate() throws IOException, EverSdkException {
 
 		String contractName = "SafeMultisigWallet";
 		String resourceName = "artifacts/multisig/SafeMultisigWallet.abi.json";
@@ -64,46 +65,49 @@ public class WrapperGenerationTests {
 
 		final TypeSpec.Builder wrapperBuilder = TypeSpec
 				.recordBuilder(wrapperName)
+				.addSuperinterface(ContractHandle.class)
 				.addJavadoc(wrapperDocs.build())
 				.addModifiers(Modifier.PUBLIC);
-		wrapperBuilder.addRecordComponent(ContractHandle.class, "contract");
-		//wrapperBuilder.superclass(OwnedContract.class);
-		var wrapperConstructorBuilder = MethodSpec.constructorBuilder();
-		// Sdk sdk, String address, ContractAbi abi, Credentials credentials
-		wrapperConstructorBuilder
-				.addModifiers(Modifier.PUBLIC)
-				.addParameter(Sdk.class, "sdk")
-				.addParameter(String.class, "address")
-				.addParameter(ContractAbi.class, "abi")
-				.addParameter(Credentials.class, "credentials")
-				.addStatement("this(new ContractHandle(sdk, address, abi, credentials))");
-		wrapperBuilder.addMethod(wrapperConstructorBuilder.build());
+		wrapperBuilder.addRecordComponent(Sdk.class, "sdk");
+		wrapperBuilder.addRecordComponent(String.class, "address");
+		wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
+		wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
 
 		final TypeSpec.Builder templateBuilder = TypeSpec
-				.classBuilder(wrapperName + "Template")
-				.addJavadoc(wrapperDocs.build())
-				.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+				.recordBuilder(wrapperName + "Template")
+				.addJavadoc(templateDocs.build())
+				.addModifiers(Modifier.PUBLIC);
 
 		for (var func : abi.functions()) {
-			if (Strings.notEmptyEquals(func.name(), "constructor")) {
-				// constructor function is special, it goes to contract template too
+			MethodSpec.Builder methodBuilder = null;
+			boolean isConstructor = Strings.notEmptyEquals(func.name(), "constructor");
+			if (isConstructor) {
+				methodBuilder = MethodSpec.methodBuilder("deploy");
 				logger.log(System.Logger.Level.INFO, "constructor!");
 			} else {
-				// all other functions
-				logger.log(System.Logger.Level.INFO, func.name());
-				//if (func.outputs().length == 0) {
-				var methodBuilder = MethodSpec.methodBuilder(func.name());
-				methodBuilder.returns(CallHandle.class);
-				methodBuilder.addModifiers(Modifier.PUBLIC);
-				StringBuilder mapStringBuilder = new StringBuilder("$T params = $T.of(");
-				List<String> mapParams = new ArrayList<>();
-				List<Object> mapArgsBuilder = new ArrayList<>();
-				mapArgsBuilder.add(ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT));
-				mapArgsBuilder.add(TypeName.MAP);
-				for (var param : func.inputs()) {
+				methodBuilder = MethodSpec.methodBuilder(func.name());
+			}
+			// all other functions
+			logger.log(System.Logger.Level.INFO, func.name());
+			//if (func.outputs().length == 0) {
+			methodBuilder.addModifiers(Modifier.PUBLIC);
+			StringBuilder mapStringBuilder = new StringBuilder("$T params = $T.of(");
+			List<String> mapParams = new ArrayList<>();
+			List<Object> mapArgsBuilder = new ArrayList<>();
+			mapArgsBuilder.add(ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT));
+			mapArgsBuilder.add(TypeName.MAP);
+
+			TypeSpec resultOfFunctionType = null;
+			if (func.outputs().length > 0) {
+
+				final TypeSpec.Builder resultTypeBuilder = TypeSpec
+						.recordBuilder("ResultOf" + ParserUtils.capitalize(func.name()))
+						.addModifiers(Modifier.PUBLIC);
+
+				for (var param : func.outputs()) {
 					var typeDetails = ContractAbi.typeParser(param.type());
 					//logger.log(System.Logger.Level.INFO, );
-					TypeName typeName = switch (typeDetails.type()) {
+					TypeName resultTypeName = switch (typeDetails.type()) {
 						case INT, UINT -> {
 							if (typeDetails.size() <= 32) {
 								yield ClassName.get(Integer.class);
@@ -122,25 +126,68 @@ public class WrapperGenerationTests {
 						case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
 					};
 					if (typeDetails.isArray()) {
-						typeName = ArrayTypeName.of(typeName);
+						resultTypeName = ArrayTypeName.of(resultTypeName);
 					}
-					var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
-					methodBuilder.addParameter(paramSpec);
-					mapParams.add("$S, $N");
-					mapArgsBuilder.add(param.name());
-					mapArgsBuilder.add(paramSpec);
+					var paramSpec = ParameterSpec.builder(resultTypeName, param.name()).build();
+					resultTypeBuilder.addRecordComponent(paramSpec);
 				}
-				mapStringBuilder.append(String.join(", \n", mapParams));
-				mapStringBuilder.append(")");
-				var bodyBuilder = CodeBlock.builder();
-				bodyBuilder.addStatement(mapStringBuilder.toString(), mapArgsBuilder.toArray());
-				bodyBuilder.addStatement("return new $T(contract(), $S, params, null)", CallHandle.class, func.name());
-				methodBuilder.addCode(bodyBuilder.build());
-				//methodBuilder.addException(EverSdkException.class);
-				wrapperBuilder.addMethod(methodBuilder.build());
-				//}
+
+				resultOfFunctionType = resultTypeBuilder.build();
+
+				wrapperBuilder.addType(resultOfFunctionType);
 			}
 
+			for (var param : func.inputs()) {
+				var typeDetails = ContractAbi.typeParser(param.type());
+				//logger.log(System.Logger.Level.INFO, );
+				TypeName typeName = switch (typeDetails.type()) {
+					case INT, UINT -> {
+						if (typeDetails.size() <= 32) {
+							yield ClassName.get(Integer.class);
+						} else if (typeDetails.size() <= 64) {
+							yield ClassName.get(Long.class);
+						} else {
+							yield ClassName.get(BigInteger.class);
+						}
+					}
+					case STRING, BYTE, BYTES -> TypeName.STRING;
+					case ADDRESS -> ClassName.get(Address.class);
+					case BOOL -> ClassName.get(Boolean.class);
+					case CELL -> ClassName.get(TvmCell.class);
+					case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
+					case BUILDER -> ClassName.get(TvmBuilder.class);
+					case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
+				};
+				if (typeDetails.isArray()) {
+					typeName = ArrayTypeName.of(typeName);
+				}
+				var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
+				methodBuilder.addParameter(paramSpec);
+				mapParams.add("$S, $N");
+				mapArgsBuilder.add(param.name());
+				mapArgsBuilder.add(paramSpec);
+			}
+			mapStringBuilder.append(String.join(", \n", mapParams));
+			mapStringBuilder.append(")");
+			var bodyBuilder = CodeBlock.builder();
+			TypeName callHandleType = Objs.isNull(resultOfFunctionType) ? ParameterizedTypeName.get(CallHandle.class,
+			                                                                                        Void.class) : ParameterizedTypeName.get(
+					ClassName.get(CallHandle.class),
+					ClassName.bestGuess(resultOfFunctionType.name));
+			bodyBuilder.addStatement(mapStringBuilder.toString(), mapArgsBuilder.toArray());
+			bodyBuilder.addStatement("return new $T(this, $S, params, null)", callHandleType, func.name());
+			methodBuilder.addCode(bodyBuilder.build());
+
+			//methodBuilder.addException(EverSdkException.class);
+			if (isConstructor) {
+				methodBuilder.returns(ClassName.bestGuess(wrapperName));
+				templateBuilder.addMethod(methodBuilder.build());
+			} else {
+				methodBuilder.returns(callHandleType);
+				wrapperBuilder.addMethod(methodBuilder.build());
+			}
+
+			//}
 		}
 
 		// file writing loop
@@ -157,8 +204,8 @@ public class WrapperGenerationTests {
 
 	@Test
 	public void test_generated() throws EverSdkException {
-		var handle = new SafeMultisigWallet(null).acceptTransfer("");
-		handle.call();
+		var handle = new SafeMultisigWallet(null, null, null, null).getParameters();
+		var result = handle.call();
 	}
 
 }

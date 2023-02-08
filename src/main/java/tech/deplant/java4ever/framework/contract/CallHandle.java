@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.Convert;
@@ -16,16 +17,20 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.info;
 
-public record CallHandle(ContractHandle contract,
-                         String functionName,
-                         Map<String, Object> functionInputs,
-                         Abi.FunctionHeader functionHeader) {
+public record CallHandle<RETURN>(ContractHandle contract,
+                                 String functionName,
+                                 Map<String, Object> functionInputs,
+                                 Abi.FunctionHeader functionHeader) {
 
 	//TODO Add CallHandle.Builder and method toBuilder()
 
 	private static System.Logger logger = System.getLogger(CallHandle.class.getName());
 
-	public Map<String, Object> get() throws EverSdkException {
+	public Abi.CallSet toCallSet() {
+		return new Abi.CallSet(functionName(), functionHeader(), functionInputs());
+	}
+
+	public RETURN get() throws EverSdkException, ClassNotFoundException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address()}));
 		Net.ResultOfQueryCollection result = Net.queryCollection(contract().sdk().context(),
@@ -49,18 +54,20 @@ public record CallHandle(ContractHandle contract,
 						null
 				);
 		String boc = result.result()[0].get("boc").toString();
-		return Optional.ofNullable(Tvm.runTvm(
-				                              contract().sdk().context(),
-				                              msg.message(),
-				                              boc,
-				                              null,
-				                              contract().abi().ABI(),
-				                              null,
-				                              false).decoded()
-		                              .output()).orElse(new HashMap<>());
+		var map = Optional.ofNullable(Tvm.runTvm(
+				                                 contract().sdk().context(),
+				                                 msg.message(),
+				                                 boc,
+				                                 null,
+				                                 contract().abi().ABI(),
+				                                 null,
+				                                 false).decoded()
+		                                 .output()).orElse(new HashMap<>());
+		return contract().sdk().convertMap(map, new TypeReference<>() {
+		});
 	}
 
-	public Map<String, Object> call() throws EverSdkException {
+	public RETURN call() throws EverSdkException {
 		var resultOfProcess = processExternalCall(this.functionName,
 		                                          this.functionInputs,
 		                                          this.functionHeader,
@@ -91,9 +98,12 @@ public record CallHandle(ContractHandle contract,
 				                                                            .toPlainString(),
 		                                                            "");
 		info(logger, lazyFormatLogMessage);
-		return Optional.ofNullable(resultOfProcess
-				                           .decoded()
-				                           .output()).orElse(new HashMap<>());
+		var map = Optional.ofNullable(resultOfProcess
+				                              .decoded()
+				                              .output()).orElse(new HashMap<>());
+
+		return contract().sdk().convertMap(map, new TypeReference<>() {
+		});
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall(String functionName,

@@ -10,7 +10,7 @@ import tech.deplant.java4ever.framework.template.ContractTvc;
 
 import java.util.Map;
 
-public interface TemplateHandle {
+public interface Template {
 
 	System.Logger logger = System.getLogger(ContractTemplate.class.getName());
 
@@ -21,7 +21,8 @@ public interface TemplateHandle {
 	default String calculateAddress(Sdk sdk,
 	                                Map<String, Object> initialData,
 	                                Credentials credentials) throws EverSdkException {
-		String address = Address.ofFutureDeploy(sdk, this, 0, initialData, credentials);
+		//TODO Coupling with ContractTemplate
+		String address = Address.ofFutureDeploy(sdk, new ContractTemplate(abi(), tvc()), 0, initialData, credentials);
 		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		return address;
 	}

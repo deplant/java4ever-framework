@@ -5,30 +5,12 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.generator.ParserUtils;
-import tech.deplant.java4ever.binding.generator.javapoet.*;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
-import tech.deplant.java4ever.framework.abi.datatype.TvmBuilder;
-import tech.deplant.java4ever.framework.abi.datatype.TvmCell;
-import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.framework.contract.CallHandle;
-import tech.deplant.java4ever.framework.contract.ContractHandle;
-import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.utils.Objs;
-import tech.deplant.java4ever.utils.Strings;
+import tech.deplant.java4ever.framework.generator.ContractWrapper;
 
-import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -39,173 +21,100 @@ public class WrapperGenerationTests {
 	@Test
 	public void generate() throws IOException, EverSdkException {
 
-		String contractName = "SafeMultisigWallet";
-		String resourceName = "artifacts/multisig/SafeMultisigWallet.abi.json";
+		Path targetDirectory = Paths.get("src/gen/java");
+		String contractPackage = "tech.deplant.java4ever.framework.contract";
+		String templatePackage = "tech.deplant.java4ever.framework.template";
 
-		var abi = ContextBuilder.DEFAULT_MAPPER.readValue(
-				new JsonResource(resourceName).get(),
-				Abi.AbiContract.class
-		);
+		// Givers
 
-		String wrapperName = ParserUtils.capitalize(contractName);
+		ContractWrapper.generate("artifacts/giver/GiverV2.abi.json",
+		                         targetDirectory,
+		                         "GiverV2",
+		                         contractPackage,
+		                         templatePackage);
 
-		var wrapperDocs = CodeBlock
-				.builder()
-				.add(String.format("""
-						                   Java wrapper class for usage of <strong>%s</strong> contract for Everscale blockchain.
-						                   """,
-				                   wrapperName));
+		// Multisigs
 
-		var templateDocs = CodeBlock
-				.builder()
-				.add(String.format("""
-						                   Java template class for deploy of <strong>%s</strong> contract for Everscale blockchain.
-						                   """,
-				                   wrapperName));
+		ContractWrapper.generate("artifacts/multisig/SafeMultisigWallet.abi.json",
+		                         targetDirectory,
+		                         "SafeMultisigWallet",
+		                         contractPackage,
+		                         templatePackage);
 
-		final TypeSpec.Builder wrapperBuilder = TypeSpec
-				.recordBuilder(wrapperName)
-				.addSuperinterface(ContractHandle.class)
-				.addJavadoc(wrapperDocs.build())
-				.addModifiers(Modifier.PUBLIC);
-		wrapperBuilder.addRecordComponent(Sdk.class, "sdk");
-		wrapperBuilder.addRecordComponent(String.class, "address");
-		wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
-		wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
+		ContractWrapper.generate("artifacts/multisig/SetcodeMultisigWallet.abi.json",
+		                         targetDirectory,
+		                         "SetcodeMultisigWallet",
+		                         contractPackage,
+		                         templatePackage);
 
-		final TypeSpec.Builder templateBuilder = TypeSpec
-				.recordBuilder(wrapperName + "Template")
-				.addJavadoc(templateDocs.build())
-				.addModifiers(Modifier.PUBLIC);
+		ContractWrapper.generate("artifacts/multisig/SurfMultisigWallet.abi.json",
+		                         targetDirectory,
+		                         "SurfMultisigWallet",
+		                         contractPackage,
+		                         templatePackage);
 
-		for (var func : abi.functions()) {
-			MethodSpec.Builder methodBuilder = null;
-			boolean isConstructor = Strings.notEmptyEquals(func.name(), "constructor");
-			if (isConstructor) {
-				methodBuilder = MethodSpec.methodBuilder("deploy");
-				logger.log(System.Logger.Level.INFO, "constructor!");
-			} else {
-				methodBuilder = MethodSpec.methodBuilder(func.name());
-			}
-			// all other functions
-			logger.log(System.Logger.Level.INFO, func.name());
-			//if (func.outputs().length == 0) {
-			methodBuilder.addModifiers(Modifier.PUBLIC);
-			StringBuilder mapStringBuilder = new StringBuilder("$T params = $T.of(");
-			List<String> mapParams = new ArrayList<>();
-			List<Object> mapArgsBuilder = new ArrayList<>();
-			mapArgsBuilder.add(ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT));
-			mapArgsBuilder.add(TypeName.MAP);
+		// TIP 3
 
-			TypeSpec resultOfFunctionType = null;
-			if (func.outputs().length > 0) {
+		ContractWrapper.generate("artifacts/tip31/TokenRoot.abi.json",
+		                         targetDirectory,
+		                         "TIP3TokenRoot",
+		                         contractPackage,
+		                         templatePackage);
 
-				final TypeSpec.Builder resultTypeBuilder = TypeSpec
-						.recordBuilder("ResultOf" + ParserUtils.capitalize(func.name()))
-						.addModifiers(Modifier.PUBLIC);
+		ContractWrapper.generate("artifacts/tip31/TokenWallet.abi.json",
+		                         targetDirectory,
+		                         "TIP3TokenWallet",
+		                         contractPackage,
+		                         templatePackage);
 
-				for (var param : func.outputs()) {
-					var typeDetails = ContractAbi.typeParser(param.type());
-					//logger.log(System.Logger.Level.INFO, );
-					TypeName resultTypeName = switch (typeDetails.type()) {
-						case INT, UINT -> {
-							if (typeDetails.size() <= 32) {
-								yield ClassName.get(Integer.class);
-							} else if (typeDetails.size() <= 64) {
-								yield ClassName.get(Long.class);
-							} else {
-								yield ClassName.get(BigInteger.class);
-							}
-						}
-						case STRING, BYTE, BYTES -> TypeName.STRING;
-						case ADDRESS -> ClassName.get(Address.class);
-						case BOOL -> ClassName.get(Boolean.class);
-						case CELL -> ClassName.get(TvmCell.class);
-						case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
-						case BUILDER -> ClassName.get(TvmBuilder.class);
-						case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
-					};
-					if (typeDetails.isArray()) {
-						resultTypeName = ArrayTypeName.of(resultTypeName);
-					}
-					var paramSpec = ParameterSpec.builder(resultTypeName, param.name()).build();
-					resultTypeBuilder.addRecordComponent(paramSpec);
-				}
 
-				resultOfFunctionType = resultTypeBuilder.build();
+		// TIP 4
 
-				wrapperBuilder.addType(resultOfFunctionType);
-			}
+		ContractWrapper.generate("artifacts/tip4/Collection.abi.json",
+		                         targetDirectory,
+		                         "TIP4Collection",
+		                         contractPackage,
+		                         templatePackage);
 
-			for (var param : func.inputs()) {
-				var typeDetails = ContractAbi.typeParser(param.type());
-				//logger.log(System.Logger.Level.INFO, );
-				TypeName typeName = switch (typeDetails.type()) {
-					case INT, UINT -> {
-						if (typeDetails.size() <= 32) {
-							yield ClassName.get(Integer.class);
-						} else if (typeDetails.size() <= 64) {
-							yield ClassName.get(Long.class);
-						} else {
-							yield ClassName.get(BigInteger.class);
-						}
-					}
-					case STRING, BYTE, BYTES -> TypeName.STRING;
-					case ADDRESS -> ClassName.get(Address.class);
-					case BOOL -> ClassName.get(Boolean.class);
-					case CELL -> ClassName.get(TvmCell.class);
-					case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
-					case BUILDER -> ClassName.get(TvmBuilder.class);
-					case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
-				};
-				if (typeDetails.isArray()) {
-					typeName = ArrayTypeName.of(typeName);
-				}
-				var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
-				methodBuilder.addParameter(paramSpec);
-				mapParams.add("$S, $N");
-				mapArgsBuilder.add(param.name());
-				mapArgsBuilder.add(paramSpec);
-			}
-			mapStringBuilder.append(String.join(", \n", mapParams));
-			mapStringBuilder.append(")");
-			var bodyBuilder = CodeBlock.builder();
-			TypeName callHandleType = Objs.isNull(resultOfFunctionType) ? ParameterizedTypeName.get(CallHandle.class,
-			                                                                                        Void.class) : ParameterizedTypeName.get(
-					ClassName.get(CallHandle.class),
-					ClassName.bestGuess(resultOfFunctionType.name));
-			bodyBuilder.addStatement(mapStringBuilder.toString(), mapArgsBuilder.toArray());
-			bodyBuilder.addStatement("return new $T(this, $S, params, null)", callHandleType, func.name());
-			methodBuilder.addCode(bodyBuilder.build());
+		ContractWrapper.generate("artifacts/tip4/Index.abi.json",
+		                         targetDirectory,
+		                         "TIP4Index",
+		                         contractPackage,
+		                         templatePackage);
 
-			//methodBuilder.addException(EverSdkException.class);
-			if (isConstructor) {
-				methodBuilder.returns(ClassName.bestGuess(wrapperName));
-				templateBuilder.addMethod(methodBuilder.build());
-			} else {
-				methodBuilder.returns(callHandleType);
-				wrapperBuilder.addMethod(methodBuilder.build());
-			}
+		ContractWrapper.generate("artifacts/tip4/IndexBasis.abi.json",
+		                         targetDirectory,
+		                         "TIP4IndexBasis",
+		                         contractPackage,
+		                         templatePackage);
 
-			//}
-		}
+		ContractWrapper.generate("artifacts/tip4/Nft.abi.json",
+		                         targetDirectory,
+		                         "TIP4Nft",
+		                         contractPackage,
+		                         templatePackage);
 
-		// file writing loop
-		JavaFile contractFile = JavaFile
-				.builder("tech.deplant.java4ever.framework.contract", wrapperBuilder.build())
-				.build();
-		contractFile.writeTo(Paths.get("src/gen/java"));
+		ContractWrapper.generate("artifacts/tip4/Wallet.abi.json",
+		                         targetDirectory,
+		                         "TIP4Wallet",
+		                         contractPackage,
+		                         templatePackage);
 
-		JavaFile templateFile = JavaFile
-				.builder("tech.deplant.java4ever.framework.template", templateBuilder.build())
-				.build();
-		templateFile.writeTo(Paths.get("src/gen/java"));
 	}
 
-	@Test
-	public void test_generated() throws EverSdkException {
-		var handle = new SafeMultisigWallet(null, null, null, null).getParameters();
-		var result = handle.call();
-	}
+//	@Test
+//	public void test_generated() throws EverSdkException, JsonProcessingException {
+//		var template = new SafeMultisigWalletTemplate(
+//				ContractAbi.ofResource("artifacts/multisig/SafeMultisigWallet.abi.json"),
+//				ContractTvc.ofResource("artifacts/multisig/SafeMultisigWallet.tvc")
+//		);
+//		var deployment = template.deploy(null,
+//		                                 Credentials.NONE,
+//		                                 null,
+//		                                 0);
+//		var multisig = deployment.deploy();
+//		var functionCall = multisig.getParameters();
+//		var resultOfCall = functionCall.call();
+//	}
 
 }

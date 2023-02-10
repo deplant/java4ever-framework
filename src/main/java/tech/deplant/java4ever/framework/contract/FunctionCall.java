@@ -17,20 +17,44 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.info;
 
-public record CallHandle<RETURN>(ContractHandle contract,
-                                 String functionName,
-                                 Map<String, Object> functionInputs,
-                                 Abi.FunctionHeader functionHeader) {
+public record FunctionCall<RETURN>(Contract contract,
+                                   String functionName,
+                                   Map<String, Object> functionInputs,
+                                   Abi.FunctionHeader functionHeader) {
 
-	//TODO Add CallHandle.Builder and method toBuilder()
+	private static System.Logger logger = System.getLogger(FunctionCall.class.getName());
 
-	private static System.Logger logger = System.getLogger(CallHandle.class.getName());
-
-	public Abi.CallSet toCallSet() {
-		return new Abi.CallSet(functionName(), functionHeader(), functionInputs());
+	public FunctionCall<RETURN> withContract(Contract contract) {
+		return new FunctionCall<>(contract, functionName(), functionInputs(), functionHeader());
 	}
 
-	public RETURN get() throws EverSdkException, ClassNotFoundException {
+	public FunctionCall<RETURN> withFunctionName(String functionName) {
+		return new FunctionCall<>(contract(), functionName, functionInputs(), functionHeader());
+	}
+
+	public FunctionCall<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
+		return new FunctionCall<>(contract(), functionName(), functionInputs, functionHeader());
+	}
+
+	public FunctionCall<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
+		return new FunctionCall<>(contract(), functionName(), functionInputs(), functionHeader);
+	}
+
+	public <T> FunctionCall<T> withReturnClass(Class<T> returnClass) {
+		return new FunctionCall<>(contract(), functionName(), functionInputs(), functionHeader());
+	}
+
+	public Abi.CallSet toCallSet() throws EverSdkException {
+		return new Abi.CallSet(functionName(),
+		                       functionHeader(),
+		                       contract().abi().convertFunctionInputs(functionName(), functionInputs()));
+	}
+
+	public Abi.Signer sign() {
+		return requireNonNullElse(contract().credentials(), Credentials.NONE).signer();
+	}
+
+	public RETURN get() throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address()}));
 		Net.ResultOfQueryCollection result = Net.queryCollection(contract().sdk().context(),
@@ -45,12 +69,8 @@ public record CallHandle<RETURN>(ContractHandle contract,
 						contract().abi().ABI(),
 						contract().address(),
 						null,
-						new Abi.CallSet(
-								this.functionName,
-								null,
-								contract().abi().convertFunctionInputs(this.functionName, this.functionInputs)
-						),
-						requireNonNullElse(contract().credentials(), Credentials.NONE).signer(),
+						toCallSet(),
+						sign(),
 						null
 				);
 		String boc = result.result()[0].get("boc").toString();
@@ -68,10 +88,7 @@ public record CallHandle<RETURN>(ContractHandle contract,
 	}
 
 	public RETURN call() throws EverSdkException {
-		var resultOfProcess = processExternalCall(this.functionName,
-		                                          this.functionInputs,
-		                                          this.functionHeader,
-		                                          contract().credentials());
+		var resultOfProcess = processExternalCall();
 		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
 		Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
 		                                                            "EXTERNAL CALL",
@@ -106,19 +123,15 @@ public record CallHandle<RETURN>(ContractHandle contract,
 		});
 	}
 
-	private Processing.ResultOfProcessMessage processExternalCall(String functionName,
-	                                                              Map<String, Object> functionInputs,
-	                                                              Abi.FunctionHeader functionHeader,
-	                                                              Credentials credentials) throws EverSdkException {
+	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
 		return Processing.processMessage(contract().sdk().context(),
 		                                 contract().abi().ABI(),
 		                                 contract().address(),
 		                                 null,
-		                                 new Abi.CallSet(functionName,
-		                                                 functionHeader,
-		                                                 contract().abi().convertFunctionInputs(functionName,
-		                                                                                        functionInputs)),
-		                                 requireNonNullElse(credentials, Credentials.NONE).signer(), null, false);
+		                                 toCallSet(),
+		                                 sign(),
+		                                 null,
+		                                 false);
 	}
 
 }

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.abi.datatype;
+package tech.deplant.java4ever.framework.datatype;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

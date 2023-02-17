@@ -7,16 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
-import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Convert;
-import tech.deplant.java4ever.framework.CurrencyUnit;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
-import tech.deplant.java4ever.framework.contract.Msig;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.MsigTemplate;
+import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
+import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,6 +25,8 @@ public class AccountTests {
 
 	static Sdk SDK;
 	static Sdk SDK_DEV;
+
+	static Giver GIVER;
 	private static System.Logger logger = System.getLogger(AccountTests.class.getName());
 
 	@BeforeAll
@@ -37,22 +37,25 @@ public class AccountTests {
 		SDK_DEV = Sdk.builder()
 		             .networkEndpoints("https://mainnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
 		             .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		GIVER = EverOSGiver.V2(SDK);
 	}
 
 	@Test
 	public void try_local_execution() throws Throwable {
 		var keys = Credentials.RANDOM(SDK);
 
-		Msig msig = MsigTemplate.SAFE()
-		                        .deploySingleSig(SDK,
-		                                         keys,
-		                                         new EverOSGiver(SDK),
-		                                         Convert.toNanos("1", CurrencyUnit.Ever.EVER));
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(SDK,
+		                                                                     keys,
+		                                                                     new BigInteger[]{keys.publicBigInt()},
+		                                                                     1);
+		SafeMultisigWallet msig = deployStatement.deployWithGiver(GIVER,
+		                                                          Convert.toValue("1",
+		                                                                          CurrencyUnit.Ever.EVER));
 		assertTrue(msig.account().isActive());
 		Account acc = Account.ofAddress(SDK, msig.address());
 		Map<String, Object> params = Map.of(
 				"dest", msig.address(),
-				"value", Convert.toNanos("1", CurrencyUnit.Ever.EVER),
+				"value", Convert.toValue("1", CurrencyUnit.Ever.EVER),
 				"bounce", true,
 				"flags", 0,
 				"payload", "");

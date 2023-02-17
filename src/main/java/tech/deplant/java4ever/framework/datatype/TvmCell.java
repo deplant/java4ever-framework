@@ -1,6 +1,10 @@
-package tech.deplant.java4ever.framework.abi.datatype;
+package tech.deplant.java4ever.framework.datatype;
 
 public record TvmCell(String cellBoc) implements AbiType<String, String> {
+
+	public static TvmCell EMPTY() {
+		return TvmCell.fromJava("");
+	}
 
 	public static TvmBuilder builder() {
 		return new TvmBuilder();

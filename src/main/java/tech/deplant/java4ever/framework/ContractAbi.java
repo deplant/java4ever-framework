@@ -1,18 +1,16 @@
-package tech.deplant.java4ever.framework.abi;
+package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.datatype.AbiType;
-import tech.deplant.java4ever.framework.abi.datatype.TypePrefix;
-import tech.deplant.java4ever.framework.abi.datatype.Uint;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.framework.datatype.AbiType;
+import tech.deplant.java4ever.framework.datatype.TypePrefix;
+import tech.deplant.java4ever.framework.datatype.Uint;
 import tech.deplant.java4ever.utils.regex.*;
 
 import java.util.Arrays;
@@ -25,29 +23,13 @@ import java.util.stream.Collectors;
 /**
  * Holds entire ABI structure and has helper methods to check functions availability or
  * getting input types and so on. Use factory methods to create from File or JsonNode.
- *
- * @param abiVersion
- * @param version
- * @param header
- * @param data
- * @param fields
- * @param functions
- * @param events
  */
-public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
-                          @JsonProperty("abi_version") Integer abiVersionOld,
-                          String version,
-                          String[] header,
-                          Abi.AbiData[] data,
-                          Abi.AbiParam[] fields,
-                          Abi.AbiFunction[] functions,
-                          Abi.AbiEvent[] events
-) {
+public record ContractAbi(Abi.AbiContract abiContract) {
 
 	private final static System.Logger logger = System.getLogger(ContractAbi.class.getName());
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
-		return ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, ContractAbi.class);
+		return new ContractAbi(ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, Abi.AbiContract.class));
 	}
 
 	public static ContractAbi ofResource(String resourceName) throws JsonProcessingException {
@@ -174,13 +156,24 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		return findParam(findEvent(events(), functionName).inputs(), inputName);
 	}
 
+	public Abi.AbiData[] data() {
+		return abiContract().data();
+	}
+
+	public Abi.AbiFunction[] functions() {
+		return abiContract().functions();
+	}
+
+	public Abi.AbiEvent[] events() {
+		return abiContract().events();
+	}
+
+	public String[] header() {
+		return abiContract().header();
+	}
+
 	public Abi.ABI ABI() {
-		try {
-			return new Abi.ABI.Json(json());
-		} catch (JsonProcessingException e) {
-			logger.log(System.Logger.Level.ERROR, () -> "This JsonAbi can't be stringified!" + e.getMessage());
-			return new Abi.ABI.Json("{}");
-		}
+		return new Abi.ABI.Contract(abiContract());
 	}
 
 	protected Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
@@ -198,7 +191,7 @@ public record ContractAbi(@JsonProperty("ABI version") Integer abiVersion,
 		String valueTypeString = null;
 
 		logger.log(System.Logger.Level.TRACE,
-		           () -> "Param: " + param.name() + "Type: " + param.type() + "Parsed: " + rootTypeString + "Value: " +
+		           () -> "param: " + param.name() + " ( " + param.type() + " -> " + rootTypeString + " ): " +
 		                 inputValue);
 		var matcher = mapPattern.matcher(rootTypeString);
 		while (matcher.find()) {

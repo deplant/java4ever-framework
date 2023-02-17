@@ -1,8 +1,7 @@
-package tech.deplant.java4ever.framework.crypto;
+package tech.deplant.java4ever.framework;
 
 import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
 
 public record Seed(String phrase, int words) {
 

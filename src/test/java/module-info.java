@@ -5,5 +5,6 @@ module test {
 	requires java.compiler;
 	exports tech.deplant.java4ever.framework.test.unit;
 	exports tech.deplant.java4ever.framework.test;
+	exports tech.deplant.java4ever.framework.test.generator;
 
 }

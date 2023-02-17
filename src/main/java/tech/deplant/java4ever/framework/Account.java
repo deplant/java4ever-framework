@@ -4,8 +4,6 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Net;
 import tech.deplant.java4ever.binding.Tvm;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.crypto.Credentials;
 
 import java.util.*;
 

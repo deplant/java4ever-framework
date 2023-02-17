@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.crypto;
+package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,9 +6,10 @@ import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+
+import java.math.BigInteger;
 
 /**
  * {@snippet :
@@ -80,5 +81,13 @@ public record Credentials(@JsonProperty("public") String publicKey,
 
 	public String publicKeyTonSafe(Sdk sdk) throws EverSdkException {
 		return Crypto.convertPublicKeyToTonSafeFormat(sdk.context(), this.publicKey).tonPublicKey();
+	}
+
+	public BigInteger publicBigInt() {
+		return Convert.hexToBigInt(publicKey());
+	}
+
+	public BigInteger secretBigInt() {
+		return Convert.hexToBigInt(secretKey());
 	}
 }

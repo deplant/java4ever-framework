@@ -1,37 +1,47 @@
 package tech.deplant.java4ever.framework.contract;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.lang.Void;
 import java.math.BigInteger;
 import java.util.Map;
+import tech.deplant.java4ever.framework.ContractAbi;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.FunctionCall;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
-import tech.deplant.java4ever.framework.abi.datatype.TvmCell;
-import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 /**
  * Java wrapper class for usage of <strong>GiverV2</strong> contract for Everscale blockchain.
  */
 public record GiverV2(Sdk sdk, String address, ContractAbi abi,
-    Credentials credentials) implements Contract {
+    Credentials credentials) implements EverOSGiver {
+  public GiverV2(Sdk sdk, String address, ContractAbi abi) {
+    this(sdk,address,abi,Credentials.NONE);
+  }
+
+  public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {
+    return ContractAbi.ofString("{\"ABI version\":2,\"header\":[\"time\",\"expire\"],\"functions\":[{\"name\":\"upgrade\",\"inputs\":[{\"name\":\"newcode\",\"type\":\"cell\"}],\"outputs\":[]},{\"name\":\"sendTransaction\",\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"},{\"name\":\"bounce\",\"type\":\"bool\"}],\"outputs\":[]},{\"name\":\"getMessages\",\"inputs\":[],\"outputs\":[{\"name\":\"messages\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"hash\",\"type\":\"uint256\"},{\"name\":\"expireAt\",\"type\":\"uint64\"}]}]},{\"name\":\"constructor\",\"inputs\":[],\"outputs\":[]}],\"events\":[]}");
+  }
+
   public FunctionCall<Void> upgrade(TvmCell newcode) {
     Map<String, Object> params = Map.of("newcode", newcode);
-    return new FunctionCall<Void>(this, "upgrade", params, null);
+    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "upgrade", params, null);
   }
 
   public FunctionCall<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce) {
     Map<String, Object> params = Map.of("dest", dest, 
         "value", value, 
         "bounce", bounce);
-    return new FunctionCall<Void>(this, "sendTransaction", params, null);
+    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
   }
 
   public FunctionCall<ResultOfGetMessages> getMessages() {
     Map<String, Object> params = Map.of();
-    return new FunctionCall<ResultOfGetMessages>(this, "getMessages", params, null);
+    return new FunctionCall<ResultOfGetMessages>(sdk(), address(), abi(), credentials(), "getMessages", params, null);
   }
 
   public record ResultOfGetMessages(Map<String, Object>[] messages) {

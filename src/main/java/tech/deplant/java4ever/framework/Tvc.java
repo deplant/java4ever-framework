@@ -1,28 +1,26 @@
-package tech.deplant.java4ever.framework.template;
+package tech.deplant.java4ever.framework;
 
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.ByteFile;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
 
 import java.util.Base64;
 import java.util.Map;
 
-public record ContractTvc(byte[] bytes) {
+public record Tvc(byte[] bytes) {
 
-	public static ContractTvc ofFile(String filePath) {
-		return new ContractTvc(new ByteFile(filePath).get());
+	public static Tvc ofFile(String filePath) {
+		return new Tvc(new ByteFile(filePath).get());
 	}
 
-	public static ContractTvc ofResource(String resourceName) {
-		return new ContractTvc(new ByteResource(resourceName).get());
+	public static Tvc ofResource(String resourceName) {
+		return new Tvc(new ByteResource(resourceName).get());
 	}
 
-	public static ContractTvc ofBase64String(String base64) {
-		return new ContractTvc(Base64.getDecoder().decode(base64));
+	public static Tvc ofBase64String(String base64) {
+		return new Tvc(Base64.getDecoder().decode(base64));
 	}
 
 	public String base64String() {
@@ -72,10 +70,10 @@ public record ContractTvc(byte[] bytes) {
 		return Boc.getBocHash(sdk.context(), saltedCode(sdk, salt)).hash();
 	}
 
-	public ContractTvc withUpdatedInitialData(Sdk sdk,
-	                                          ContractAbi abi,
-	                                          Map<String, Object> initialData,
-	                                          String publicKey) throws EverSdkException {
+	public Tvc withUpdatedInitialData(Sdk sdk,
+	                                  ContractAbi abi,
+	                                  Map<String, Object> initialData,
+	                                  String publicKey) throws EverSdkException {
 		String updatedDataString = Abi.updateInitialData(sdk.context(),
 		                                                 abi.ABI(),
 		                                                 data(sdk),
@@ -91,7 +89,7 @@ public record ContractTvc(byte[] bytes) {
 		                                 decoded.tock(),
 		                                 decoded.splitDepth(),
 		                                 null).tvc();
-		return ContractTvc.ofBase64String(newTvcString);
+		return Tvc.ofBase64String(newTvcString);
 	}
 
 	public Builder toBuilder(Sdk sdk) throws EverSdkException {
@@ -173,15 +171,15 @@ public record ContractTvc(byte[] bytes) {
 			return this;
 		}
 
-		public ContractTvc build(Sdk sdk) throws EverSdkException {
-			return ContractTvc.ofBase64String(Boc.encodeTvc(sdk.context(),
-			                                                this.code,
-			                                                this.data,
-			                                                this.library,
-			                                                this.tick,
-			                                                this.tock,
-			                                                this.splitDepth,
-			                                                null).tvc());
+		public Tvc build(Sdk sdk) throws EverSdkException {
+			return Tvc.ofBase64String(Boc.encodeTvc(sdk.context(),
+			                                        this.code,
+			                                        this.data,
+			                                        this.library,
+			                                        this.tick,
+			                                        this.tock,
+			                                        this.splitDepth,
+			                                        null).tvc());
 		}
 	}
 }

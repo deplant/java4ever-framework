@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.abi.datatype;
+package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.EverSdkException;
 

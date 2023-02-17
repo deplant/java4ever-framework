@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Account;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.crypto.Seed;
-import tech.deplant.java4ever.framework.template.MsigTemplate;
+import tech.deplant.java4ever.framework.Seed;
+import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
 
@@ -30,6 +30,6 @@ public class TempTests {
 		var acc = Account.ofAddress(sdk, "0:315e946e49e0f149989c82c9b5025697b92797985a3d66c6d18a4130edc3ca7f");
 		//System.out.println(ContractTvc.ofBase64String(acc.data())
 		//                              .decodeInitialData(sdk, MsigTemplate.SAFE_MULTISIG_ABI()));
-		System.out.println(Address.ofFutureDeploy(sdk, MsigTemplate.SAFE(), 0, null, Credentials.NONE));
+		System.out.println(Address.ofFutureDeploy(sdk, new SafeMultisigWalletTemplate(), 0, null, Credentials.NONE));
 	}
 }

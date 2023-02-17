@@ -1,11 +1,11 @@
-package tech.deplant.java4ever.framework.abi.datatype;
+package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.ContractTemplate;
+import tech.deplant.java4ever.framework.template.Template;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -43,7 +43,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 	}
 
 	public static String ofFutureDeploy(Sdk sdk,
-	                                    ContractTemplate template,
+	                                    Template template,
 	                                    int workchainId,
 	                                    Map<String, Object> initialData,
 	                                    Credentials credentials) throws EverSdkException {

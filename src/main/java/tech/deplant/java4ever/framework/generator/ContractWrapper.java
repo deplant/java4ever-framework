@@ -1,22 +1,18 @@
 package tech.deplant.java4ever.framework.generator;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.binding.generator.javapoet.*;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
-import tech.deplant.java4ever.framework.abi.datatype.Address;
-import tech.deplant.java4ever.framework.abi.datatype.TvmBuilder;
-import tech.deplant.java4ever.framework.abi.datatype.TvmCell;
-import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.contract.DeployCall;
-import tech.deplant.java4ever.framework.contract.FunctionCall;
-import tech.deplant.java4ever.framework.contract.Template;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.ContractTvc;
+import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.datatype.TvmBuilder;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
+import tech.deplant.java4ever.framework.template.Template;
 import tech.deplant.java4ever.utils.Objs;
 import tech.deplant.java4ever.utils.Strings;
 
@@ -90,16 +86,15 @@ public class ContractWrapper {
 		}
 	}
 
-	public static void generate(String resourceName,
+	public static void generate(Abi.AbiContract abi,
+	                            Tvc tvc,
 	                            Path targetDirectory,
 	                            String contractName,
 	                            String wrapperPackage,
-	                            String templatePackage) throws IOException, EverSdkException {
+	                            String templatePackage,
+	                            String[] superInterfaces) throws IOException, EverSdkException {
 
-		var abi = ContextBuilder.DEFAULT_MAPPER.readValue(
-				new JsonResource(resourceName).get(),
-				Abi.AbiContract.class
-		);
+		boolean hasTvc = Objs.isNotNull(tvc);
 
 		String wrapperName = ParserUtils.capitalize(contractName);
 
@@ -119,13 +114,31 @@ public class ContractWrapper {
 
 		final TypeSpec.Builder wrapperBuilder = TypeSpec
 				.recordBuilder(wrapperName)
-				.addSuperinterface(Contract.class)
 				.addJavadoc(wrapperDocs.build())
 				.addModifiers(Modifier.PUBLIC);
+
+		if (Objs.isNull(superInterfaces) || superInterfaces.length == 0) {
+			wrapperBuilder.addSuperinterface(Contract.class);
+		} else {
+			for (var s : superInterfaces) {
+				wrapperBuilder.addSuperinterface(ClassName.bestGuess(s));
+			}
+		}
+
 		wrapperBuilder.addRecordComponent(Sdk.class, "sdk");
 		wrapperBuilder.addRecordComponent(String.class, "address");
 		wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
 		wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
+
+
+		var noCredsConstructorBuilder = MethodSpec.constructorBuilder();
+		noCredsConstructorBuilder
+				.addStatement("this(sdk,address,abi,Credentials.NONE)")
+				.addParameter(Sdk.class, "sdk")
+				.addParameter(String.class, "address")
+				.addParameter(ContractAbi.class, "abi")
+				.addModifiers(Modifier.PUBLIC);
+		wrapperBuilder.addMethod(noCredsConstructorBuilder.build());
 
 		final TypeSpec.Builder templateBuilder = TypeSpec
 				.recordBuilder(wrapperName + "Template")
@@ -134,13 +147,50 @@ public class ContractWrapper {
 				.addModifiers(Modifier.PUBLIC);
 
 		templateBuilder.addRecordComponent(ContractAbi.class, "abi");
-		templateBuilder.addRecordComponent(ContractTvc.class, "tvc");
+		templateBuilder.addRecordComponent(Tvc.class, "tvc");
+
+		var defaultAbiFunction = MethodSpec.methodBuilder("DEFAULT_ABI")
+		                                   .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+		                                   .returns(ClassName.get(ContractAbi.class))
+		                                   .addException(JsonProcessingException.class)
+		                                   .addStatement("return ContractAbi.ofString($S)",
+		                                                 ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(
+				                                                               JsonInclude.Include.NON_NULL)
+		                                                                              .writeValueAsString(abi))
+		                                   .build();
+		wrapperBuilder.addMethod(defaultAbiFunction);
+		templateBuilder.addMethod(defaultAbiFunction);
+
+		var tvcOnlyConstructorBuilder = MethodSpec.constructorBuilder();
+		tvcOnlyConstructorBuilder
+				.addStatement("this(DEFAULT_ABI(), tvc)")
+				.addParameter(ParameterSpec.builder(Tvc.class, "tvc").build())
+				.addModifiers(Modifier.PUBLIC)
+				.addException(JsonProcessingException.class);
+		templateBuilder.addMethod(tvcOnlyConstructorBuilder.build());
+
+		if (hasTvc) {
+			templateBuilder.addMethod(MethodSpec.methodBuilder("DEFAULT_TVC")
+			                                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+			                                    .returns(ClassName.get(Tvc.class))
+			                                    .addStatement("return Tvc.ofBase64String($S)", tvc.base64String())
+			                                    .build());
+
+			var noArgsConstructorBuilder = MethodSpec.constructorBuilder();
+			noArgsConstructorBuilder
+					.addStatement("this(DEFAULT_ABI(),DEFAULT_TVC())")
+					.addModifiers(Modifier.PUBLIC)
+					.addException(JsonProcessingException.class);
+			templateBuilder.addMethod(noArgsConstructorBuilder.build());
+		}
+		//public static final Tvc SAFE_MULTISIG_TVC = Tvc.ofResource(
+		//		"artifacts/multisig/SafeMultisigWallet.tvc");
 
 		for (var func : abi.functions()) {
 			MethodSpec.Builder methodBuilder = null;
 			boolean isConstructor = Strings.notEmptyEquals(func.name(), "constructor");
 			if (isConstructor) {
-				methodBuilder = MethodSpec.methodBuilder("deploy");
+				methodBuilder = MethodSpec.methodBuilder("prepareDeploy");
 				logger.log(System.Logger.Level.INFO, "constructor!");
 				methodBuilder.addParameter(ParameterSpec.builder(Sdk.class, "sdk").build());
 				//methodBuilder.addParameter(ParameterSpec.builder(Integer.class, "workchainId").build());
@@ -230,12 +280,15 @@ public class ContractWrapper {
 
 			if (isConstructor) {
 				bodyBuilder.addStatement(
-						"return new $T(sdk, this, sdk.clientConfig().abi().workchain(), credentials, initialDataFields, params, null)",
-						resultName);
+						"return new $T($T.class, sdk, abi(), tvc(), sdk.clientConfig().abi().workchain(), credentials, initialDataFields, params, null)",
+						resultName,
+						handleParamTypeName);
 				methodBuilder.addCode(bodyBuilder.build());
 				templateBuilder.addMethod(methodBuilder.build());
 			} else {
-				bodyBuilder.addStatement("return new $T(this, $S, params, null)", resultName, func.name());
+				bodyBuilder.addStatement("return new $T(sdk(), address(), abi(), credentials(), $S, params, null)",
+				                         resultName,
+				                         func.name());
 				methodBuilder.addCode(bodyBuilder.build());
 				wrapperBuilder.addMethod(methodBuilder.build());
 			}

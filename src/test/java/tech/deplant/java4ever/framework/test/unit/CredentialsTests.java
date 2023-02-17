@@ -9,8 +9,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.crypto.Seed;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.Seed;
 
 import java.io.IOException;
 

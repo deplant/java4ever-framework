@@ -8,8 +8,7 @@ import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.artifact.Solc;
 import tech.deplant.java4ever.framework.artifact.TvmLinker;
-import tech.deplant.java4ever.framework.contract.OwnedContract;
-import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.contract.CustomContract;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,6 +32,10 @@ public record Sdk(Context context,
 		return Client.version(context()).version();
 	}
 
+	public ObjectMapper mapper() {
+		return context().mapper();
+	}
+
 	public <T> T convertMap(Map<String, Object> inputMap, Class<T> outputClass) {
 		return context().mapper().convertValue(inputMap, outputClass);
 	}
@@ -53,7 +56,7 @@ public record Sdk(Context context,
 		return context().mapper().writeValueAsString(inputObject);
 	}
 
-	public void saveContract(String name, OwnedContract contract) throws IOException {
+	public void saveContract(String name, CustomContract contract) throws IOException {
 		explorerConfig().addContract(name, contract);
 	}
 

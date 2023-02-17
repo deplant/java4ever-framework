@@ -18,12 +18,12 @@ public class Convert {
 
 	private static System.Logger logger = System.getLogger(Convert.class.getName());
 
-	public static BigInteger toNanos(String number, CurrencyUnit unit) {
-		return toNanos(new BigDecimal(number), unit);
+	public static BigInteger toValue(String amount, CurrencyUnit unit) {
+		return toValue(new BigDecimal(amount), unit);
 	}
 
-	public static BigInteger toNanos(BigDecimal number, CurrencyUnit unit) {
-		return number.multiply(unit.factor()).toBigInteger();
+	public static BigInteger toValue(BigDecimal amount, CurrencyUnit unit) {
+		return amount.multiply(unit.factor()).toBigInteger();
 	}
 
 	public static String base64ToHexString(String base64string) {

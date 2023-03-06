@@ -1,3 +1,20 @@
+### 1.5.0
+
+- Updated EVER-SDK -> 1.41
+- - Updated dependency: Gradle -> 8.0.2
+- Added Contract Wrapper Generation API (creates contract and template wrappers from ABI json)
+- Reworked java4ever API to work with generated wrappers
+- Simplified writing custom wrappers
+
+### 1.4.0
+
+- Updated EVER-SDK -> 1.40
+- Made large API rework
+- Added transaction tree logging
+- Added functionId() calculator
+- Added util methods for templates
+- Updated dependency: Gradle -> 7.6
+
 ### 1.3.0
 
 - Removed SLF4J facade

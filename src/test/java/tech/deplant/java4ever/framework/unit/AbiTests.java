@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.test.unit;
+package tech.deplant.java4ever.framework.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayNameGeneration;

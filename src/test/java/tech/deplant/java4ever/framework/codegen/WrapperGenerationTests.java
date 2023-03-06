@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.test.generator;
+package tech.deplant.java4ever.framework.codegen;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -12,7 +12,7 @@ import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.generator.ContractWrapper;
 import tech.deplant.java4ever.framework.generator.GeneratorConfig;
-import tech.deplant.java4ever.framework.test.unit.CredentialsTests;
+import tech.deplant.java4ever.framework.unit.CredentialsTests;
 import tech.deplant.java4ever.utils.Objs;
 
 import java.io.IOException;

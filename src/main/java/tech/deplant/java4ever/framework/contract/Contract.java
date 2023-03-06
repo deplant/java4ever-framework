@@ -43,7 +43,7 @@ public interface Contract {
 	 * @return
 	 * @throws EverSdkException
 	 */
-	default BigInteger balance() throws EverSdkException {
+	default BigInteger accountBalance() throws EverSdkException {
 		return Uint.fromJava(128, account().balance()).toJava();
 	}
 
@@ -110,16 +110,16 @@ public interface Contract {
 		return account().tvmPubkey(sdk(), abi());
 	}
 
-	default FunctionCall<Map<String, Object>> prepareCall(String functionName,
-	                                                      Map<String, Object> functionInputs,
-	                                                      Abi.FunctionHeader functionHeader) {
-		return new FunctionCall<>(sdk(),
-		                          address(),
-		                          abi(),
-		                          credentials(),
-		                          functionName,
-		                          functionInputs,
-		                          functionHeader);
+	default FunctionHandle<Map<String, Object>> prepareCall(String functionName,
+	                                                        Map<String, Object> functionInputs,
+	                                                        Abi.FunctionHeader functionHeader) {
+		return new FunctionHandle<>(sdk(),
+		                            address(),
+		                            abi(),
+		                            credentials(),
+		                            functionName,
+		                            functionInputs,
+		                            functionHeader);
 	}
 
 }

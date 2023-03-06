@@ -13,66 +13,66 @@ import java.util.concurrent.Future;
 
 import static java.util.Objects.requireNonNullElse;
 
-public record DeployCall<RETURN>(Class<RETURN> clazz,
-                                 Sdk sdk,
-                                 ContractAbi abi,
-                                 Tvc tvc,
-                                 int workchainId,
-                                 Credentials credentials,
-                                 Map<String, Object> initialDataFields,
-                                 Map<String, Object> constructorInputs,
-                                 Abi.FunctionHeader constructorHeader) {
+public record DeployHandle<RETURN>(Class<RETURN> clazz,
+                                   Sdk sdk,
+                                   ContractAbi abi,
+                                   Tvc tvc,
+                                   int workchainId,
+                                   Credentials credentials,
+                                   Map<String, Object> initialDataFields,
+                                   Map<String, Object> constructorInputs,
+                                   Abi.FunctionHeader constructorHeader) {
 
 	//TODO Add DeployHandle.Builder and method toBuilder()
 
-	private static System.Logger logger = System.getLogger(FunctionCall.class.getName());
+	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
-	public <T> DeployCall<T> withReturnClass(Class<T> returnClass) {
-		return new DeployCall<>(returnClass,
-		                        sdk(),
-		                        abi(),
-		                        tvc(),
-		                        workchainId(),
-		                        credentials(),
-		                        initialDataFields(),
-		                        constructorInputs(),
-		                        constructorHeader());
+	public <T> DeployHandle<T> withReturnClass(Class<T> returnClass) {
+		return new DeployHandle<>(returnClass,
+		                          sdk(),
+		                          abi(),
+		                          tvc(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields(),
+		                          constructorInputs(),
+		                          constructorHeader());
 	}
 
-	public DeployCall<RETURN> withConstructorHeader(Abi.FunctionHeader constructorHeader) {
-		return new DeployCall<>(clazz(),
-		                        sdk(),
-		                        abi(),
-		                        tvc(),
-		                        workchainId(),
-		                        credentials(),
-		                        initialDataFields(),
-		                        constructorInputs(),
-		                        constructorHeader);
+	public DeployHandle<RETURN> withConstructorHeader(Abi.FunctionHeader constructorHeader) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          abi(),
+		                          tvc(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields(),
+		                          constructorInputs(),
+		                          constructorHeader);
 	}
 
-	public DeployCall<RETURN> withConstructorInputs(Map<String, Object> constructorInputs) {
-		return new DeployCall<>(clazz(),
-		                        sdk(),
-		                        abi(),
-		                        tvc(),
-		                        workchainId(),
-		                        credentials(),
-		                        initialDataFields(),
-		                        constructorInputs,
-		                        constructorHeader());
+	public DeployHandle<RETURN> withConstructorInputs(Map<String, Object> constructorInputs) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          abi(),
+		                          tvc(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields(),
+		                          constructorInputs,
+		                          constructorHeader());
 	}
 
-	public DeployCall<RETURN> withInitDataFields(Map<String, Object> initialDataFields) {
-		return new DeployCall<>(clazz(),
-		                        sdk(),
-		                        abi(),
-		                        tvc(),
-		                        workchainId(),
-		                        credentials(),
-		                        initialDataFields,
-		                        constructorInputs(),
-		                        constructorHeader());
+	public DeployHandle<RETURN> withInitDataFields(Map<String, Object> initialDataFields) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          abi(),
+		                          tvc(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields,
+		                          constructorInputs(),
+		                          constructorHeader());
 	}
 
 	public Abi.DeploySet toDeploySet() throws EverSdkException {

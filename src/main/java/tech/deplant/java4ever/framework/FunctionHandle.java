@@ -12,64 +12,64 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
-public record FunctionCall<RETURN>(Sdk sdk,
-                                   String address,
-                                   ContractAbi abi,
-                                   Credentials credentials,
-                                   String functionName,
-                                   Map<String, Object> functionInputs,
-                                   Abi.FunctionHeader functionHeader) {
+public record FunctionHandle<RETURN>(Sdk sdk,
+                                     String address,
+                                     ContractAbi abi,
+                                     Credentials credentials,
+                                     String functionName,
+                                     Map<String, Object> functionInputs,
+                                     Abi.FunctionHeader functionHeader) {
 
-	private static System.Logger logger = System.getLogger(FunctionCall.class.getName());
+	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
-	public FunctionCall<RETURN> withSdk(Sdk sdk) {
-		return new FunctionCall<>(sdk,
-		                          address(),
-		                          abi(),
-		                          credentials(),
-		                          functionName(),
-		                          functionInputs(),
-		                          functionHeader());
+	public FunctionHandle<RETURN> withSdk(Sdk sdk) {
+		return new FunctionHandle<>(sdk,
+		                            address(),
+		                            abi(),
+		                            credentials(),
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader());
 	}
 
-	public FunctionCall<RETURN> withCredentials(Credentials credentials) {
-		return new FunctionCall<>(sdk(),
-		                          address(),
-		                          abi(),
-		                          credentials,
-		                          functionName(),
-		                          functionInputs(),
-		                          functionHeader());
+	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
+		return new FunctionHandle<>(sdk(),
+		                            address(),
+		                            abi(),
+		                            credentials,
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader());
 	}
 
-	public FunctionCall<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
-		return new FunctionCall<>(sdk(),
-		                          address(),
-		                          abi(),
-		                          credentials(),
-		                          functionName(),
-		                          functionInputs,
-		                          functionHeader());
+	public FunctionHandle<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
+		return new FunctionHandle<>(sdk(),
+		                            address(),
+		                            abi(),
+		                            credentials(),
+		                            functionName(),
+		                            functionInputs,
+		                            functionHeader());
 	}
 
-	public FunctionCall<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
-		return new FunctionCall<>(sdk(),
-		                          address(),
-		                          abi(),
-		                          credentials(),
-		                          functionName(),
-		                          functionInputs(),
-		                          functionHeader);
+	public FunctionHandle<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
+		return new FunctionHandle<>(sdk(),
+		                            address(),
+		                            abi(),
+		                            credentials(),
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader);
 	}
 
-	public <T> FunctionCall<T> withReturnClass(Class<T> returnClass) {
-		return new FunctionCall<>(sdk(),
-		                          address(),
-		                          abi(),
-		                          credentials(),
-		                          functionName(),
-		                          functionInputs(),
-		                          functionHeader());
+	public <T> FunctionHandle<T> withReturnClass(Class<T> returnClass) {
+		return new FunctionHandle<>(sdk(),
+		                            address(),
+		                            abi(),
+		                            credentials(),
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader());
 	}
 
 	public Abi.CallSet toCallSet() throws EverSdkException {

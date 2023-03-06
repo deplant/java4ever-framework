@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.test.unit;
+package tech.deplant.java4ever.framework.unit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Seed;
 
@@ -16,27 +14,25 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static tech.deplant.java4ever.framework.unit.TestEnvironment.RNG_KEYS;
+import static tech.deplant.java4ever.framework.unit.TestEnvironment.RNG_SEED;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
 public class CredentialsTests {
 
-	static Sdk SDK;
-	private static System.Logger logger = System.getLogger(CredentialsTests.class.getName());
-
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		SDK = Sdk.builder()
-		         .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+		TestEnvironment.INIT();
 	}
 
 	@Test
 	public void all_random_keys_should_be_different() throws Throwable {
-		var keys1 = Credentials.RANDOM(SDK);
-		var keys2 = Credentials.RANDOM(SDK);
-		var keys3 = Credentials.RANDOM(SDK);
-		var keys4 = Credentials.RANDOM(SDK);
-		var keys5 = Credentials.RANDOM(SDK);
+		var keys1 = RNG_KEYS();
+		var keys2 = RNG_KEYS();
+		var keys3 = RNG_KEYS();
+		var keys4 = RNG_KEYS();
+		var keys5 = RNG_KEYS();
 		assertNotEquals(keys1.toString(), keys2.toString());
 		assertNotEquals(keys2.toString(), keys3.toString());
 		assertNotEquals(keys3.toString(), keys4.toString());
@@ -46,11 +42,11 @@ public class CredentialsTests {
 
 	@Test
 	public void all_random_seeds_should_be_different() throws Throwable {
-		var seed1 = Seed.RANDOM(SDK);
-		var seed2 = Seed.RANDOM(SDK);
-		var seed3 = Seed.RANDOM(SDK);
-		var seed4 = Seed.RANDOM(SDK);
-		var seed5 = Seed.RANDOM(SDK);
+		var seed1 = RNG_SEED();
+		var seed2 = RNG_SEED();
+		var seed3 = RNG_SEED();
+		var seed4 = RNG_SEED();
+		var seed5 = RNG_SEED();
 		assertNotEquals(seed1.toString(), seed2.toString());
 		assertNotEquals(seed2.toString(), seed3.toString());
 		assertNotEquals(seed3.toString(), seed4.toString());
@@ -60,19 +56,19 @@ public class CredentialsTests {
 
 	@Test
 	public void make_seed_and_keys() throws Throwable {
-		logger.log(System.Logger.Level.DEBUG, Seed.RANDOM(SDK).toString());
-		logger.log(System.Logger.Level.DEBUG, Credentials.ofSeed(SDK,
-		                                                         new Seed(
-				                                                         "object burger primary dish harbor luxury morning mystery sausage wide this time",
-				                                                         12)).toString());
+		TestEnvironment.LOG.log(System.Logger.Level.DEBUG, Seed.RANDOM(TestEnvironment.SDK_EMPTY).toString());
+		TestEnvironment.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(TestEnvironment.SDK_EMPTY,
+		                                                                      new Seed(
+				                                                      "object burger primary dish harbor luxury morning mystery sausage wide this time",
+				                                                      12)).toString());
 	}
 
 
 	@Test
 	public void all_keys_from_one_seed_should_be_equal() throws Throwable {
-		var seed = Seed.RANDOM(SDK);
-		var keys1 = Credentials.ofSeed(SDK, seed);
-		var keys2 = Credentials.ofSeed(SDK, seed);
+		var seed = Seed.RANDOM(TestEnvironment.SDK_EMPTY);
+		var keys1 = Credentials.ofSeed(TestEnvironment.SDK_EMPTY, seed);
+		var keys2 = Credentials.ofSeed(TestEnvironment.SDK_EMPTY, seed);
 		assertEquals(keys1.toString(), keys2.toString());
 	}
 

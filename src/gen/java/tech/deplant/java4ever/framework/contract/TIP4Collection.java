@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.FunctionCall;
+import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
@@ -20,113 +20,119 @@ import tech.deplant.java4ever.framework.datatype.TvmCell;
  */
 public record TIP4Collection(Sdk sdk, String address, ContractAbi abi,
     Credentials credentials) implements Contract {
+  public TIP4Collection(Sdk sdk, String address) throws JsonProcessingException {
+    this(sdk,address,DEFAULT_ABI(),Credentials.NONE);
+  }
+
   public TIP4Collection(Sdk sdk, String address, ContractAbi abi) {
     this(sdk,address,abi,Credentials.NONE);
+  }
+
+  public TIP4Collection(Sdk sdk, String address, Credentials credentials) throws
+      JsonProcessingException {
+    this(sdk,address,DEFAULT_ABI(),credentials);
   }
 
   public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {
     return ContractAbi.ofString("{\"ABI version\":2,\"version\":\"2.2\",\"header\":[\"pubkey\",\"time\",\"expire\"],\"functions\":[{\"name\":\"constructor\",\"inputs\":[{\"name\":\"codeNft\",\"type\":\"cell\"},{\"name\":\"codeIndex\",\"type\":\"cell\"},{\"name\":\"codeIndexBasis\",\"type\":\"cell\"},{\"name\":\"ownerPubkey\",\"type\":\"uint256\"},{\"name\":\"json\",\"type\":\"string\"},{\"name\":\"mintingFee\",\"type\":\"uint128\"}],\"outputs\":[]},{\"name\":\"mintNft\",\"inputs\":[{\"name\":\"json\",\"type\":\"string\"}],\"outputs\":[]},{\"name\":\"withdraw\",\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"}],\"outputs\":[]},{\"name\":\"onTokenBurned\",\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"manager\",\"type\":\"address\"}],\"outputs\":[]},{\"name\":\"setRemainOnNft\",\"inputs\":[{\"name\":\"remainOnNft\",\"type\":\"uint128\"}],\"outputs\":[]},{\"name\":\"setMintingFee\",\"inputs\":[{\"name\":\"mintingFee\",\"type\":\"uint128\"}],\"outputs\":[]},{\"name\":\"mintingFee\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"value0\",\"type\":\"uint128\"}]},{\"name\":\"owner\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"pubkey\",\"type\":\"uint256\"}]},{\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"uint256\"}],\"outputs\":[]},{\"name\":\"indexBasisCode\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"code\",\"type\":\"cell\"}]},{\"name\":\"indexBasisCodeHash\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"hash\",\"type\":\"uint256\"}]},{\"name\":\"resolveIndexBasis\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"indexBasis\",\"type\":\"address\"}]},{\"name\":\"indexCode\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"code\",\"type\":\"cell\"}]},{\"name\":\"indexCodeHash\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"hash\",\"type\":\"uint256\"}]},{\"name\":\"getJson\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"json\",\"type\":\"string\"}]},{\"name\":\"totalSupply\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"count\",\"type\":\"uint128\"}]},{\"name\":\"nftCode\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"code\",\"type\":\"cell\"}]},{\"name\":\"nftCodeHash\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"codeHash\",\"type\":\"uint256\"}]},{\"name\":\"nftAddress\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"},{\"name\":\"id\",\"type\":\"uint256\"}],\"outputs\":[{\"name\":\"nft\",\"type\":\"address\"}]},{\"name\":\"supportsInterface\",\"inputs\":[{\"name\":\"answerId\",\"type\":\"uint32\"},{\"name\":\"interfaceID\",\"type\":\"uint32\"}],\"outputs\":[{\"name\":\"value0\",\"type\":\"bool\"}]}],\"events\":[{\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"oldOwner\",\"type\":\"uint256\"},{\"name\":\"newOwner\",\"type\":\"uint256\"}]},{\"name\":\"NftCreated\",\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"nft\",\"type\":\"address\"},{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"manager\",\"type\":\"address\"},{\"name\":\"creator\",\"type\":\"address\"}]},{\"name\":\"NftBurned\",\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"nft\",\"type\":\"address\"},{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"manager\",\"type\":\"address\"}]}],\"data\":[],\"fields\":[{\"name\":\"_pubkey\",\"type\":\"uint256\"},{\"name\":\"_timestamp\",\"type\":\"uint64\"},{\"name\":\"_constructorFlag\",\"type\":\"bool\"},{\"name\":\"_supportedInterfaces\",\"type\":\"optional(cell)\"},{\"name\":\"_codeNft\",\"type\":\"cell\"},{\"name\":\"_totalSupply\",\"type\":\"uint128\"},{\"name\":\"_json\",\"type\":\"string\"},{\"name\":\"_codeIndex\",\"type\":\"cell\"},{\"name\":\"_codeIndexBasis\",\"type\":\"cell\"},{\"name\":\"_indexDeployValue\",\"type\":\"uint128\"},{\"name\":\"_indexDestroyValue\",\"type\":\"uint128\"},{\"name\":\"_deployIndexBasisValue\",\"type\":\"uint128\"},{\"name\":\"_owner\",\"type\":\"uint256\"},{\"name\":\"_remainOnNft\",\"type\":\"uint128\"},{\"name\":\"_lastTokenId\",\"type\":\"uint128\"},{\"name\":\"_mintingFee\",\"type\":\"uint128\"}]}");
   }
 
-  public FunctionCall<Void> mintNft(String json) {
+  public FunctionHandle<Void> mintNft(String json) {
     Map<String, Object> params = Map.of("json", json);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "mintNft", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "mintNft", params, null);
   }
 
-  public FunctionCall<Void> withdraw(Address dest, BigInteger value) {
+  public FunctionHandle<Void> withdraw(Address dest, BigInteger value) {
     Map<String, Object> params = Map.of("dest", dest, 
         "value", value);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "withdraw", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "withdraw", params, null);
   }
 
-  public FunctionCall<Void> onTokenBurned(BigInteger id, Address owner, Address manager) {
+  public FunctionHandle<Void> onTokenBurned(BigInteger id, Address owner, Address manager) {
     Map<String, Object> params = Map.of("id", id, 
         "owner", owner, 
         "manager", manager);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "onTokenBurned", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "onTokenBurned", params, null);
   }
 
-  public FunctionCall<Void> setRemainOnNft(BigInteger remainOnNft) {
+  public FunctionHandle<Void> setRemainOnNft(BigInteger remainOnNft) {
     Map<String, Object> params = Map.of("remainOnNft", remainOnNft);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "setRemainOnNft", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "setRemainOnNft", params, null);
   }
 
-  public FunctionCall<Void> setMintingFee(BigInteger mintingFee) {
+  public FunctionHandle<Void> setMintingFee(BigInteger mintingFee) {
     Map<String, Object> params = Map.of("mintingFee", mintingFee);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "setMintingFee", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "setMintingFee", params, null);
   }
 
-  public FunctionCall<ResultOfMintingFee> mintingFee(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfMintingFee>(sdk(), address(), abi(), credentials(), "mintingFee", params, null);
+  public FunctionHandle<ResultOfMintingFee> mintingFee() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfMintingFee>(sdk(), address(), abi(), credentials(), "mintingFee", params, null);
   }
 
-  public FunctionCall<ResultOfOwner> owner(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfOwner>(sdk(), address(), abi(), credentials(), "owner", params, null);
+  public FunctionHandle<ResultOfOwner> owner() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfOwner>(sdk(), address(), abi(), credentials(), "owner", params, null);
   }
 
-  public FunctionCall<Void> transferOwnership(BigInteger newOwner) {
+  public FunctionHandle<Void> transferOwnership(BigInteger newOwner) {
     Map<String, Object> params = Map.of("newOwner", newOwner);
-    return new FunctionCall<Void>(sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
+    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
   }
 
-  public FunctionCall<ResultOfIndexBasisCode> indexBasisCode(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfIndexBasisCode>(sdk(), address(), abi(), credentials(), "indexBasisCode", params, null);
+  public FunctionHandle<ResultOfIndexBasisCode> indexBasisCode() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfIndexBasisCode>(sdk(), address(), abi(), credentials(), "indexBasisCode", params, null);
   }
 
-  public FunctionCall<ResultOfIndexBasisCodeHash> indexBasisCodeHash(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfIndexBasisCodeHash>(sdk(), address(), abi(), credentials(), "indexBasisCodeHash", params, null);
+  public FunctionHandle<ResultOfIndexBasisCodeHash> indexBasisCodeHash() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfIndexBasisCodeHash>(sdk(), address(), abi(), credentials(), "indexBasisCodeHash", params, null);
   }
 
-  public FunctionCall<ResultOfResolveIndexBasis> resolveIndexBasis(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfResolveIndexBasis>(sdk(), address(), abi(), credentials(), "resolveIndexBasis", params, null);
+  public FunctionHandle<ResultOfResolveIndexBasis> resolveIndexBasis() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfResolveIndexBasis>(sdk(), address(), abi(), credentials(), "resolveIndexBasis", params, null);
   }
 
-  public FunctionCall<ResultOfIndexCode> indexCode(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfIndexCode>(sdk(), address(), abi(), credentials(), "indexCode", params, null);
+  public FunctionHandle<ResultOfIndexCode> indexCode() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfIndexCode>(sdk(), address(), abi(), credentials(), "indexCode", params, null);
   }
 
-  public FunctionCall<ResultOfIndexCodeHash> indexCodeHash(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfIndexCodeHash>(sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
+  public FunctionHandle<ResultOfIndexCodeHash> indexCodeHash() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfIndexCodeHash>(sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
   }
 
-  public FunctionCall<ResultOfGetJson> getJson(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfGetJson>(sdk(), address(), abi(), credentials(), "getJson", params, null);
+  public FunctionHandle<ResultOfGetJson> getJson() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfGetJson>(sdk(), address(), abi(), credentials(), "getJson", params, null);
   }
 
-  public FunctionCall<ResultOfTotalSupply> totalSupply(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfTotalSupply>(sdk(), address(), abi(), credentials(), "totalSupply", params, null);
+  public FunctionHandle<ResultOfTotalSupply> totalSupply() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfTotalSupply>(sdk(), address(), abi(), credentials(), "totalSupply", params, null);
   }
 
-  public FunctionCall<ResultOfNftCode> nftCode(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfNftCode>(sdk(), address(), abi(), credentials(), "nftCode", params, null);
+  public FunctionHandle<ResultOfNftCode> nftCode() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfNftCode>(sdk(), address(), abi(), credentials(), "nftCode", params, null);
   }
 
-  public FunctionCall<ResultOfNftCodeHash> nftCodeHash(Integer answerId) {
-    Map<String, Object> params = Map.of("answerId", answerId);
-    return new FunctionCall<ResultOfNftCodeHash>(sdk(), address(), abi(), credentials(), "nftCodeHash", params, null);
+  public FunctionHandle<ResultOfNftCodeHash> nftCodeHash() {
+    Map<String, Object> params = Map.of();
+    return new FunctionHandle<ResultOfNftCodeHash>(sdk(), address(), abi(), credentials(), "nftCodeHash", params, null);
   }
 
-  public FunctionCall<ResultOfNftAddress> nftAddress(Integer answerId, BigInteger id) {
-    Map<String, Object> params = Map.of("answerId", answerId, 
-        "id", id);
-    return new FunctionCall<ResultOfNftAddress>(sdk(), address(), abi(), credentials(), "nftAddress", params, null);
+  public FunctionHandle<ResultOfNftAddress> nftAddress(BigInteger id) {
+    Map<String, Object> params = Map.of("id", id);
+    return new FunctionHandle<ResultOfNftAddress>(sdk(), address(), abi(), credentials(), "nftAddress", params, null);
   }
 
-  public FunctionCall<ResultOfSupportsInterface> supportsInterface(Integer answerId,
-      Integer interfaceID) {
-    Map<String, Object> params = Map.of("answerId", answerId, 
-        "interfaceID", interfaceID);
-    return new FunctionCall<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
+  public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
+    Map<String, Object> params = Map.of("interfaceID", interfaceID);
+    return new FunctionHandle<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
   }
 
   public record ResultOfMintingFee(BigInteger value0) {

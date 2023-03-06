@@ -130,15 +130,30 @@ public class ContractWrapper {
 		wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
 		wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
 
+		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
+		                                   .addStatement("this(sdk,address,DEFAULT_ABI(),Credentials.NONE)")
+		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addParameter(String.class, "address")
+		                                   .addException(JsonProcessingException.class)
+		                                   .addModifiers(Modifier.PUBLIC)
+		                                   .build());
 
-		var noCredsConstructorBuilder = MethodSpec.constructorBuilder();
-		noCredsConstructorBuilder
-				.addStatement("this(sdk,address,abi,Credentials.NONE)")
-				.addParameter(Sdk.class, "sdk")
-				.addParameter(String.class, "address")
-				.addParameter(ContractAbi.class, "abi")
-				.addModifiers(Modifier.PUBLIC);
-		wrapperBuilder.addMethod(noCredsConstructorBuilder.build());
+		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
+		                                   .addStatement("this(sdk,address,abi,Credentials.NONE)")
+		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addParameter(String.class, "address")
+		                                   .addParameter(ContractAbi.class, "abi")
+		                                   .addModifiers(Modifier.PUBLIC)
+		                                   .build());
+
+		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
+		                                   .addStatement("this(sdk,address,DEFAULT_ABI(),credentials)")
+		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addParameter(String.class, "address")
+		                                   .addParameter(Credentials.class, "credentials")
+		                                   .addException(JsonProcessingException.class)
+		                                   .addModifiers(Modifier.PUBLIC)
+		                                   .build());
 
 		final TypeSpec.Builder templateBuilder = TypeSpec
 				.recordBuilder(wrapperName + "Template")
@@ -249,12 +264,14 @@ public class ContractWrapper {
 			}
 
 			for (var param : func.inputs()) {
-				TypeName typeName = toTypeName(param.type());
-				var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
-				methodBuilder.addParameter(paramSpec);
-				mapParams.add("$S, $N");
-				mapArgsBuilder.add(param.name());
-				mapArgsBuilder.add(paramSpec);
+				if (!param.name().equals("answerId")) {
+					TypeName typeName = toTypeName(param.type());
+					var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
+					methodBuilder.addParameter(paramSpec);
+					mapParams.add("$S, $N");
+					mapArgsBuilder.add(param.name());
+					mapArgsBuilder.add(paramSpec);
+				}
 			}
 			mapStringBuilder.append(String.join(", \n", mapParams));
 			mapStringBuilder.append(")");
@@ -265,10 +282,10 @@ public class ContractWrapper {
 			ClassName handleParamTypeName;
 
 			if (isConstructor) {
-				handleTypeName = ClassName.get(DeployCall.class);
+				handleTypeName = ClassName.get(DeployHandle.class);
 				handleParamTypeName = ClassName.get(wrapperPackage, wrapperName);
 			} else {
-				handleTypeName = ClassName.get(FunctionCall.class);
+				handleTypeName = ClassName.get(FunctionHandle.class);
 				if (Objs.isNull(resultOfFunctionType)) {
 					handleParamTypeName = ClassName.get(Void.class);
 				} else {

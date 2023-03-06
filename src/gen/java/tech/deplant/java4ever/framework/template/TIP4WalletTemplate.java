@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.DeployCall;
+import tech.deplant.java4ever.framework.DeployHandle;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.contract.TIP4Wallet;
@@ -32,10 +32,10 @@ public record TIP4WalletTemplate(ContractAbi abi, Tvc tvc) implements Template {
     return Tvc.ofBase64String("te6ccgECGAEAAuQAAgE0AwEBAcACAEPQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBCSK7VMg4wMgwP/jAiDA/uMC8gsVBQQXArztRNDXScMB+GYh2zzTAAGOHIMI1xgg+QEB0wABlNP/AwGTAvhC4iD4ZfkQ8qiV0wAB8nri0z8B+EMhufK0IPgjgQPoqIIIG3dAoLnytPhj0x8B+CO88rnTHwHbPPI8CAYDSu1E0NdJwwH4ZiLQ1wsDqTgA3CHHAOMCIdcNH/K8IeMDAds88jwUFAYCKCCCEFhakGS74wIgghBotV8/uuMCCQcDUjD4Qm7jAPhG8nPR+EUgbpIwcN74Qrry5E/4APhFIG6SMHDe2zzbPPIACA0LAWLtRNDXScIBjiZw7UTQ9AVwcSKAQPQOb5GT1wv/3vhr+GqAQPQO8r3XC//4YnD4Y+MNEwRQIIIQEXjpvbrjAiCCEDtTMx+64wIgghBM7mRsuuMCIIIQWFqQZLrjAhIRDgoDNjD4RvLgTPhCbuMAIZPU0dDe0//R2zww2zzyABMMCwAs+Ev4SvhD+ELIy//LP8+Dy//L/8ntVAEs+EUgbpIwcN74Srry5E0g8uRO+ADbPA0ARvhKIfhqjQRwAAAAAAAAAAAAAAAAFNs0/KDIzsv/y//JcPsAA0Iw+Eby4Ez4Qm7jACGT1NHQ3vpA03/SANMH1NHbPOMA8gATEA8AKO1E0NP/0z8x+ENYyMv/yz/Oye1UAFT4RSBukjBw3vhKuvLkTfgAVQJVEsjPhYDKAM+EQM4B+gJxzwtqzMkB+wABUDDR2zz4SyGOHI0EcAAAAAAAAAAAAAAAAC7UzMfgyM7L/8lw+wDe8gATAVAw0ds8+EohjhyNBHAAAAAAAAAAAAAAAAAkXjpvYMjOy//JcPsA3vIAEwAu7UTQ0//TP9MAMdP/0//R+Gv4avhj+GIACvhG8uBMAgr0pCD0oRcWABRzb2wgMC42Mi4wAAA=");
   }
 
-  public DeployCall<TIP4Wallet> prepareDeploy(Sdk sdk, Credentials credentials,
+  public DeployHandle<TIP4Wallet> prepareDeploy(Sdk sdk, Credentials credentials,
       BigInteger _randomNonce) {
     Map<String, Object> initialDataFields = Map.of("_randomNonce", _randomNonce);
     Map<String, Object> params = Map.of();
-    return new DeployCall<TIP4Wallet>(TIP4Wallet.class, sdk, abi(), tvc(), sdk.clientConfig().abi().workchain(), credentials, initialDataFields, params, null);
+    return new DeployHandle<TIP4Wallet>(TIP4Wallet.class, sdk, abi(), tvc(), sdk.clientConfig().abi().workchain(), credentials, initialDataFields, params, null);
   }
 }

@@ -3,8 +3,8 @@ module test {
 	requires java4ever.binding;
 	requires org.junit.jupiter.api;
 	requires java.compiler;
-	exports tech.deplant.java4ever.framework.test.unit;
-	exports tech.deplant.java4ever.framework.test;
-	exports tech.deplant.java4ever.framework.test.generator;
+	opens tech.deplant.java4ever.framework.unit to org.junit.platform.commons;
+	exports tech.deplant.java4ever.framework.unit;
+	exports tech.deplant.java4ever.framework.codegen;
 
 }

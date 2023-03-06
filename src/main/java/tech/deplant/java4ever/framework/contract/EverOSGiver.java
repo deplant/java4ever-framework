@@ -2,7 +2,7 @@ package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.FunctionCall;
+import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.datatype.Address;
 
@@ -22,10 +22,10 @@ public interface EverOSGiver extends Giver {
 	}
 
 	@Override
-	default FunctionCall<Void> give(String to, BigInteger value) {
+	default FunctionHandle<Void> give(String to, BigInteger value) {
 		logger.log(System.Logger.Level.INFO, "Giver called!");
 		return sendTransaction(new Address(to), value, false);
 	}
 
-	FunctionCall<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce);
+	FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce);
 }

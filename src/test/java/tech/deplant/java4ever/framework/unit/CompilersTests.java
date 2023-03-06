@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.test.unit;
+package tech.deplant.java4ever.framework.unit;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;

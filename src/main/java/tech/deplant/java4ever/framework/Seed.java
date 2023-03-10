@@ -11,7 +11,7 @@ public record Seed(String phrase, int words) {
 	public final static String HD_PATH = "m/44'/396'/0'/0/0";
 
 	private static String generateMnemonicPhraseFromRandom(Sdk sdk, int words) throws EverSdkException {
-		return Crypto.mnemonicFromRandom(sdk.context(), DICTIONARY_ENGLISH, words).phrase();
+		return Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.English, words).phrase();
 	}
 
 	/**
@@ -21,11 +21,11 @@ public record Seed(String phrase, int words) {
 	 * @return
 	 */
 	public static Seed RANDOM(Sdk sdk) throws EverSdkException {
-		return new Seed(generateMnemonicPhraseFromRandom(sdk, DEFAULT_WORD_COUNT), DEFAULT_WORD_COUNT);
+		return new Seed(Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.English, DEFAULT_WORD_COUNT).phrase(), DEFAULT_WORD_COUNT);
 	}
 
-	public static Seed RANDOM24(Sdk sdk) throws EverSdkException {
-		return new Seed(generateMnemonicPhraseFromRandom(sdk, 24), 24);
+	public static Seed RANDOM_TON(Sdk sdk) throws EverSdkException {
+		return new Seed(Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.Ton, 24).phrase(), 24);
 	}
 
 }

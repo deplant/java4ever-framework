@@ -95,7 +95,8 @@ public interface Contract {
 				true,
 				Credentials.NONE.signer(),
 				null,
-				address()
+				address(),
+				null
 		).body();
 	}
 

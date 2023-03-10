@@ -1,7 +1,8 @@
 ### 1.5.0
 
 - Updated EVER-SDK -> 1.41
-- - Updated dependency: Gradle -> 8.0.2
+- Updated dependency: Gradle -> 8.0.2
+- Removed dependency: org.junit.platform:junit-platform-launcher
 - Added Contract Wrapper Generation API (creates contract and template wrappers from ABI json)
 - Reworked java4ever API to work with generated wrappers
 - Simplified writing custom wrappers

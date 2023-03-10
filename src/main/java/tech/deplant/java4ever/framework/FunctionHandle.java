@@ -107,6 +107,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 						null,
 						toCallSet(),
 						toSigner(),
+						null,
 						null
 				);
 		String boc = result.result()[0].get("boc").toString();
@@ -266,6 +267,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 		                                 toCallSet(),
 		                                 toSigner(),
 		                                 null,
+										 null,
 		                                 false);
 	}
 

@@ -57,6 +57,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
 				null,
 				requireNonNullElse(credentials, Credentials.NONE).signer(),
+				null,
 				null
 		).address();
 	}

@@ -88,7 +88,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 
 	public String json() throws JsonProcessingException {
 		return ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-		                                    .writeValueAsString(this);
+		                                    .writeValueAsString(abiContract());
 	}
 
 	public String functionId(Sdk sdk, String name) throws EverSdkException {

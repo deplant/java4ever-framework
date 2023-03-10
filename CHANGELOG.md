@@ -13,8 +13,11 @@
 - Made large API rework
 - Added transaction tree logging
 - Added functionId() calculator
+- Added builder for creating TVCs from scratch
+- Improved type conversion between ABI and Java
 - Added util methods for templates
 - Updated dependency: Gradle -> 7.6
+- Added transaction tree logging and exception handling
 
 ### 1.3.0
 

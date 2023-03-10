@@ -1,0 +1,73 @@
+{
+  "target_dir": "src/gen/java",
+  "contract_pkg": "tech.deplant.java4ever.framework.contract",
+  "template_pkg": "tech.deplant.java4ever.framework.template",
+  "contract_list": [
+    {
+      "name": "GiverV2",
+      "abi": "artifacts/giver/GiverV2.abi.json",
+      "interfaces": [
+        "EverOSGiver"
+      ]
+    },
+    {
+      "name": "SafeMultisigWallet",
+      "abi": "artifacts/multisig/SafeMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SafeMultisigWallet.tvc",
+      "interfaces": [
+        "MultisigWallet"
+      ]
+    },
+    {
+      "name": "SetcodeMultisigWallet",
+      "abi": "artifacts/multisig/SetcodeMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SetcodeMultisigWallet.tvc",
+      "interfaces": [
+        "MultisigWallet"
+      ]
+    },
+    {
+      "name": "SurfMultisigWallet",
+      "abi": "artifacts/multisig/SurfMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SurfMultisigWallet.tvc",
+      "interfaces": [
+        "MultisigWallet"
+      ]
+    },
+    {
+      "name": "TIP3TokenRoot",
+      "abi": "artifacts/tip31/TokenRoot.abi.json",
+      "tvc": "artifacts/tip31/TokenRoot.tvc"
+    },
+    {
+      "name": "TIP3TokenWallet",
+      "abi": "artifacts/tip31/TokenWallet.abi.json",
+      "tvc": "artifacts/tip31/TokenWallet.tvc"
+    },
+    {
+      "name": "TIP4Collection",
+      "abi": "artifacts/tip4/Collection.abi.json",
+      "tvc": "artifacts/tip4/Collection.tvc"
+    },
+    {
+      "name": "TIP4Index",
+      "abi": "artifacts/tip4/Index.abi.json",
+      "tvc": "artifacts/tip4/Index.tvc"
+    },
+    {
+      "name": "TIP4IndexBasis",
+      "abi": "artifacts/tip4/IndexBasis.abi.json",
+      "tvc": "artifacts/tip4/IndexBasis.tvc"
+    },
+    {
+      "name": "TIP4Nft",
+      "abi": "artifacts/tip4/Nft.abi.json",
+      "tvc": "artifacts/tip4/Nft.tvc"
+    },
+    {
+      "name": "TIP4Wallet",
+      "abi": "artifacts/tip4/Wallet.abi.json",
+      "tvc": "artifacts/tip4/Wallet.tvc"
+    }
+  ]
+}

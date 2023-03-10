@@ -11,7 +11,7 @@ ext {
     junitVersion = "5.9.1"
 
     // details
-    v_version = "1.4.0"
+    v_version = "1.5.0"
     v_groupId = "tech.deplant.java4ever"
     v_artifactId = "java4ever-framework"
     v_repository = "deplant/java4ever-framework"
@@ -28,12 +28,21 @@ repositories {
     mavenLocal()
 }
 
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/gen/java']
+        }
+    }
+}
+
 dependencies {
 
     // RUNTIME **************************
 
     api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
-    api "tech.deplant.java4ever:java4ever-utils:1.4.0" // java4ever-binding
+    api "tech.deplant.java4ever:java4ever-utils:$v_version" // java4ever-utils
     implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
     // TESTS **************************
@@ -44,7 +53,6 @@ dependencies {
     // JUnit 5
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher" // https://github.com/gradle/gradle/issues/18627
 
 }
 

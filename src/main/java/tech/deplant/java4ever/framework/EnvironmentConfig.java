@@ -3,13 +3,10 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.Solc;
 import tech.deplant.java4ever.framework.artifact.TvmLinker;
-import tech.deplant.java4ever.framework.crypto.Credentials;
-import tech.deplant.java4ever.framework.template.ContractTemplate;
-import tech.deplant.java4ever.framework.template.ContractTvc;
+import tech.deplant.java4ever.framework.template.Template;
 
 import java.io.IOException;
 import java.util.Map;
@@ -52,18 +49,18 @@ public record EnvironmentConfig(String serializationPath,
 		                                               EnvironmentConfig.class);
 	}
 
-	public ContractTemplate compileTemplate(String filename,
-	                                        String contractName) throws JsonProcessingException, EverSdkException {
+	public Template compileTemplate(String filename,
+	                                String contractName) throws JsonProcessingException, EverSdkException {
 		return compileTemplate(sourcePath(),
 		                       buildPath(),
 		                       filename,
 		                       contractName);
 	}
 
-	public ContractTemplate compileTemplate(String sourcePath,
-	                                        String buildPath,
-	                                        String filename,
-	                                        String contractName) throws JsonProcessingException, EverSdkException {
+	public Template compileTemplate(String sourcePath,
+	                                String buildPath,
+	                                String filename,
+	                                String contractName) throws JsonProcessingException, EverSdkException {
 		var compilerResult = compiler().compileContract(
 				contractName,
 				filename,
@@ -73,9 +70,9 @@ public record EnvironmentConfig(String serializationPath,
 		if (compilerResult == 0) {
 			var linkerResult = linker().assemblyContract(contractName, buildPath);
 			if (linkerResult == 0) {
-				return new ContractTemplate(
+				return new Template.CustomTemplate(
 						ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
-						ContractTvc.ofFile(buildPath + "/" + contractName + ".tvc")
+						Tvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);
 			} else {
 				error(logger, () -> "TvmLinker exit code:" + linkerResult);
@@ -97,8 +94,8 @@ public record EnvironmentConfig(String serializationPath,
 		return Credentials.ofFile(keys().get(name));
 	}
 
-	public ContractTvc tvc(String name) {
-		return ContractTvc.ofFile(tvcs().get(name));
+	public Tvc tvc(String name) {
+		return Tvc.ofFile(tvcs().get(name));
 	}
 
 	public void addAbiPath(String name, String pathStr) throws IOException {

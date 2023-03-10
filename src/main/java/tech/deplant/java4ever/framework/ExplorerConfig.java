@@ -2,10 +2,8 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.ContextBuilder;
-import tech.deplant.java4ever.framework.abi.ContractAbi;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
-import tech.deplant.java4ever.framework.contract.OwnedContract;
-import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.contract.CustomContract;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,8 +37,10 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 		return ContractAbi.ofString(contracts().get(contractName).abiJson());
 	}
 
-	public OwnedContract contract(Sdk sdk, String contractName, String keysName) throws JsonProcessingException {
-		return new OwnedContract(
+	public CustomContract contract(Sdk sdk,
+	                               String contractName,
+	                               String keysName) throws JsonProcessingException {
+		return new CustomContract(
 				sdk,
 				address(contractName),
 				abi(contractName),
@@ -55,7 +55,7 @@ public record ExplorerConfig(String serializationPath, Map<String, SavedContract
 	 * @return OwnedContract that we successfully putted to config
 	 * @throws IOException can be thrown by the call of sync() method
 	 */
-	public OwnedContract addContract(String name, OwnedContract contract) throws IOException {
+	public CustomContract addContract(String name, CustomContract contract) throws IOException {
 		contracts().put(name,
 		                new ExplorerConfig.SavedContract(contract.abi().json(), contract.address()));
 		sync();

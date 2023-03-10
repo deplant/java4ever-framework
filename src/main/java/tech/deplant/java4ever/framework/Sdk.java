@@ -1,14 +1,14 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.artifact.Solc;
 import tech.deplant.java4ever.framework.artifact.TvmLinker;
-import tech.deplant.java4ever.framework.contract.OwnedContract;
-import tech.deplant.java4ever.framework.crypto.Credentials;
+import tech.deplant.java4ever.framework.contract.CustomContract;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,8 +32,16 @@ public record Sdk(Context context,
 		return Client.version(context()).version();
 	}
 
+	public ObjectMapper mapper() {
+		return context().mapper();
+	}
+
 	public <T> T convertMap(Map<String, Object> inputMap, Class<T> outputClass) {
 		return context().mapper().convertValue(inputMap, outputClass);
+	}
+
+	public <T> T convertMap(Map<String, Object> inputMap, TypeReference<T> outputType) {
+		return context().mapper().convertValue(inputMap, outputType);
 	}
 
 	public JsonNode parseStruct(Object struct) throws JsonProcessingException {
@@ -48,7 +56,7 @@ public record Sdk(Context context,
 		return context().mapper().writeValueAsString(inputObject);
 	}
 
-	public void saveContract(String name, OwnedContract contract) throws IOException {
+	public void saveContract(String name, CustomContract contract) throws IOException {
 		explorerConfig().addContract(name, contract);
 	}
 
@@ -86,7 +94,7 @@ public record Sdk(Context context,
 		private Integer reconnectTimeout = 12000;
 		private String accessKey;
 		//Context.CryptoConfig
-		private Integer mnemonicDictionary = 1;
+		private Crypto.MnemonicDictionary mnemonicDictionary = Crypto.MnemonicDictionary.English;
 		private Integer mnemonicWordCount = 12;
 		private String hdkeyDerivationPath = "m/44'/396'/0'/0/0";
 		//Context.AbiConfig;
@@ -102,6 +110,8 @@ public record Sdk(Context context,
 		private Client.NetworkQueriesProtocol queriesProtocol = Client.NetworkQueriesProtocol.HTTP;
 		private Integer firstRempStatusTimeout = 1000;
 		private Integer nextRempStatusTimeout = 5000;
+
+		private Integer signatureId = null;
 
 		private ExplorerConfig explorerConfig;
 
@@ -239,13 +249,18 @@ public record Sdk(Context context,
 			return this;
 		}
 
+		public Builder networkSignatureId(Integer signatureId) {
+			this.signatureId = signatureId;
+			return this;
+		}
+
 		public Builder networkAccessKey(String access_key) {
 			this.accessKey = access_key;
 			return this;
 		}
 
 		//cripto
-		public Builder cryptoMnemonicDictionary(Integer mnemonic_dictionary) {
+		public Builder cryptoMnemonicDictionary(Crypto.MnemonicDictionary mnemonic_dictionary) {
 			this.mnemonicDictionary = mnemonic_dictionary;
 			return this;
 		}
@@ -288,6 +303,7 @@ public record Sdk(Context context,
 
 		public Sdk build(LibraryLoader loader) throws IOException {
 			var config = new Client.ClientConfig(
+					new Client.BindingConfig("java4ever","1.5.0"),
 					new Client.NetworkConfig(
 							this.serverAddress,
 							this.endpoints,
@@ -305,6 +321,7 @@ public record Sdk(Context context,
 							this.queriesProtocol,
 							this.firstRempStatusTimeout,
 							this.nextRempStatusTimeout,
+							this.signatureId,
 							this.accessKey),
 					new Client.CryptoConfig(
 							this.mnemonicDictionary,

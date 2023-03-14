@@ -8,7 +8,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public record JsonResource(String resourceName) implements Supplier<String>, Consumer<String> {
+public record JsonResource(String resourceName) implements Artifact<String,String> {
 	@Override
 	public String get() {
 		return new String(

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.codegen;
+package tech.deplant.java4ever.frtest.codegen;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -12,7 +12,6 @@ import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.generator.ContractWrapper;
 import tech.deplant.java4ever.framework.generator.GeneratorConfig;
-import tech.deplant.java4ever.framework.unit.CredentialsTests;
 import tech.deplant.java4ever.utils.Objs;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.nio.file.Paths;
 @Execution(ExecutionMode.CONCURRENT)
 public class WrapperGenerationTests {
 
-	private static System.Logger logger = System.getLogger(CredentialsTests.class.getName());
+	private static System.Logger logger = System.getLogger(WrapperGenerationTests.class.getName());
 
 	@Test
 	public void generate() throws IOException, EverSdkException {
@@ -31,7 +30,7 @@ public class WrapperGenerationTests {
 
 		var mapper = ContextBuilder.DEFAULT_MAPPER;
 
-		var config = mapper.readValue(new JsonResource("generator-config.json").get(), GeneratorConfig.class);
+		var config = mapper.readValue(new JsonResource("codegen/generator-config.json").get(), GeneratorConfig.class);
 		Path targetDirectory = Paths.get(config.targetDir());
 		String contractPackage = config.contractPkg();
 		String templatePackage = config.templatePkg();

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -14,8 +14,8 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static tech.deplant.java4ever.framework.unit.TestEnvironment.RNG_KEYS;
-import static tech.deplant.java4ever.framework.unit.TestEnvironment.RNG_SEED;
+import static tech.deplant.java4ever.frtest.unit.Env.RNG_KEYS;
+import static tech.deplant.java4ever.frtest.unit.Env.RNG_SEED;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -23,7 +23,7 @@ public class CredentialsTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		TestEnvironment.INIT();
+		Env.INIT();
 	}
 
 	@Test
@@ -56,9 +56,9 @@ public class CredentialsTests {
 
 	@Test
 	public void make_seed_and_keys() throws Throwable {
-		TestEnvironment.LOG.log(System.Logger.Level.DEBUG, Seed.RANDOM(TestEnvironment.SDK_EMPTY).toString());
-		TestEnvironment.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(TestEnvironment.SDK_EMPTY,
-		                                                                      new Seed(
+		Env.LOG.log(System.Logger.Level.DEBUG, Seed.RANDOM(Env.SDK_EMPTY).toString());
+		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
+		                                                          new Seed(
 				                                                      "object burger primary dish harbor luxury morning mystery sausage wide this time",
 				                                                      12)).toString());
 	}
@@ -66,9 +66,9 @@ public class CredentialsTests {
 
 	@Test
 	public void all_keys_from_one_seed_should_be_equal() throws Throwable {
-		var seed = Seed.RANDOM(TestEnvironment.SDK_EMPTY);
-		var keys1 = Credentials.ofSeed(TestEnvironment.SDK_EMPTY, seed);
-		var keys2 = Credentials.ofSeed(TestEnvironment.SDK_EMPTY, seed);
+		var seed = Seed.RANDOM(Env.SDK_EMPTY);
+		var keys1 = Credentials.ofSeed(Env.SDK_EMPTY, seed);
+		var keys2 = Credentials.ofSeed(Env.SDK_EMPTY, seed);
 		assertEquals(keys1.toString(), keys2.toString());
 	}
 

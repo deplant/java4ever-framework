@@ -14,5 +14,6 @@ module java4ever.framework {
 	opens tech.deplant.java4ever.framework.template to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.generator to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.datatype to com.fasterxml.jackson.databind;
+	opens tech.deplant.java4ever.framework.artifact to com.fasterxml.jackson.databind;
 
 }

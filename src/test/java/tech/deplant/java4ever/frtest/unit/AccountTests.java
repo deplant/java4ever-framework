@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -17,35 +17,36 @@ import java.math.BigInteger;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
 public class AccountTests {
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		TestEnvironment.INIT();
+		INIT();
 	}
 
 	@Test
 	public void try_local_execution() throws Throwable {
-		var keys = TestEnvironment.RNG_KEYS();
+		var keys = RNG_KEYS();
 
-		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(TestEnvironment.SDK_LOCAL,
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(SDK_LOCAL,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
-		SafeMultisigWallet msig = deployStatement.deployWithGiver(TestEnvironment.GIVER_LOCAL,
+		SafeMultisigWallet msig = deployStatement.deployWithGiver(GIVER_LOCAL,
 		                                                          Convert.toValue("1",
 		                                                                          CurrencyUnit.Ever.EVER));
 		assertTrue(msig.account().isActive());
-		Account acc = Account.ofAddress(TestEnvironment.SDK_LOCAL, msig.address());
+		Account acc = Account.ofAddress(SDK_LOCAL, msig.address());
 		Map<String, Object> params = Map.of(
 				"dest", msig.address(),
 				"value", Convert.toValue("1", CurrencyUnit.Ever.EVER),
 				"bounce", true,
 				"flags", 0,
 				"payload", "");
-		var result = acc.runLocal(TestEnvironment.SDK_LOCAL, msig.abi(), "sendTransaction", params, null, msig.credentials(), null);
+		var result = acc.runLocal(SDK_LOCAL, msig.abi(), "sendTransaction", params, null, msig.credentials(), null);
 		String newBoc = result.account();
 		Map<String, Object> outputs = result.decoded().output();
 	}

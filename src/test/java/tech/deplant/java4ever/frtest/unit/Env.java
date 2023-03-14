@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
@@ -10,7 +10,7 @@ import tech.deplant.java4ever.framework.contract.MultisigWallet;
 
 import java.io.IOException;
 
-public class TestEnvironment {
+public class Env {
 
 	public static Sdk SDK_EMPTY;
 	public static Sdk SDK_LOCAL;
@@ -19,7 +19,7 @@ public class TestEnvironment {
 	public static EverOSGiver GIVER_LOCAL;
 	public static MultisigWallet GIVER_DEV;
 	public static MultisigWallet GIVER_MAIN;
-	public static System.Logger LOG = System.getLogger(TestEnvironment.class.getName());
+	public static System.Logger LOG = System.getLogger(Env.class.getName());
 	private static boolean isInitialized = false;
 
 	public static void INIT() throws IOException {
@@ -44,6 +44,6 @@ public class TestEnvironment {
 	}
 
 	public static Seed RNG_SEED() throws EverSdkException {
-		return Seed.RANDOM(TestEnvironment.SDK_EMPTY);
+		return Seed.RANDOM(Env.SDK_EMPTY);
 	}
 }

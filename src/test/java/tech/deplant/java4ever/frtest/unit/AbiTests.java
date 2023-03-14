@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AbiTests {
 
 	private static System.Logger logger = System.getLogger(AbiTests.class.getName());
+
+
 
 	@Test
 	public void deserialized_abi_equals_original_json() throws JsonProcessingException {

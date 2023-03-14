@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public record Sdk(Context context,
                   Integer debugTreeTimeout,
                   Client.ClientConfig clientConfig,
-                  ExplorerConfig explorerConfig,
-                  EnvironmentConfig environmentConfig) {
+                  OnchainConfig onchainConfig,
+                  LocalConfig localConfig) {
 
 	public static Builder builder() {
 		return new Builder();
@@ -57,12 +57,12 @@ public record Sdk(Context context,
 	}
 
 	public void saveContract(String name, CustomContract contract) throws IOException {
-		explorerConfig().addContract(name, contract);
+		onchainConfig().addContract(name, contract);
 	}
 
 	public void saveKeys(String name, Credentials keys) throws IOException {
-		explorerConfig().credentials().put(name, keys);
-		explorerConfig().sync();
+		onchainConfig().addKeys(name, keys);
+		onchainConfig().sync();
 	}
 
 	public Tvm.ExecutionOptions executionOptions() {
@@ -113,9 +113,9 @@ public record Sdk(Context context,
 
 		private Integer signatureId = null;
 
-		private ExplorerConfig explorerConfig;
+		private OnchainConfig onchainConfig;
 
-		private EnvironmentConfig environmentConfig;
+		private LocalConfig localConfig;
 
 		private String explorerConfigPath = System.getProperty("user.dir") + "/explorer.json";
 
@@ -154,13 +154,13 @@ public record Sdk(Context context,
 			return this;
 		}
 
-		public Builder environmentConfig(EnvironmentConfig environmentConfig) {
-			this.environmentConfig = environmentConfig;
+		public Builder environmentConfig(LocalConfig localConfig) {
+			this.localConfig = localConfig;
 			return this;
 		}
 
-		public Builder explorerConfig(ExplorerConfig explorerConfig) {
-			this.explorerConfig = explorerConfig;
+		public Builder explorerConfig(OnchainConfig onchainConfig) {
+			this.onchainConfig = onchainConfig;
 			return this;
 		}
 
@@ -336,17 +336,14 @@ public record Sdk(Context context,
 					this.localStoragePath
 			);
 			var explorerConfig =
-					this.explorerConfig == null ? ExplorerConfig.EMPTY(this.explorerConfigPath) : this.explorerConfig;
-			var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+					this.onchainConfig == null ? OnchainConfig.EMPTY(this.explorerConfigPath) : this.onchainConfig;
+			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(
 					this.environmentConfigPath,
-					new Solc(this.solidityCompilerPath),
-					new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
+					this.solidityCompilerPath,
+					this.tvmlinkerPath,
+					this.stdLibPath,
 					this.soliditySourcesDefaultPath,
-					this.solidityArtifactsBuildPath,
-					new ConcurrentHashMap<String, String>(),
-					new ConcurrentHashMap<String, String>(),
-					new ConcurrentHashMap<String, String>()
-			) : this.environmentConfig;
+					this.solidityArtifactsBuildPath) : this.localConfig;
 			return new Sdk(
 					new ContextBuilder()
 							.setConfigJson(this.mapper.writeValueAsString(config))
@@ -364,17 +361,14 @@ public record Sdk(Context context,
 					.buildFromExisting(contextId, contextRequestCount);
 			Client.ClientConfig config = null;
 			var explorerConfig =
-					this.explorerConfig == null ? ExplorerConfig.EMPTY(this.explorerConfigPath) : this.explorerConfig;
-			var envConfig = this.environmentConfig == null ? new EnvironmentConfig(
+					this.onchainConfig == null ? OnchainConfig.EMPTY(this.explorerConfigPath) : this.onchainConfig;
+			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(
 					this.environmentConfigPath,
-					new Solc(this.solidityCompilerPath),
-					new TvmLinker(this.tvmlinkerPath, this.stdLibPath),
+					this.solidityCompilerPath,
+					this.tvmlinkerPath,
+					this.stdLibPath,
 					this.soliditySourcesDefaultPath,
-					this.solidityArtifactsBuildPath,
-					new ConcurrentHashMap<String, String>(),
-					new ConcurrentHashMap<String, String>(),
-					new ConcurrentHashMap<String, String>()
-			) : this.environmentConfig;
+					this.solidityArtifactsBuildPath) : this.localConfig;
 			config = Client.config(context);
 			return new Sdk(context, this.debugTimeout, config, explorerConfig, envConfig);
 		}

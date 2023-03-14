@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -25,23 +25,23 @@ public class MsigTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		TestEnvironment.INIT();
+		Env.INIT();
 	}
 
 	@Test
 	public void first_msig_deploy_passes_second_throws() throws Throwable {
-		var keys = TestEnvironment.RNG_KEYS();
+		var keys = Env.RNG_KEYS();
 
-		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(TestEnvironment.SDK_LOCAL,
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
-		SafeMultisigWallet msig = deployStatement.deployWithGiver(TestEnvironment.GIVER_LOCAL,
+		SafeMultisigWallet msig = deployStatement.deployWithGiver(Env.GIVER_LOCAL,
 		                                                          Convert.toValue("1",
 		                                                                          CurrencyUnit.Ever.EVER));
-		assertTrue(Account.ofAddress(TestEnvironment.SDK_LOCAL, msig.address()).isActive());
+		assertTrue(Account.ofAddress(Env.SDK_LOCAL, msig.address()).isActive());
 		try {
-			deployStatement.deployWithGiver(TestEnvironment.GIVER_LOCAL,
+			deployStatement.deployWithGiver(Env.GIVER_LOCAL,
 			                                Convert.toValue("1",
 			                                                CurrencyUnit.Ever.EVER));
 		} catch (EverSdkException e) {

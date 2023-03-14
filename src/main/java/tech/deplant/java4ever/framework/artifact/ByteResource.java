@@ -7,7 +7,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public record ByteResource(String resourceName) implements Supplier<byte[]>, Consumer<byte[]> {
+public record ByteResource(String resourceName) implements Artifact<byte[],byte[]> {
     @Override
     public byte[] get() {
         try (var stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName())) {

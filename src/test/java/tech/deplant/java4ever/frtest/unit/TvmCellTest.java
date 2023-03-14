@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -12,7 +12,7 @@ import tech.deplant.java4ever.framework.datatype.TvmCell;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static tech.deplant.java4ever.framework.unit.TestEnvironment.SDK_EMPTY;
+import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -20,7 +20,7 @@ class TvmCellTest {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException {
-		TestEnvironment.INIT();
+		Env.INIT();
 	}
 
 	@Test

@@ -1,16 +1,25 @@
 package tech.deplant.java4ever.framework.artifact;
 
+import tech.deplant.java4ever.utils.Fls;
+
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public record ByteFile(String filePath) implements Supplier<byte[]>, Consumer<byte[]> {
+public record ByteFile(Path filePath) implements Artifact<byte[],byte[]> {
+
+	public ByteFile(String filePathString) {
+		this(Paths.get(filePathString));
+	}
+
 	@Override
 	public byte[] get() {
 		try {
-			return Files.readAllBytes(Paths.get(filePath()));
+			return Files.readAllBytes(filePath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -19,8 +28,7 @@ public record ByteFile(String filePath) implements Supplier<byte[]>, Consumer<by
 	@Override
 	public void accept(byte[] bytes) {
 		try {
-			Files.write(Paths.get(filePath()),
-			            bytes);
+			Fls.write(filePath(), bytes);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

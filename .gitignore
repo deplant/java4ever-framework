@@ -55,6 +55,7 @@ fabric.properties
 # Build artifacts
 build/
 target/
+config/
 
 # JVM crash logs
 hs_err_pid*.*

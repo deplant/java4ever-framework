@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.unit;
+package tech.deplant.java4ever.frtest.unit;
 
 import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.binding.EverSdkException;

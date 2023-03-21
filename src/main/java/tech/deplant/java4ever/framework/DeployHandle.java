@@ -25,7 +25,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 
 	//TODO Add DeployHandle.Builder and method toBuilder()
 
-	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
+	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
 	public <T> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,

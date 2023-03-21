@@ -48,7 +48,7 @@ public class TemplateTests {
 		assertEquals("0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
 		             new SurfMultisigWalletTemplate()
 				             .prepareDeploy(SDK_EMPTY, keys, new BigInteger[]{keys.publicBigInt()}, 1)
-				             .calculateAddress());
+				             .toAddress());
 	}
 
 	@Test

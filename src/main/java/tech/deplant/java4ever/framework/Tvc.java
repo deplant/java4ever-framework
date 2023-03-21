@@ -5,6 +5,7 @@ import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.ByteFile;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 import java.util.Base64;
 import java.util.Map;
@@ -44,6 +45,10 @@ public record Tvc(byte[] bytes) {
 
 	public String code(Sdk sdk) throws EverSdkException {
 		return decode(sdk).code();
+	}
+
+	public TvmCell codeCell(Sdk sdk) throws EverSdkException {
+		return TvmCell.fromJava(decode(sdk).code());
 	}
 
 	public Boc.ResultOfDecodeTvc decode(Sdk sdk) throws EverSdkException {

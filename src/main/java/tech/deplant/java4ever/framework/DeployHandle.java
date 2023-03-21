@@ -92,7 +92,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		return requireNonNullElse(credentials(), Credentials.NONE).signer();
 	}
 
-	public String calculateAddress() throws EverSdkException {
+	public String toAddress() throws EverSdkException {
 		return Abi.encodeMessage(
 				sdk().context(),
 				abi().ABI(),
@@ -106,13 +106,13 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	public RETURN deployWithGiver(Giver giver, BigInteger value) throws EverSdkException {
-		var address = calculateAddress();
+		var address = toAddress();
 		giver.give(address, value).call();
 		return deploy(address);
 	}
 
 	public RETURN deploy() throws EverSdkException {
-		var address = calculateAddress();
+		var address = toAddress();
 		return deploy(address);
 	}
 

@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 
 import java.math.BigDecimal;
@@ -76,6 +77,26 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 		return new Abi.CallSet(functionName(),
 		                       functionHeader(),
 		                       abi().convertFunctionInputs(functionName(), functionInputs()));
+	}
+
+	/**
+	 * Encodes internal message string. Result of this method can be used as a payload for internal transactions
+	 * to pass function calls and inputs with transfer.
+	 *
+	 * @return TvmCell of the internal call payload
+	 * @throws EverSdkException
+	 */
+	public TvmCell toPayload() throws EverSdkException {
+			return TvmCell.fromJava(Abi.encodeMessageBody(
+					sdk().context(),
+					abi().ABI(),
+					toCallSet(),
+					true,
+					toSigner(),
+					null,
+					address(),
+					null
+			).body());
 	}
 
 	public Abi.Signer toSigner() {
@@ -185,12 +206,12 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	 * returns a set of messages and transactions, logs everything and throws exceptions on errors
 	 * encountered in a tree.
 	 *
-	 * @param debugThrowOnTreeErrors If 'true' method will throw on any internal non-0 exit_code encountered in tree.
+	 * @param throwOnTreeError If 'true' method will throw on any internal non-0 exit_code encountered in tree.
 	 * @param otherAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
-	public ResultOfTree<Map<String, Object>> callTreeAsMap(boolean debugThrowOnTreeErrors,
+	public ResultOfTree<Map<String, Object>> callTreeAsMap(boolean throwOnTreeError,
 	                                                       List<ContractAbi> otherAbisForDecode) throws EverSdkException {
 		Abi.ABI[] abiArray = Stream
 				.concat(Stream.of(abi()),
@@ -223,7 +244,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 			                                                            Convert.hexToDecOrZero(tr.totalFees(), 9)
 			                                                                   .toPlainString(),
 			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
-			if (tr.aborted() && debugThrowOnTreeErrors) {
+			if (tr.aborted() && throwOnTreeError) {
 				error(logger, lazyFormatLogMessage);
 				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),
 				                                                            "One of the message tree transaction was aborted!"),
@@ -246,14 +267,14 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	 * returns a set of messages and transactions, logs everything and throws exceptions on errors
 	 * encountered in a tree.
 	 *
-	 * @param debugThrowOnTreeErrors If 'true' method will throw on any internal non-0 exit_code encountered in tree.
+	 * @param throwOnTreeError If 'true' method will throw on any internal non-0 exit_code encountered in tree.
 	 * @param otherAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
-	public ResultOfTree<RETURN> callTree(boolean debugThrowOnTreeErrors,
+	public ResultOfTree<RETURN> callTree(boolean throwOnTreeError,
 	                                     List<ContractAbi> otherAbisForDecode) throws EverSdkException {
-		var result = callTreeAsMap(debugThrowOnTreeErrors, otherAbisForDecode);
+		var result = callTreeAsMap(throwOnTreeError, otherAbisForDecode);
 		return new ResultOfTree<>(result.queryTree(),
 		                          sdk().convertMap(result.decodedOutuput(), new TypeReference<>() {
 		                          }));

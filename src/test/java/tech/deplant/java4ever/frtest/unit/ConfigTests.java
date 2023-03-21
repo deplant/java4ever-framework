@@ -38,7 +38,7 @@ public class ConfigTests {
 		conf.addContract("test_contract", contract);
 		conf = OnchainConfig.LOAD("config/onchain-config.json");
 		assertEquals(keys.publicKey(), conf.keys("test_keys").publicKey());
-		assertEquals(contract.abi().json(), conf.contract(SDK_EMPTY,"test_contract").abi().json());
+		assertEquals(contract.abi().json(), conf.contract(CustomContract.class,SDK_EMPTY,"test_contract").abi().json());
 	}
 
 	@Test

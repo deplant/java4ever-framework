@@ -5,6 +5,7 @@ import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.CustomContract;
 
 import java.io.IOException;
@@ -53,22 +54,17 @@ public record OnchainConfig(Artifact<String,String> artifact, OnchainInfo info) 
 		return ContractAbi.ofString(info().contracts().get(contractName).abiJson());
 	}
 
-	public CustomContract contract(Sdk sdk,
-	                               String contractName,
-	                               String keysName) throws JsonProcessingException {
-		return new CustomContract(
-				sdk,
-				address(contractName),
-				abi(contractName),
-				keys(keysName));
+	public <T> T contract(Class<T> clazz,
+	                    Sdk sdk,
+	                    String contractName,
+	                    String keysName) throws JsonProcessingException {
+		return Contract.instantiate(clazz, sdk, address(contractName), abi(contractName), keys(keysName));
 	}
 
-	public CustomContract contract(Sdk sdk,
-	                               String contractName) throws JsonProcessingException {
-		return new CustomContract(
-				sdk,
-				address(contractName),
-				abi(contractName));
+	public <T> T contract(Class<T> clazz,
+	                      Sdk sdk,
+	                      String contractName) throws JsonProcessingException {
+		return Contract.instantiate(clazz, sdk, address(contractName), abi(contractName), Credentials.NONE);
 	}
 
 	/**
@@ -79,7 +75,7 @@ public record OnchainConfig(Artifact<String,String> artifact, OnchainInfo info) 
 	 * @return OwnedContract that we successfully putted to config
 	 * @throws IOException can be thrown by the call of sync() method
 	 */
-	public CustomContract addContract(String name, CustomContract contract) throws IOException {
+	public Contract addContract(String name, Contract contract) throws IOException {
 		info().contracts().put(name,
 		                new OnchainConfig.SavedContract(contract.abi().json(), contract.address()));
 		sync();

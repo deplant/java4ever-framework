@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework.template;
 
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.contract.CustomContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 import java.util.Map;
@@ -40,6 +42,4 @@ public interface Template {
 		return Account.ofAddress(sdk, addressFromEncodedTvc(sdk)).isActive();
 	}
 
-	record CustomTemplate(ContractAbi abi, Tvc tvc) implements Template {
-	}
 }

@@ -74,33 +74,6 @@ public interface Contract {
 	Credentials credentials();
 
 	/**
-	 * Encodes internal message string. Result of this method can be used as a payload for internal transactions
-	 * to pass function calls and inputs with transfer.
-	 *
-	 * @param functionName
-	 * @param functionInputs
-	 * @param functionHeader
-	 * @return
-	 * @throws EverSdkException
-	 */
-	default String encodeInternalPayload(String functionName,
-	                                     Map<String, Object> functionInputs,
-	                                     Abi.FunctionHeader functionHeader) throws EverSdkException {
-		return Abi.encodeMessageBody(
-				sdk().context(),
-				abi().ABI(),
-				new Abi.CallSet(functionName,
-				                functionHeader,
-				                abi().convertFunctionInputs(functionName, functionInputs)),
-				true,
-				Credentials.NONE.signer(),
-				null,
-				address(),
-				null
-		).body();
-	}
-
-	/**
 	 * Returns actual tvm.pubkey() of smart contract. If you want to get Credentials specified at
 	 * OwnedContract constructor - use credentials() method.
 	 *

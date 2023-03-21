@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.*;
+import tech.deplant.java4ever.framework.template.CustomTemplate;
 import tech.deplant.java4ever.framework.template.Template;
 
 import java.io.IOException;
@@ -84,7 +85,7 @@ public record LocalConfig(Artifact<String, String> artifact,
 		if (compilerResult == 0) {
 			var linkerResult = info().linker().assemblyContract(contractName, buildPath);
 			if (linkerResult == 0) {
-				return new Template.CustomTemplate(
+				return new CustomTemplate(
 						ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
 						Tvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);

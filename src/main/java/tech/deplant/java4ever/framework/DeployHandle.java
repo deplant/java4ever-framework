@@ -75,6 +75,18 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		                          constructorHeader());
 	}
 
+	public DeployHandle<RETURN> withCredentials(Credentials credentials) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          abi(),
+		                          tvc(),
+		                          workchainId(),
+		                          credentials,
+		                          initialDataFields(),
+		                          constructorInputs(),
+		                          constructorHeader());
+	}
+
 	public Abi.DeploySet toDeploySet() throws EverSdkException {
 		return new Abi.DeploySet(tvc().base64String(),
 		                         workchainId(),
@@ -116,8 +128,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		return deploy(address);
 	}
 
-	public RETURN deploy(String address) throws EverSdkException {
-
+	private RETURN deploy(String address) throws EverSdkException {
 		try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 			final Future<Abi.DeploySet> deploySetFuture = scope.fork(this::toDeploySet);
 			final Future<Abi.CallSet> callSetFuture = scope.fork(this::toConstructorCallSet);
@@ -138,7 +149,6 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 

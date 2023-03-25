@@ -1,10 +1,19 @@
 package tech.deplant.java4ever.framework;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface CurrencyUnit {
 
 	BigDecimal factor();
+
+	static BigInteger VALUE(CurrencyUnit unit, String amount) {
+		return VALUE(unit, new BigDecimal(amount));
+	}
+
+	static BigInteger VALUE(CurrencyUnit unit, BigDecimal amount) {
+		return amount.multiply(unit.factor()).toBigInteger();
+	}
 
 	enum Ever implements CurrencyUnit {
 		NANOEVER(0),

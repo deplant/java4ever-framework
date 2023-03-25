@@ -1,3 +1,15 @@
+### 1.6.0
+
+- Updated EVER-SDK -> 1.42.1
+- Fixed logging in DeployHandle
+- Added FunctionHandle::runLocal and FunctionHandle::runLocalAsMap methods to for local/mock/fake execution of contract calls
+- Added tests for OnchainConfig and LocalConfig
+- Improved config serialization
+- Added method Tvc::codeCell for creation of acquiring template code
+- Added method FunctionHandle::toPayload for acquiring payload of function call
+- Added deploy of CustomContract from CustomTemplate.
+- Added method DeployHandle::withCredentials to change credentials in chain style
+
 ### 1.5.0
 
 - Updated EVER-SDK -> 1.41

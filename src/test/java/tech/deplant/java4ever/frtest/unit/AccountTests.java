@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -36,13 +37,12 @@ public class AccountTests {
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
 		SafeMultisigWallet msig = deployStatement.deployWithGiver(GIVER_LOCAL,
-		                                                          Convert.toValue("1",
-		                                                                          CurrencyUnit.Ever.EVER));
+		                                                          EVER_ONE);
 		assertTrue(msig.account().isActive());
 		Account acc = Account.ofAddress(SDK_LOCAL, msig.address());
 		Map<String, Object> params = Map.of(
 				"dest", msig.address(),
-				"value", Convert.toValue("1", CurrencyUnit.Ever.EVER),
+				"value", EVER_ONE,
 				"bounce", true,
 				"flags", 0,
 				"payload", "");

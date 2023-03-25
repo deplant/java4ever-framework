@@ -13,6 +13,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 
+import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
+
 public class DevTests {
 
 	private static System.Logger logger = System.getLogger(DevTests.class.getName());
@@ -78,6 +80,8 @@ public class DevTests {
 		}
 		return response.body();
 	}
+
+
 
 	@Test
 	public void get_graphql_schema() throws IOException, InterruptedException {
@@ -187,6 +191,9 @@ public class DevTests {
 							           }"
 				}
 				""";
+		final var jsonRequest = "{\"query\":" + SDK_EMPTY.context().mapper().writeValueAsString("{messages(filter: {msg_type: {eq:2}}) { id body boc src created_at }}") + "}";
+		String result1 = httpRequest("http://185.20.226.96/graphql", jsonRequest,
+		                            "POST","Accept: application/json","Content-Type: application/json");
 
 		String result = httpRequest("http://185.20.226.96/graphql",queryParams,
 		"POST","Accept: application/json","Content-Type: application/json");

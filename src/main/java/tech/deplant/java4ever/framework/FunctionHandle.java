@@ -156,6 +156,45 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 		});
 	}
 
+	/**
+	 * Encodes inputs and runs callExternal method on account's boc then decodes answer.
+	 * Important! When you run callExternal locally, directly on Account boc,
+	 * your blockchain real info remains unchanged.
+	 */
+	public Map<String, Object> runLocalAsMap(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+		Abi.ResultOfEncodeMessage msg =
+				Abi.encodeMessage(
+						sdk().context(),
+						abi().ABI(),
+						address(),
+						null,
+						toCallSet(),
+						toSigner(),
+						null,
+						null
+				);
+		return Optional.ofNullable(Tvm.runExecutor(sdk().context(),
+		                       msg.message(),
+		                       new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
+		                       options,
+		                       abi().ABI(),
+		                       false,
+		                       null,
+		                       true).decoded()
+		          .output()).orElse(new HashMap<>());
+	}
+
+	/**
+	 * Calls smart contract with external message using credentials provided
+	 * on initialization.
+	 *
+	 * @throws EverSdkException
+	 */
+	public RETURN runLocal(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+		return sdk().convertMap(runLocalAsMap(boc, options, unlimitedBalance), new TypeReference<>() {
+		});
+	}
+
 	public Map<String, Object> callAsMap() throws EverSdkException {
 		var resultOfProcess = processExternalCall();
 		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);

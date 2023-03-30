@@ -44,22 +44,22 @@ public record TIP4Wallet(Sdk sdk, String address, ContractAbi abi,
         "bounce", bounce, 
         "flags", flags, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
   }
 
   public FunctionHandle<Void> transferOwnership(BigInteger newOwner) {
     Map<String, Object> params = Map.of("newOwner", newOwner);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
   }
 
   public FunctionHandle<ResultOfOwner> owner() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfOwner>(sdk(), address(), abi(), credentials(), "owner", params, null);
+    return new FunctionHandle<ResultOfOwner>(ResultOfOwner.class, sdk(), address(), abi(), credentials(), "owner", params, null);
   }
 
   public FunctionHandle<ResultOf_randomNonce> _randomNonce() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOf_randomNonce>(sdk(), address(), abi(), credentials(), "_randomNonce", params, null);
+    return new FunctionHandle<ResultOf_randomNonce>(ResultOf_randomNonce.class, sdk(), address(), abi(), credentials(), "_randomNonce", params, null);
   }
 
   public record ResultOfOwner(BigInteger owner) {

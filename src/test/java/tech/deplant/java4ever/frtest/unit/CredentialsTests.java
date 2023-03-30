@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Seed;
 
@@ -22,7 +23,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.RNG_SEED;
 public class CredentialsTests {
 
 	@BeforeAll
-	public static void init_sdk_and_other_vars() throws IOException {
+	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
 		Env.INIT();
 	}
 

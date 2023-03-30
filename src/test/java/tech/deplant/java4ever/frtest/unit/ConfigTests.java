@@ -25,7 +25,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
 public class ConfigTests {
 
 	@BeforeAll
-	public static void init_sdk_and_other_vars() throws IOException {
+	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
 		INIT();
 	}
 

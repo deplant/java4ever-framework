@@ -7,11 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +46,5 @@ public class AbiTests {
 	public void false_if_abi_lacks_function() throws JsonProcessingException {
 		assertFalse(SafeMultisigWalletTemplate.DEFAULT_ABI().hasFunction("releaseKraken"));
 	}
-
 
 }

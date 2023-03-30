@@ -38,28 +38,29 @@ public record TIP4Nft(Sdk sdk, String address, ContractAbi abi,
 
   public FunctionHandle<Void> burn(Address dest) {
     Map<String, Object> params = Map.of("dest", dest);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "burn", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "burn", params, null);
   }
 
   public FunctionHandle<ResultOfIndexCode> indexCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexCode>(sdk(), address(), abi(), credentials(), "indexCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexCode>(ResultOfIndexCode.class, sdk(), address(), abi(), credentials(), "indexCode", params, null);
   }
 
   public FunctionHandle<ResultOfIndexCodeHash> indexCodeHash() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexCodeHash>(sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexCodeHash>(ResultOfIndexCodeHash.class, sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
   }
 
   public FunctionHandle<ResultOfResolveIndex> resolveIndex(Address collection, Address owner) {
-    Map<String, Object> params = Map.of("collection", collection, 
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "collection", collection, 
         "owner", owner);
-    return new FunctionHandle<ResultOfResolveIndex>(sdk(), address(), abi(), credentials(), "resolveIndex", params, null);
+    return new FunctionHandle<ResultOfResolveIndex>(ResultOfResolveIndex.class, sdk(), address(), abi(), credentials(), "resolveIndex", params, null);
   }
 
   public FunctionHandle<ResultOfGetJson> getJson() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetJson>(sdk(), address(), abi(), credentials(), "getJson", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfGetJson>(ResultOfGetJson.class, sdk(), address(), abi(), credentials(), "getJson", params, null);
   }
 
   public FunctionHandle<Void> transfer(Address to, Address sendGasTo,
@@ -67,7 +68,7 @@ public record TIP4Nft(Sdk sdk, String address, ContractAbi abi,
     Map<String, Object> params = Map.of("to", to, 
         "sendGasTo", sendGasTo, 
         "callbacks", callbacks);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transfer", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transfer", params, null);
   }
 
   public FunctionHandle<Void> changeOwner(Address newOwner, Address sendGasTo,
@@ -75,7 +76,7 @@ public record TIP4Nft(Sdk sdk, String address, ContractAbi abi,
     Map<String, Object> params = Map.of("newOwner", newOwner, 
         "sendGasTo", sendGasTo, 
         "callbacks", callbacks);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "changeOwner", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "changeOwner", params, null);
   }
 
   public FunctionHandle<Void> changeManager(Address newManager, Address sendGasTo,
@@ -83,17 +84,18 @@ public record TIP4Nft(Sdk sdk, String address, ContractAbi abi,
     Map<String, Object> params = Map.of("newManager", newManager, 
         "sendGasTo", sendGasTo, 
         "callbacks", callbacks);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "changeManager", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "changeManager", params, null);
   }
 
   public FunctionHandle<ResultOfGetInfo> getInfo() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetInfo>(sdk(), address(), abi(), credentials(), "getInfo", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfGetInfo>(ResultOfGetInfo.class, sdk(), address(), abi(), credentials(), "getInfo", params, null);
   }
 
   public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
-    Map<String, Object> params = Map.of("interfaceID", interfaceID);
-    return new FunctionHandle<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "interfaceID", interfaceID);
+    return new FunctionHandle<ResultOfSupportsInterface>(ResultOfSupportsInterface.class, sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
   }
 
   public record ResultOfIndexCode(TvmCell code) {

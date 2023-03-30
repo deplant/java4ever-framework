@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.CurrencyUnit;
@@ -24,7 +25,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.*;
 @Execution(ExecutionMode.CONCURRENT)
 public class AccountTests {
 	@BeforeAll
-	public static void init_sdk_and_other_vars() throws IOException {
+	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
 		INIT();
 	}
 

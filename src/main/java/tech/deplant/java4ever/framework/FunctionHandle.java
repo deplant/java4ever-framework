@@ -1,6 +1,12 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
@@ -10,10 +16,13 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
-public record FunctionHandle<RETURN>(Sdk sdk,
+public record FunctionHandle<RETURN>(
+									Class<RETURN> clazz,
+									Sdk sdk,
                                      String address,
                                      ContractAbi abi,
                                      Credentials credentials,
@@ -21,10 +30,21 @@ public record FunctionHandle<RETURN>(Sdk sdk,
                                      Map<String, Object> functionInputs,
                                      Abi.FunctionHeader functionHeader) {
 
+	public FunctionHandle(Sdk sdk,
+                         String address,
+                         ContractAbi abi,
+                         Credentials credentials,
+                         String functionName,
+                         Map<String, Object> functionInputs,
+                         Abi.FunctionHeader functionHeader) {
+		this((Class<RETURN>) new HashMap<String,Object>().getClass(),sdk, address, abi, credentials, functionName, functionInputs, functionHeader);
+	}
+
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
 	public FunctionHandle<RETURN> withSdk(Sdk sdk) {
-		return new FunctionHandle<>(sdk,
+		return new FunctionHandle<>(
+				clazz(), sdk,
 		                            address(),
 		                            abi(),
 		                            credentials(),
@@ -34,27 +54,29 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	}
 
 	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
-		return new FunctionHandle<>(sdk(),
+		return new FunctionHandle<>(clazz(), sdk(),
 		                            address(),
 		                            abi(),
 		                            credentials,
 		                            functionName(),
 		                            functionInputs(),
-		                            functionHeader());
+		                            functionHeader()
+		                            );
 	}
 
 	public FunctionHandle<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
-		return new FunctionHandle<>(sdk(),
+		return new FunctionHandle<>(clazz(), sdk(),
 		                            address(),
 		                            abi(),
 		                            credentials(),
 		                            functionName(),
 		                            functionInputs,
-		                            functionHeader());
+		                            functionHeader()
+		                            );
 	}
 
 	public FunctionHandle<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
-		return new FunctionHandle<>(sdk(),
+		return new FunctionHandle<>(clazz(), sdk(),
 		                            address(),
 		                            abi(),
 		                            credentials(),
@@ -64,7 +86,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	}
 
 	public <T> FunctionHandle<T> withReturnClass(Class<T> returnClass) {
-		return new FunctionHandle<>(sdk(),
+		return new FunctionHandle<>(returnClass, sdk(),
 		                            address(),
 		                            abi(),
 		                            credentials(),
@@ -74,9 +96,33 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	}
 
 	public Abi.CallSet toCallSet() throws EverSdkException {
+		Map<String, Object> converted = abi().convertFunctionInputs(functionName(), functionInputs());
 		return new Abi.CallSet(functionName(),
-		                       functionHeader(),
-		                       abi().convertFunctionInputs(functionName(), functionInputs()));
+			                       functionHeader(),
+			                       converted);
+	}
+
+	public RETURN toOutput(Map<String, Object> outputMap) throws EverSdkException {
+		Map<String, Object> converted = abi().convertFunctionOutputs(functionName(), outputMap);
+		try {
+			JsonMapper mapper = JsonMapper.builder()
+			                              .addModules(new ParameterNamesModule(),new Jdk8Module(),new JavaTimeModule())
+			                              .build();
+			String jsonStr = mapper.writeValueAsString(converted);
+
+			return mapper.readValue(jsonStr, clazz());
+		} catch (Throwable e) {
+			try {
+				trace(logger, String.format("Original: %s, Converted: %s",
+				                            sdk().mapper().writeValueAsString(outputMap),
+				                            sdk().mapper().writeValueAsString(converted)
+				      )
+				);
+				throw new RuntimeException(e);
+			} catch (JsonProcessingException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	}
 
 	/**
@@ -132,15 +178,16 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 						null
 				);
 		String boc = result.result()[0].get("boc").toString();
-		return Optional.ofNullable(Tvm.runTvm(
-				                              sdk().context(),
-				                              msg.message(),
-				                              boc,
-				                              null,
-				                              abi().ABI(),
-				                              null,
-				                              false).decoded()
-		                              .output()).orElse(new HashMap<>());
+		var resultMap = Optional.ofNullable(Tvm.runTvm(
+				                       sdk().context(),
+				                       msg.message(),
+				                       boc,
+				                       null,
+				                       abi().ABI(),
+				                       null,
+				                       false).decoded()
+		                       .output()).orElse(new HashMap<>());
+		return resultMap;
 	}
 
 	/**
@@ -152,8 +199,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	 * @throws EverSdkException
 	 */
 	public RETURN get() throws EverSdkException {
-		return sdk().convertMap(getAsMap(), new TypeReference<>() {
-		});
+		return toOutput(getAsMap());
 	}
 
 	/**
@@ -191,8 +237,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	 * @throws EverSdkException
 	 */
 	public RETURN runLocal(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
-		return sdk().convertMap(runLocalAsMap(boc, options, unlimitedBalance), new TypeReference<>() {
-		});
+		return toOutput(runLocalAsMap(boc, options, unlimitedBalance));
 	}
 
 	public Map<String, Object> callAsMap() throws EverSdkException {
@@ -235,8 +280,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	 * @throws EverSdkException
 	 */
 	public RETURN call() throws EverSdkException {
-		return sdk().convertMap(callAsMap(), new TypeReference<>() {
-		});
+		return toOutput(callAsMap());
 	}
 
 	/**
@@ -315,8 +359,7 @@ public record FunctionHandle<RETURN>(Sdk sdk,
 	                                     List<ContractAbi> otherAbisForDecode) throws EverSdkException {
 		var result = callTreeAsMap(throwOnTreeError, otherAbisForDecode);
 		return new ResultOfTree<>(result.queryTree(),
-		                          sdk().convertMap(result.decodedOutuput(), new TypeReference<>() {
-		                          }));
+		                          toOutput(result.decodedOutput()));
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {

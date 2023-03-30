@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.frtest.unit;
+package tech.deplant.java4ever.frtest.unit.datatype;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
+import tech.deplant.java4ever.frtest.unit.Env;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
 class TvmCellTest {
 
 	@BeforeAll
-	public static void init_sdk_and_other_vars() throws IOException {
+	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
 		Env.INIT();
 	}
 

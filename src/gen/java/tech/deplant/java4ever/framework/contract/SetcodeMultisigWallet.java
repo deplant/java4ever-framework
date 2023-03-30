@@ -40,7 +40,7 @@ public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
 
   public FunctionHandle<Void> acceptTransfer(String payload) {
     Map<String, Object> params = Map.of("payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "acceptTransfer", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "acceptTransfer", params, null);
   }
 
   public FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce,
@@ -50,7 +50,7 @@ public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
         "bounce", bounce, 
         "flags", flags, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
   }
 
   public FunctionHandle<ResultOfSubmitTransaction> submitTransaction(Address dest, BigInteger value,
@@ -60,43 +60,43 @@ public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
         "bounce", bounce, 
         "allBalance", allBalance, 
         "payload", payload);
-    return new FunctionHandle<ResultOfSubmitTransaction>(sdk(), address(), abi(), credentials(), "submitTransaction", params, null);
+    return new FunctionHandle<ResultOfSubmitTransaction>(ResultOfSubmitTransaction.class, sdk(), address(), abi(), credentials(), "submitTransaction", params, null);
   }
 
   public FunctionHandle<Void> confirmTransaction(Long transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "confirmTransaction", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmTransaction", params, null);
   }
 
   public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Integer mask, Integer index) {
     Map<String, Object> params = Map.of("mask", mask, 
         "index", index);
-    return new FunctionHandle<ResultOfIsConfirmed>(sdk(), address(), abi(), credentials(), "isConfirmed", params, null);
+    return new FunctionHandle<ResultOfIsConfirmed>(ResultOfIsConfirmed.class, sdk(), address(), abi(), credentials(), "isConfirmed", params, null);
   }
 
   public FunctionHandle<ResultOfGetParameters> getParameters() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetParameters>(sdk(), address(), abi(), credentials(), "getParameters", params, null);
+    return new FunctionHandle<ResultOfGetParameters>(ResultOfGetParameters.class, sdk(), address(), abi(), credentials(), "getParameters", params, null);
   }
 
   public FunctionHandle<ResultOfGetTransaction> getTransaction(Long transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
-    return new FunctionHandle<ResultOfGetTransaction>(sdk(), address(), abi(), credentials(), "getTransaction", params, null);
+    return new FunctionHandle<ResultOfGetTransaction>(ResultOfGetTransaction.class, sdk(), address(), abi(), credentials(), "getTransaction", params, null);
   }
 
   public FunctionHandle<ResultOfGetTransactions> getTransactions() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetTransactions>(sdk(), address(), abi(), credentials(), "getTransactions", params, null);
+    return new FunctionHandle<ResultOfGetTransactions>(ResultOfGetTransactions.class, sdk(), address(), abi(), credentials(), "getTransactions", params, null);
   }
 
   public FunctionHandle<ResultOfGetTransactionIds> getTransactionIds() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetTransactionIds>(sdk(), address(), abi(), credentials(), "getTransactionIds", params, null);
+    return new FunctionHandle<ResultOfGetTransactionIds>(ResultOfGetTransactionIds.class, sdk(), address(), abi(), credentials(), "getTransactionIds", params, null);
   }
 
   public FunctionHandle<ResultOfGetCustodians> getCustodians() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetCustodians>(sdk(), address(), abi(), credentials(), "getCustodians", params, null);
+    return new FunctionHandle<ResultOfGetCustodians>(ResultOfGetCustodians.class, sdk(), address(), abi(), credentials(), "getCustodians", params, null);
   }
 
   public FunctionHandle<ResultOfSubmitUpdate> submitUpdate(BigInteger codeHash, BigInteger[] owners,
@@ -104,23 +104,23 @@ public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     Map<String, Object> params = Map.of("codeHash", codeHash, 
         "owners", owners, 
         "reqConfirms", reqConfirms);
-    return new FunctionHandle<ResultOfSubmitUpdate>(sdk(), address(), abi(), credentials(), "submitUpdate", params, null);
+    return new FunctionHandle<ResultOfSubmitUpdate>(ResultOfSubmitUpdate.class, sdk(), address(), abi(), credentials(), "submitUpdate", params, null);
   }
 
   public FunctionHandle<Void> confirmUpdate(Long updateId) {
     Map<String, Object> params = Map.of("updateId", updateId);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "confirmUpdate", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmUpdate", params, null);
   }
 
   public FunctionHandle<Void> executeUpdate(Long updateId, TvmCell code) {
     Map<String, Object> params = Map.of("updateId", updateId, 
         "code", code);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "executeUpdate", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "executeUpdate", params, null);
   }
 
   public FunctionHandle<ResultOfGetUpdateRequests> getUpdateRequests() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetUpdateRequests>(sdk(), address(), abi(), credentials(), "getUpdateRequests", params, null);
+    return new FunctionHandle<ResultOfGetUpdateRequests>(ResultOfGetUpdateRequests.class, sdk(), address(), abi(), credentials(), "getUpdateRequests", params, null);
   }
 
   public record ResultOfSubmitTransaction(Long transId) {

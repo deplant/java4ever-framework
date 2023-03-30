@@ -264,7 +264,9 @@ public class ContractWrapper {
 			}
 
 			for (var param : func.inputs()) {
-				if (!param.name().equals("answerId")) {
+				if (param.name().equals("answerId")) {
+					mapParams.add("\"answerId\", 0");
+				} else {
 					TypeName typeName = toTypeName(param.type());
 					var paramSpec = ParameterSpec.builder(typeName, param.name()).build();
 					methodBuilder.addParameter(paramSpec);
@@ -303,8 +305,9 @@ public class ContractWrapper {
 				methodBuilder.addCode(bodyBuilder.build());
 				templateBuilder.addMethod(methodBuilder.build());
 			} else {
-				bodyBuilder.addStatement("return new $T(sdk(), address(), abi(), credentials(), $S, params, null)",
+				bodyBuilder.addStatement("return new $T($T.class, sdk(), address(), abi(), credentials(), $S, params, null)",
 				                         resultName,
+				                         handleParamTypeName,
 				                         func.name());
 				methodBuilder.addCode(bodyBuilder.build());
 				wrapperBuilder.addMethod(methodBuilder.build());

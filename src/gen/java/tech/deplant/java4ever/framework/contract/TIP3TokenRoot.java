@@ -38,18 +38,19 @@ public record TIP3TokenRoot(Sdk sdk, String address, ContractAbi abi,
   }
 
   public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
-    Map<String, Object> params = Map.of("interfaceID", interfaceID);
-    return new FunctionHandle<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "interfaceID", interfaceID);
+    return new FunctionHandle<ResultOfSupportsInterface>(ResultOfSupportsInterface.class, sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
   }
 
   public FunctionHandle<ResultOfDisableMint> disableMint() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfDisableMint>(sdk(), address(), abi(), credentials(), "disableMint", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfDisableMint>(ResultOfDisableMint.class, sdk(), address(), abi(), credentials(), "disableMint", params, null);
   }
 
   public FunctionHandle<ResultOfMintDisabled> mintDisabled() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfMintDisabled>(sdk(), address(), abi(), credentials(), "mintDisabled", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfMintDisabled>(ResultOfMintDisabled.class, sdk(), address(), abi(), credentials(), "mintDisabled", params, null);
   }
 
   public FunctionHandle<Void> burnTokens(BigInteger amount, Address walletOwner,
@@ -59,27 +60,28 @@ public record TIP3TokenRoot(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "callbackTo", callbackTo, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "burnTokens", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "burnTokens", params, null);
   }
 
   public FunctionHandle<ResultOfDisableBurnByRoot> disableBurnByRoot() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfDisableBurnByRoot>(sdk(), address(), abi(), credentials(), "disableBurnByRoot", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfDisableBurnByRoot>(ResultOfDisableBurnByRoot.class, sdk(), address(), abi(), credentials(), "disableBurnByRoot", params, null);
   }
 
   public FunctionHandle<ResultOfBurnByRootDisabled> burnByRootDisabled() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfBurnByRootDisabled>(sdk(), address(), abi(), credentials(), "burnByRootDisabled", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfBurnByRootDisabled>(ResultOfBurnByRootDisabled.class, sdk(), address(), abi(), credentials(), "burnByRootDisabled", params, null);
   }
 
   public FunctionHandle<ResultOfBurnPaused> burnPaused() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfBurnPaused>(sdk(), address(), abi(), credentials(), "burnPaused", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfBurnPaused>(ResultOfBurnPaused.class, sdk(), address(), abi(), credentials(), "burnPaused", params, null);
   }
 
   public FunctionHandle<ResultOfSetBurnPaused> setBurnPaused(Boolean paused) {
-    Map<String, Object> params = Map.of("paused", paused);
-    return new FunctionHandle<ResultOfSetBurnPaused>(sdk(), address(), abi(), credentials(), "setBurnPaused", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "paused", paused);
+    return new FunctionHandle<ResultOfSetBurnPaused>(ResultOfSetBurnPaused.class, sdk(), address(), abi(), credentials(), "setBurnPaused", params, null);
   }
 
   public FunctionHandle<Void> transferOwnership(Address newOwner, Address remainingGasTo,
@@ -87,49 +89,51 @@ public record TIP3TokenRoot(Sdk sdk, String address, ContractAbi abi,
     Map<String, Object> params = Map.of("newOwner", newOwner, 
         "remainingGasTo", remainingGasTo, 
         "callbacks", callbacks);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
   }
 
   public FunctionHandle<ResultOfName> name() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfName>(sdk(), address(), abi(), credentials(), "name", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfName>(ResultOfName.class, sdk(), address(), abi(), credentials(), "name", params, null);
   }
 
   public FunctionHandle<ResultOfSymbol> symbol() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfSymbol>(sdk(), address(), abi(), credentials(), "symbol", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfSymbol>(ResultOfSymbol.class, sdk(), address(), abi(), credentials(), "symbol", params, null);
   }
 
   public FunctionHandle<ResultOfDecimals> decimals() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfDecimals>(sdk(), address(), abi(), credentials(), "decimals", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfDecimals>(ResultOfDecimals.class, sdk(), address(), abi(), credentials(), "decimals", params, null);
   }
 
   public FunctionHandle<ResultOfTotalSupply> totalSupply() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfTotalSupply>(sdk(), address(), abi(), credentials(), "totalSupply", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfTotalSupply>(ResultOfTotalSupply.class, sdk(), address(), abi(), credentials(), "totalSupply", params, null);
   }
 
   public FunctionHandle<ResultOfWalletCode> walletCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfWalletCode>(sdk(), address(), abi(), credentials(), "walletCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfWalletCode>(ResultOfWalletCode.class, sdk(), address(), abi(), credentials(), "walletCode", params, null);
   }
 
   public FunctionHandle<ResultOfRootOwner> rootOwner() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfRootOwner>(sdk(), address(), abi(), credentials(), "rootOwner", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfRootOwner>(ResultOfRootOwner.class, sdk(), address(), abi(), credentials(), "rootOwner", params, null);
   }
 
   public FunctionHandle<ResultOfWalletOf> walletOf(Address walletOwner) {
-    Map<String, Object> params = Map.of("walletOwner", walletOwner);
-    return new FunctionHandle<ResultOfWalletOf>(sdk(), address(), abi(), credentials(), "walletOf", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "walletOwner", walletOwner);
+    return new FunctionHandle<ResultOfWalletOf>(ResultOfWalletOf.class, sdk(), address(), abi(), credentials(), "walletOf", params, null);
   }
 
   public FunctionHandle<ResultOfDeployWallet> deployWallet(Address walletOwner,
       BigInteger deployWalletValue) {
-    Map<String, Object> params = Map.of("walletOwner", walletOwner, 
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "walletOwner", walletOwner, 
         "deployWalletValue", deployWalletValue);
-    return new FunctionHandle<ResultOfDeployWallet>(sdk(), address(), abi(), credentials(), "deployWallet", params, null);
+    return new FunctionHandle<ResultOfDeployWallet>(ResultOfDeployWallet.class, sdk(), address(), abi(), credentials(), "deployWallet", params, null);
   }
 
   public FunctionHandle<Void> mint(BigInteger amount, Address recipient,
@@ -140,7 +144,7 @@ public record TIP3TokenRoot(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "notify", notify, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "mint", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "mint", params, null);
   }
 
   public FunctionHandle<Void> acceptBurn(BigInteger amount, Address walletOwner,
@@ -150,12 +154,12 @@ public record TIP3TokenRoot(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "callbackTo", callbackTo, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "acceptBurn", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "acceptBurn", params, null);
   }
 
   public FunctionHandle<Void> sendSurplusGas(Address to) {
     Map<String, Object> params = Map.of("to", to);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "sendSurplusGas", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "sendSurplusGas", params, null);
   }
 
   public record ResultOfSupportsInterface(Boolean value0) {

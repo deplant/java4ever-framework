@@ -39,100 +39,102 @@ public record TIP4Collection(Sdk sdk, String address, ContractAbi abi,
 
   public FunctionHandle<Void> mintNft(String json) {
     Map<String, Object> params = Map.of("json", json);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "mintNft", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "mintNft", params, null);
   }
 
   public FunctionHandle<Void> withdraw(Address dest, BigInteger value) {
     Map<String, Object> params = Map.of("dest", dest, 
         "value", value);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "withdraw", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "withdraw", params, null);
   }
 
   public FunctionHandle<Void> onTokenBurned(BigInteger id, Address owner, Address manager) {
     Map<String, Object> params = Map.of("id", id, 
         "owner", owner, 
         "manager", manager);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "onTokenBurned", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "onTokenBurned", params, null);
   }
 
   public FunctionHandle<Void> setRemainOnNft(BigInteger remainOnNft) {
     Map<String, Object> params = Map.of("remainOnNft", remainOnNft);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "setRemainOnNft", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "setRemainOnNft", params, null);
   }
 
   public FunctionHandle<Void> setMintingFee(BigInteger mintingFee) {
     Map<String, Object> params = Map.of("mintingFee", mintingFee);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "setMintingFee", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "setMintingFee", params, null);
   }
 
   public FunctionHandle<ResultOfMintingFee> mintingFee() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfMintingFee>(sdk(), address(), abi(), credentials(), "mintingFee", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfMintingFee>(ResultOfMintingFee.class, sdk(), address(), abi(), credentials(), "mintingFee", params, null);
   }
 
   public FunctionHandle<ResultOfOwner> owner() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfOwner>(sdk(), address(), abi(), credentials(), "owner", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfOwner>(ResultOfOwner.class, sdk(), address(), abi(), credentials(), "owner", params, null);
   }
 
   public FunctionHandle<Void> transferOwnership(BigInteger newOwner) {
     Map<String, Object> params = Map.of("newOwner", newOwner);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transferOwnership", params, null);
   }
 
   public FunctionHandle<ResultOfIndexBasisCode> indexBasisCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexBasisCode>(sdk(), address(), abi(), credentials(), "indexBasisCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexBasisCode>(ResultOfIndexBasisCode.class, sdk(), address(), abi(), credentials(), "indexBasisCode", params, null);
   }
 
   public FunctionHandle<ResultOfIndexBasisCodeHash> indexBasisCodeHash() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexBasisCodeHash>(sdk(), address(), abi(), credentials(), "indexBasisCodeHash", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexBasisCodeHash>(ResultOfIndexBasisCodeHash.class, sdk(), address(), abi(), credentials(), "indexBasisCodeHash", params, null);
   }
 
   public FunctionHandle<ResultOfResolveIndexBasis> resolveIndexBasis() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfResolveIndexBasis>(sdk(), address(), abi(), credentials(), "resolveIndexBasis", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfResolveIndexBasis>(ResultOfResolveIndexBasis.class, sdk(), address(), abi(), credentials(), "resolveIndexBasis", params, null);
   }
 
   public FunctionHandle<ResultOfIndexCode> indexCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexCode>(sdk(), address(), abi(), credentials(), "indexCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexCode>(ResultOfIndexCode.class, sdk(), address(), abi(), credentials(), "indexCode", params, null);
   }
 
   public FunctionHandle<ResultOfIndexCodeHash> indexCodeHash() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfIndexCodeHash>(sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfIndexCodeHash>(ResultOfIndexCodeHash.class, sdk(), address(), abi(), credentials(), "indexCodeHash", params, null);
   }
 
   public FunctionHandle<ResultOfGetJson> getJson() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetJson>(sdk(), address(), abi(), credentials(), "getJson", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfGetJson>(ResultOfGetJson.class, sdk(), address(), abi(), credentials(), "getJson", params, null);
   }
 
   public FunctionHandle<ResultOfTotalSupply> totalSupply() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfTotalSupply>(sdk(), address(), abi(), credentials(), "totalSupply", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfTotalSupply>(ResultOfTotalSupply.class, sdk(), address(), abi(), credentials(), "totalSupply", params, null);
   }
 
   public FunctionHandle<ResultOfNftCode> nftCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfNftCode>(sdk(), address(), abi(), credentials(), "nftCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfNftCode>(ResultOfNftCode.class, sdk(), address(), abi(), credentials(), "nftCode", params, null);
   }
 
   public FunctionHandle<ResultOfNftCodeHash> nftCodeHash() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfNftCodeHash>(sdk(), address(), abi(), credentials(), "nftCodeHash", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfNftCodeHash>(ResultOfNftCodeHash.class, sdk(), address(), abi(), credentials(), "nftCodeHash", params, null);
   }
 
   public FunctionHandle<ResultOfNftAddress> nftAddress(BigInteger id) {
-    Map<String, Object> params = Map.of("id", id);
-    return new FunctionHandle<ResultOfNftAddress>(sdk(), address(), abi(), credentials(), "nftAddress", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "id", id);
+    return new FunctionHandle<ResultOfNftAddress>(ResultOfNftAddress.class, sdk(), address(), abi(), credentials(), "nftAddress", params, null);
   }
 
   public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
-    Map<String, Object> params = Map.of("interfaceID", interfaceID);
-    return new FunctionHandle<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "interfaceID", interfaceID);
+    return new FunctionHandle<ResultOfSupportsInterface>(ResultOfSupportsInterface.class, sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
   }
 
   public record ResultOfMintingFee(BigInteger value0) {

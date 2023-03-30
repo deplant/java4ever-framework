@@ -38,13 +38,14 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
   }
 
   public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
-    Map<String, Object> params = Map.of("interfaceID", interfaceID);
-    return new FunctionHandle<ResultOfSupportsInterface>(sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
+    Map<String, Object> params = Map.of("answerId", 0, 
+        "interfaceID", interfaceID);
+    return new FunctionHandle<ResultOfSupportsInterface>(ResultOfSupportsInterface.class, sdk(), address(), abi(), credentials(), "supportsInterface", params, null);
   }
 
   public FunctionHandle<Void> destroy(Address remainingGasTo) {
     Map<String, Object> params = Map.of("remainingGasTo", remainingGasTo);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "destroy", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "destroy", params, null);
   }
 
   public FunctionHandle<Void> burnByRoot(BigInteger amount, Address remainingGasTo,
@@ -53,7 +54,7 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "callbackTo", callbackTo, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "burnByRoot", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "burnByRoot", params, null);
   }
 
   public FunctionHandle<Void> burn(BigInteger amount, Address remainingGasTo, Address callbackTo,
@@ -62,27 +63,27 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "callbackTo", callbackTo, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "burn", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "burn", params, null);
   }
 
   public FunctionHandle<ResultOfBalance> balance() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfBalance>(sdk(), address(), abi(), credentials(), "balance", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfBalance>(ResultOfBalance.class, sdk(), address(), abi(), credentials(), "balance", params, null);
   }
 
   public FunctionHandle<ResultOfOwner> owner() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfOwner>(sdk(), address(), abi(), credentials(), "owner", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfOwner>(ResultOfOwner.class, sdk(), address(), abi(), credentials(), "owner", params, null);
   }
 
   public FunctionHandle<ResultOfRoot> root() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfRoot>(sdk(), address(), abi(), credentials(), "root", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfRoot>(ResultOfRoot.class, sdk(), address(), abi(), credentials(), "root", params, null);
   }
 
   public FunctionHandle<ResultOfWalletCode> walletCode() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfWalletCode>(sdk(), address(), abi(), credentials(), "walletCode", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfWalletCode>(ResultOfWalletCode.class, sdk(), address(), abi(), credentials(), "walletCode", params, null);
   }
 
   public FunctionHandle<Void> transfer(BigInteger amount, Address recipient,
@@ -93,7 +94,7 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "notify", notify, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transfer", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transfer", params, null);
   }
 
   public FunctionHandle<Void> transferToWallet(BigInteger amount, Address recipientTokenWallet,
@@ -103,7 +104,7 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "notify", notify, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "transferToWallet", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "transferToWallet", params, null);
   }
 
   public FunctionHandle<Void> acceptTransfer(BigInteger amount, Address sender,
@@ -113,7 +114,7 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "notify", notify, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "acceptTransfer", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "acceptTransfer", params, null);
   }
 
   public FunctionHandle<Void> acceptMint(BigInteger amount, Address remainingGasTo, Boolean notify,
@@ -122,12 +123,12 @@ public record TIP3TokenWallet(Sdk sdk, String address, ContractAbi abi,
         "remainingGasTo", remainingGasTo, 
         "notify", notify, 
         "payload", payload);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "acceptMint", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "acceptMint", params, null);
   }
 
   public FunctionHandle<Void> sendSurplusGas(Address to) {
     Map<String, Object> params = Map.of("to", to);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "sendSurplusGas", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "sendSurplusGas", params, null);
   }
 
   public record ResultOfSupportsInterface(Boolean value0) {

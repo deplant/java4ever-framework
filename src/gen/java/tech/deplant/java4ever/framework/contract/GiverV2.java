@@ -37,19 +37,19 @@ public record GiverV2(Sdk sdk, String address, ContractAbi abi,
 
   public FunctionHandle<Void> upgrade(TvmCell newcode) {
     Map<String, Object> params = Map.of("newcode", newcode);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "upgrade", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "upgrade", params, null);
   }
 
   public FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce) {
     Map<String, Object> params = Map.of("dest", dest, 
         "value", value, 
         "bounce", bounce);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "sendTransaction", params, null);
   }
 
   public FunctionHandle<ResultOfGetMessages> getMessages() {
     Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetMessages>(sdk(), address(), abi(), credentials(), "getMessages", params, null);
+    return new FunctionHandle<ResultOfGetMessages>(ResultOfGetMessages.class, sdk(), address(), abi(), credentials(), "getMessages", params, null);
   }
 
   public record ResultOfGetMessages(Map<String, Object>[] messages) {

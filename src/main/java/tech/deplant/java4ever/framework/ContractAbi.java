@@ -176,7 +176,9 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 		return new Abi.ABI.Contract(abiContract());
 	}
 
-	protected Object serializeTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
+
+
+	protected Object serializeInputTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
@@ -213,8 +215,8 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key).toABI(),
 				              // serializeTree is used for map(type,tuple) cases,
 				              // thus it will continue to serialize tuple part
-				              serializeTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
-				                            value));
+				              serializeInputTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
+				                                 value));
 			} else {
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
 				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
@@ -233,7 +235,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 						Collectors.toMap(component -> component.name(),
 						                 component -> {
 							                 try {
-								                 return serializeTree(component, mapValue.get(component.name()));
+								                 return serializeInputTree(component, mapValue.get(component.name()));
 							                 } catch (EverSdkException e) {
 								                 // in the complex cases, if we can't serialize, we can try to put object as is
 								                 return mapValue.get(component.name());
@@ -271,6 +273,144 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 		}
 	}
 
+	protected Object serializeOutputTree(Abi.AbiParam param, Object outputValue) throws EverSdkException {
+
+		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
+
+		var mapPattern = Pattern.compile("(map\\()" +
+		                                 typeStringPattern +
+		                                 "(,)" +
+		                                 typeStringPattern +
+		                                 "(\\))");
+		boolean rootIsMap = false;
+		String rootTypeString = param.type();
+		String keyTypeString = null;
+		String valueTypeString = null;
+
+		logger.log(System.Logger.Level.TRACE,
+		           () -> "param: " + param.name() + " ( " + param.type() + " -> " + rootTypeString + " ): " +
+		                 outputValue);
+		var matcher = mapPattern.matcher(rootTypeString);
+		while (matcher.find()) {
+			rootIsMap = true;
+			keyTypeString = matcher.group(2);
+			valueTypeString = matcher.group(4);
+		}
+
+		// map = Map<String,Object> from types
+		// map(type,tuple) = Map<String,Map<String,Object>>
+		if (rootIsMap) {
+			// Key Parse
+			final var keyDetails = typeParser(keyTypeString);
+
+			Map<Object, Object> mapValue = (Map<Object, Object>) outputValue;
+			if (mapValue.size() == 1) {
+				final Object key = mapValue.keySet().toArray()[0];
+				final Object value = mapValue.values().toArray()[0];
+				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key).toJava(),
+				              // serializeTree is used for map(type,tuple) cases,
+				              // thus it will continue to serialize tuple part
+				              serializeOutputTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
+				                                 value));
+			} else {
+				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
+				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+				                                                               mapValue), new RuntimeException());
+				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+				throw ex;
+			}
+		} else {
+			// Normal (not map) root types
+			final var rootDetails = typeParser(rootTypeString);
+			// tuples
+			if (rootDetails.type().equals(TypePrefix.TUPLE)) {
+				// tuple = Map<String,Object> from components
+				Map<String, Object> mapValue = (Map<String, Object>) outputValue;
+				return Arrays.stream(param.components()).collect(
+						Collectors.toMap(component -> component.name(),
+						                 component -> {
+							                 try {
+								                 return serializeOutputTree(component, mapValue.get(component.name()));
+							                 } catch (EverSdkException e) {
+								                 // in the complex cases, if we can't serialize, we can try to put object as is
+								                 return mapValue.get(component.name());
+							                 }
+						                 }
+						));
+				// arrays
+			} else if (rootDetails.isArray()) {
+				return switch (outputValue) {
+					case String s -> new Object[]{AbiType.of(rootDetails.type(), rootDetails.size(), s).toJava()};
+					case Object[] arr -> Arrays.stream(arr).map(element -> {
+						try {
+							return AbiType.of(rootDetails.type(), rootDetails.size(), element).toJava();
+						} catch (EverSdkException e) {
+							// in the complex cases, if we can't serialize, we can try to put object as is
+							return element;
+						}
+					}).toArray();
+					case List list -> list.stream().map(element -> {
+						try {
+							return AbiType.of(rootDetails.type(), rootDetails.size(), element).toJava();
+						} catch (EverSdkException e) {
+							// in the complex cases, if we can't serialize, we can try to put object as is
+							return element;
+						}
+					}).toArray();
+					default -> new Object[]{AbiType.of(rootDetails.type(),
+					                                   rootDetails.size(),
+					                                   outputValue).toJava()};
+				};
+			} else {
+				// all others
+				return AbiType.of(rootDetails.type(), rootDetails.size(), outputValue).toJava();
+			}
+		}
+	}
+
+
+	/**
+	 * Checks and converts provided Java Map containing inputs for function call
+	 * to correct representation that will be accepted by ABI. If map doesn't meet
+	 * ABI input structure, this method will fail. If some type doesn't have conversion,
+	 * it will be serialized as is.
+	 *
+	 * @param functionName
+	 * @param functionOutputs
+	 * @return
+	 * @throws EverSdkException
+	 */
+	public Map<String, Object> convertFunctionOutputs(String functionName,
+	                                                 Map<String, Object> functionOutputs) throws EverSdkException {
+		if (functionOutputs != null) {
+			Map<String, Object> converted = new HashMap<>();
+			for (Map.Entry<String, Object> entry : functionOutputs.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (hasOutput(functionName, key)) {
+					var type = this.functionOutputType(functionName, key);
+					try {
+						converted.put(key, serializeOutputTree(type, value));
+					} catch (EverSdkException e) {
+						// in the complex cases, if we can't serialize, we can try to put object as is
+						converted.put(key, value);
+					}
+				} else {
+					logger.log(System.Logger.Level.ERROR, () ->
+							"ABI Function " + functionName + " doesn't contain input '" + key + "'");
+					throw new EverSdkException(new EverSdkException.ErrorResult(-303,
+					                                                            "Function " + functionName +
+					                                                            " doesn't contain input (" + key +
+					                                                            ") in ABI"), new Exception());
+				}
+			}
+			return converted;
+		} else {
+			return null;
+		}
+	}
+
+
 	/**
 	 * Checks and converts provided Java Map containing inputs for function call
 	 * to correct representation that will be accepted by ABI. If map doesn't meet
@@ -285,17 +425,17 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	public Map<String, Object> convertFunctionInputs(String functionName,
 	                                                 Map<String, Object> functionInputs) throws EverSdkException {
 		if (functionInputs != null) {
-			Map<String, Object> convertedInputs = new HashMap<>();
+			Map<String, Object> converted = new HashMap<>();
 			for (Map.Entry<String, Object> entry : functionInputs.entrySet()) {
 				String key = entry.getKey();
 				Object value = entry.getValue();
 				if (hasInput(functionName, key)) {
 					var type = this.functionInputType(functionName, key);
 					try {
-						convertedInputs.put(key, serializeTree(type, value));
+						converted.put(key, serializeInputTree(type, value));
 					} catch (EverSdkException e) {
 						// in the complex cases, if we can't serialize, we can try to put object as is
-						convertedInputs.put(key, value);
+						converted.put(key, value);
 					}
 				} else {
 					logger.log(System.Logger.Level.ERROR, () ->
@@ -306,7 +446,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 					                                                            ") in ABI"), new Exception());
 				}
 			}
-			return convertedInputs;
+			return converted;
 		} else {
 			return null;
 		}
@@ -324,17 +464,17 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	 */
 	public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) throws EverSdkException {
 		if (initDataInputs != null) {
-			Map<String, Object> convertedInputs = new HashMap<>();
+			Map<String, Object> converted = new HashMap<>();
 			for (Map.Entry<String, Object> entry : initDataInputs.entrySet()) {
 				String key = entry.getKey();
 				Object value = entry.getValue();
 				if (hasInitDataParam(key)) {
 					var type = initDataType(key);
 					try {
-						convertedInputs.put(key, serializeTree(type, value));
+						converted.put(key, serializeInputTree(type, value));
 					} catch (EverSdkException e) {
 						// in the complex cases, if we can't serialize, we can try to put object as is
-						convertedInputs.put(key, value);
+						converted.put(key, value);
 					}
 				} else {
 					logger.log(System.Logger.Level.ERROR, () ->
@@ -345,7 +485,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 					                                                            "'"), new Exception());
 				}
 			}
-			return convertedInputs;
+			return converted;
 		} else {
 			return null;
 		}

@@ -24,8 +24,8 @@ group v_groupId
 version v_version
 
 repositories {
-    mavenCentral()
     mavenLocal()
+    mavenCentral()
 }
 
 

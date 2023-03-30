@@ -34,13 +34,13 @@ public record TIP4Index(Sdk sdk, String address, ContractAbi abi,
   }
 
   public FunctionHandle<ResultOfGetInfo> getInfo() {
-    Map<String, Object> params = Map.of();
-    return new FunctionHandle<ResultOfGetInfo>(sdk(), address(), abi(), credentials(), "getInfo", params, null);
+    Map<String, Object> params = Map.of("answerId", 0);
+    return new FunctionHandle<ResultOfGetInfo>(ResultOfGetInfo.class, sdk(), address(), abi(), credentials(), "getInfo", params, null);
   }
 
   public FunctionHandle<Void> destruct(Address gasReceiver) {
     Map<String, Object> params = Map.of("gasReceiver", gasReceiver);
-    return new FunctionHandle<Void>(sdk(), address(), abi(), credentials(), "destruct", params, null);
+    return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "destruct", params, null);
   }
 
   public record ResultOfGetInfo(Address collection, Address owner, Address nft) {

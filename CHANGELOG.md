@@ -1,3 +1,14 @@
+### 1.6.1
+
+- Updated code generation to fix method outputs problem
+- Added output type conversion
+- Added MessageFlag helper enum
+- Added ResultOfTree::extractDeployAddress method to easily get new contract addresses
+- Added some methods to TIP3 class for faster deploy and usage of TIP3 contracts
+- Added easier deploy methods to MultisigWallet class
+- Improved a lot of tests
+- Added TIP3 tests
+
 ### 1.6.0
 
 - Updated EVER-SDK -> 1.42.1

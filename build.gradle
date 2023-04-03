@@ -11,7 +11,7 @@ ext {
     junitVersion = "5.9.1"
 
     // details
-    v_version = "1.6.0"
+    v_version = "1.6.1"
     v_groupId = "tech.deplant.java4ever"
     v_artifactId = "java4ever-framework"
     v_repository = "deplant/java4ever-framework"

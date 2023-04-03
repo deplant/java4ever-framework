@@ -20,7 +20,7 @@ public class TvmBuilder {
 	public TvmBuilder store(AbiType type) throws EverSdkException {
 		this.operations.add(switch (type) {
 			case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
-			case ByteString str -> new Boc.BuilderOp.BitString(str.toABI());
+			case ByteString str -> new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
 			case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
 			case TvmBuilder builder -> {
 				int refCount = this.refCounter.incrementAndGet();

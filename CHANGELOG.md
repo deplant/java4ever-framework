@@ -1,3 +1,9 @@
+### 1.6.2
+
+- Fixed string ABI->Java decoding
+- Fixed string refs not incrementing counter in TvmCell encoding
+
+
 ### 1.6.1
 
 - Updated code generation to fix method outputs problem
@@ -8,6 +14,7 @@
 - Added easier deploy methods to MultisigWallet class
 - Improved a lot of tests
 - Added TIP3 tests
+- Fixed problem with TvmBuilder::store for strings
 
 ### 1.6.0
 

@@ -20,14 +20,13 @@ public class TvmBuilder {
 	public TvmBuilder store(AbiType type) throws EverSdkException {
 		this.operations.add(switch (type) {
 			case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
-			case ByteString str -> new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
 			case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
+			case ByteString str -> {
+				incrementRefCounter();
+				yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
+			}
 			case TvmBuilder builder -> {
-				int refCount = this.refCounter.incrementAndGet();
-				if (refCount > 4) {
-					throw new EverSdkException(new EverSdkException.ErrorResult(-306,
-					                                                            "TvmCell can't contain more than 4 references to other TvmCells"));
-				}
+				incrementRefCounter();
 				yield new Boc.BuilderOp.Cell(builder.builders());
 			}
 			default -> throw new EverSdkException(new EverSdkException.ErrorResult(-305,
@@ -35,6 +34,14 @@ public class TvmBuilder {
 			                                      new Exception());
 		});
 		return this;
+	}
+
+	private void incrementRefCounter() throws EverSdkException {
+		int refCount = this.refCounter.incrementAndGet();
+		if (refCount > 4) {
+			throw new EverSdkException(new EverSdkException.ErrorResult(-306,
+			                                                            "TvmCell can't contain more than 4 references to other TvmCells"));
+		}
 	}
 
 	public TvmBuilder store(TypePrefix prefix, int size, Object inputValue) throws EverSdkException {

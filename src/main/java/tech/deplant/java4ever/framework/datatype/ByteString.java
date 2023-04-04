@@ -9,7 +9,7 @@ public record ByteString(String text) implements AbiType<String, String> {
 	}
 
 	public static ByteString fromABI(String hexString) {
-		return new ByteString(Convert.hexToStr(hexString));
+		return new ByteString(Convert.hexToStr(hexString.toUpperCase()));
 	}
 
 	@Override

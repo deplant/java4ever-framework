@@ -17,23 +17,24 @@ public class TvmBuilder {
 		return this.operations.toArray(Boc.BuilderOp[]::new);
 	}
 
-	public TvmBuilder store(AbiType type) throws EverSdkException {
-		this.operations.add(switch (type) {
-			case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
-			case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
-			case ByteString str -> {
-				incrementRefCounter();
-				yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
-			}
-			case TvmBuilder builder -> {
-				incrementRefCounter();
-				yield new Boc.BuilderOp.Cell(builder.builders());
-			}
-			default -> throw new EverSdkException(new EverSdkException.ErrorResult(-305,
-			                                                                       "Builder of TvmCell doesn't support this type for ABI conversion"),
-			                                      new Exception());
-		});
-		return this;
+	public void store(AbiType... types) throws EverSdkException {
+		for (var type : types) {
+			this.operations.add(switch (type) {
+				case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
+				case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
+				case ByteString str -> {
+					incrementRefCounter();
+					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
+				}
+				case TvmBuilder builder -> {
+					incrementRefCounter();
+					yield new Boc.BuilderOp.Cell(builder.builders());
+				}
+				default -> throw new EverSdkException(new EverSdkException.ErrorResult(-305,
+				                                                                       "Builder of TvmCell doesn't support this type for ABI conversion"),
+				                                      new Exception());
+			});
+		}
 	}
 
 	private void incrementRefCounter() throws EverSdkException {

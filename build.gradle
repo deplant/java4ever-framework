@@ -7,17 +7,7 @@ plugins {
 // Global variables for all modules
 ext {
     // dependencies
-    slf4jVersion = "2.0.3"
-    junitVersion = "5.9.1"
 
-    // details
-    v_version = "1.6.1"
-    v_groupId = "tech.deplant.java4ever"
-    v_artifactId = "java4ever-framework"
-    v_repository = "deplant/java4ever-framework"
-    v_developerId = "cassandrus"
-    v_developerName = "Dima Yankin"
-    v_developerEmail = "cassandrus@protonmail.com"
 }
 
 group v_groupId
@@ -102,8 +92,8 @@ publishing {
                         id = v_developerId
                         name = v_developerName
                         email = v_developerEmail
-                        organization = "deplant"
-                        organizationUrl = "https://deplant.tech"
+                        organization = v_org
+                        organizationUrl = v_url
                     }
                 }
                 scm {

@@ -47,6 +47,16 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 	}
 
 	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, abiTypeName(), null);
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "cell";
+	}
+
+	@Override
 	public String toJava() {
 		return cellBoc();
 	}

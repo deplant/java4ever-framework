@@ -1,5 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import tech.deplant.java4ever.binding.Abi;
+
 public record Bool(Boolean value) implements AbiType<Boolean, Boolean> {
 
 	public static Bool fromJava(Object input) {
@@ -10,6 +12,16 @@ public record Bool(Boolean value) implements AbiType<Boolean, Boolean> {
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + input + " class: " + input.getClass().getName());
 		};
+	}
+
+	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, abiTypeName(), null);
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "bool";
 	}
 
 	@Override

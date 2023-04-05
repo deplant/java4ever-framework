@@ -2,7 +2,8 @@
 
 - Fixed string ABI->Java decoding
 - Fixed string refs not incrementing counter in TvmCell encoding
-
+- Added helper methods for getting type names from AbiType objects
+- Added TvmCell::decode and TvmCell::decodeAndGet for decoding bocs
 
 ### 1.6.1
 

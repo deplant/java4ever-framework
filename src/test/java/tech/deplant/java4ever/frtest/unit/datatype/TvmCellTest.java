@@ -7,13 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.datatype.ByteString;
-import tech.deplant.java4ever.framework.datatype.TvmBuilder;
-import tech.deplant.java4ever.framework.datatype.TvmCell;
-import tech.deplant.java4ever.framework.datatype.Uint;
+import tech.deplant.java4ever.framework.datatype.*;
 import tech.deplant.java4ever.frtest.unit.Env;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
@@ -34,13 +32,21 @@ class TvmCellTest {
 
 	@Test
 	public void original_equals_decoded() throws EverSdkException {
-		var builder = new TvmBuilder();
-		builder.store(Uint.fromJava(32,"200"));
-		builder.store(Uint.fromJava(64,"300"));
-		builder.store(ByteString.fromJava("test"));
-		var cell = builder.toCell(SDK_EMPTY);
 
-		assertEquals(TvmCell.EMPTY(),TvmCell.builder().toCell(SDK_EMPTY));
+		String source = "I want to be equal!!!";
+
+		List<AbiType> types = List.of(Uint.fromJava(32, "200"),
+		                              Uint.fromJava(64, "300"),
+		                              ByteString.fromJava(source));
+
+		var builder = new TvmBuilder();
+		builder.store(types.toArray(AbiType[]::new));
+
+		var result = builder.toCell(SDK_EMPTY).decodeAndGet(SDK_EMPTY, types.stream()
+		                                               .map(AbiType::abiTypeName)
+		                                               .toArray(String[]::new), 2);
+
+		assertEquals(source,result.toString());
 	}
 
 	@Test

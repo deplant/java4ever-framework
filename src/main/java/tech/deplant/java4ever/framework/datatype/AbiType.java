@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 
 public interface AbiType<JAVA_TYPE, JSON_TYPE> {
@@ -20,6 +21,10 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 			}
 		};
 	}
+
+	Abi.AbiParam toAbiParam(String name);
+
+	String abiTypeName();
 
 	JAVA_TYPE toJava();
 

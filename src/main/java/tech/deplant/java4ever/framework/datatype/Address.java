@@ -84,6 +84,16 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 	}
 
 	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, abiTypeName(), null);
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "address";
+	}
+
+	@Override
 	public String toJava() {
 		return makeAddrStd();
 	}

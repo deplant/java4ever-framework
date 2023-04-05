@@ -1,5 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import tech.deplant.java4ever.binding.Abi;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -21,6 +23,16 @@ public record Uint(int size, BigInteger bigInteger) implements AbiType<BigIntege
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + input + " class: " + input.getClass().getName());
 		};
+	}
+
+	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, abiTypeName(), null);
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "uint" + size();
 	}
 
 	@Override

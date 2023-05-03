@@ -5,10 +5,10 @@ plugins {
 }
 
 // Global variables for all modules
-ext {
+//ext {
     // dependencies
 
-}
+//}
 
 group v_groupId
 version v_version

@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework.contract;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 
 import java.lang.reflect.Constructor;
@@ -94,6 +95,15 @@ public interface Contract {
 		                            functionName,
 		                            functionInputs,
 		                            functionHeader);
+	}
+
+	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {
+		return Abi.decodeMessage(sdk().context(),
+		                         abi().ABI(),
+		                         messageBoc.cellBoc(),
+		                         false,
+		                         null,
+		                         null);
 	}
 
 }

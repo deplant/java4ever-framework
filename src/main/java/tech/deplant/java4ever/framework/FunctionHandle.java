@@ -1,8 +1,6 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,7 +14,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
@@ -203,11 +200,50 @@ public record FunctionHandle<RETURN>(
 	}
 
 	/**
-	 * Encodes inputs and runs callExternal method on account's boc then decodes answer.
-	 * Important! When you run callExternal locally, directly on Account boc,
+	 * Encodes inputs and run getter method on account's boc then decodes answer.
+	 * Important! This method uses provided boc!
+	 * There's no guarantee that it corresponds to current blockchain state.
+	 *
+	 * @throws EverSdkException
+	 */
+	public RETURN getLocal(String boc) throws EverSdkException {
+		return toOutput(getLocalAsMap(boc));
+	}
+
+	/**
+	 * Encodes inputs and runs getter method on account's boc then decodes answer.
+	 * Important! When you run getter locally, directly on Account boc,
+	 * there's no guarantee that it corresponds to current blockchain state.
+	 */
+	public Map<String, Object> getLocalAsMap(String boc) throws EverSdkException {
+		Abi.ResultOfEncodeMessage msg =
+				Abi.encodeMessage(
+						sdk().context(),
+						abi().ABI(),
+						address(),
+						null,
+						toCallSet(),
+						toSigner(),
+						null,
+						null
+				);
+		return Optional.ofNullable(Tvm.runTvm(
+				                              sdk().context(),
+				                              msg.message(),
+				                              boc,
+				                              null,
+				                              abi().ABI(),
+				                              null,
+				                              false).decoded()
+		                              .output()).orElse(new HashMap<>());
+	}
+
+	/**
+	 * Encodes inputs and runs external call method on account's boc then decodes answer.
+	 * Important! When you run external call locally, directly on Account boc,
 	 * your blockchain real info remains unchanged.
 	 */
-	public Map<String, Object> runLocalAsMap(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+	public Map<String, Object> callLocalAsMap(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
 		Abi.ResultOfEncodeMessage msg =
 				Abi.encodeMessage(
 						sdk().context(),
@@ -236,8 +272,8 @@ public record FunctionHandle<RETURN>(
 	 *
 	 * @throws EverSdkException
 	 */
-	public RETURN runLocal(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
-		return toOutput(runLocalAsMap(boc, options, unlimitedBalance));
+	public RETURN callLocal(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+		return toOutput(callLocalAsMap(boc, options, unlimitedBalance));
 	}
 
 	public Map<String, Object> callAsMap() throws EverSdkException {

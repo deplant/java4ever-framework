@@ -1,3 +1,8 @@
+### 1.7.0
+
+- Added FunctionHandle::getLocal and FunctionHandle::getLocalAsMap for getters run locally on downloadad bocs
+- Added Contract::decodeMessageBoc to decode events and other messages produced by contract
+
 ### 1.6.2
 
 - Fixed string ABI->Java decoding

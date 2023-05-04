@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Convert;
@@ -16,6 +17,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 
 	public static final Address ZERO = new Address(0, BigInteger.ZERO);
 
+	@JsonCreator
 	public Address(String address) {
 		this(Integer.parseInt(address.split(":")[0]), new BigInteger(address.split(":")[1], 16));
 	}

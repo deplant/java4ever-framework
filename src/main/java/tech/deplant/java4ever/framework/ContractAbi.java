@@ -307,7 +307,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 			if (mapValue.size() == 1) {
 				final Object key = mapValue.keySet().toArray()[0];
 				final Object value = mapValue.values().toArray()[0];
-				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key).toJava(),
+				return Map.of(AbiType.ofABI(keyDetails.type(), keyDetails.size(), key).toJava(),
 				              // serializeTree is used for map(type,tuple) cases,
 				              // thus it will continue to serialize tuple part
 				              serializeOutputTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
@@ -340,10 +340,10 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (outputValue) {
-					case String s -> new Object[]{AbiType.of(rootDetails.type(), rootDetails.size(), s).toJava()};
+					case String s -> new Object[]{AbiType.ofABI(rootDetails.type(), rootDetails.size(), s).toJava()};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiType.of(rootDetails.type(), rootDetails.size(), element).toJava();
+							return AbiType.ofABI(rootDetails.type(), rootDetails.size(), element).toJava();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -351,19 +351,19 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 					}).toArray();
 					case List list -> list.stream().map(element -> {
 						try {
-							return AbiType.of(rootDetails.type(), rootDetails.size(), element).toJava();
+							return AbiType.ofABI(rootDetails.type(), rootDetails.size(), element).toJava();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
 						}
 					}).toArray();
-					default -> new Object[]{AbiType.of(rootDetails.type(),
+					default -> new Object[]{AbiType.ofABI(rootDetails.type(),
 					                                   rootDetails.size(),
 					                                   outputValue).toJava()};
 				};
 			} else {
 				// all others
-				return AbiType.of(rootDetails.type(), rootDetails.size(), outputValue).toJava();
+				return AbiType.ofABI(rootDetails.type(), rootDetails.size(), outputValue).toJava();
 			}
 		}
 	}

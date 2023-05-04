@@ -22,6 +22,24 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 		};
 	}
 
+	static AbiType ofABI(TypePrefix prefix, int size, Object inputValue) throws EverSdkException {
+		return switch (prefix) {
+			case UINT, INT -> Uint.fromJava(size, inputValue);
+			case STRING-> ByteString.fromJava(inputValue.toString());
+			case BYTES, BYTE -> ByteString.fromABI(inputValue.toString());
+			case ADDRESS -> Address.fromABI(inputValue);
+			case BOOL -> Bool.fromJava(inputValue);
+			case CELL, SLICE, BUILDER -> TvmCell.fromJava(inputValue);
+			case TUPLE -> {
+				var ex = new EverSdkException(new EverSdkException.ErrorResult(-301,
+				                                                               "ABI Parsing unexpected! Shouldn't get here!"),
+				                              new RuntimeException());
+				System.getLogger(AbiType.class.getName()).log(System.Logger.Level.WARNING, () -> ex.toString());
+				throw ex;
+			}
+		};
+	}
+
 	Abi.AbiParam toAbiParam(String name);
 
 	String abiTypeName();

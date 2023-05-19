@@ -18,36 +18,43 @@ import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
 public record FunctionHandle<RETURN>(
-									Class<RETURN> clazz,
-									Sdk sdk,
-                                     String address,
-                                     ContractAbi abi,
-                                     Credentials credentials,
-                                     String functionName,
-                                     Map<String, Object> functionInputs,
-                                     Abi.FunctionHeader functionHeader) {
-
-	public FunctionHandle(Sdk sdk,
-                         String address,
-                         ContractAbi abi,
-                         Credentials credentials,
-                         String functionName,
-                         Map<String, Object> functionInputs,
-                         Abi.FunctionHeader functionHeader) {
-		this((Class<RETURN>) new HashMap<String,Object>().getClass(),sdk, address, abi, credentials, functionName, functionInputs, functionHeader);
-	}
+		Class<RETURN> clazz,
+		Sdk sdk,
+		String address,
+		ContractAbi abi,
+		Credentials credentials,
+		String functionName,
+		Map<String, Object> functionInputs,
+		Abi.FunctionHeader functionHeader) {
 
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
+
+	public FunctionHandle(Sdk sdk,
+	                      String address,
+	                      ContractAbi abi,
+	                      Credentials credentials,
+	                      String functionName,
+	                      Map<String, Object> functionInputs,
+	                      Abi.FunctionHeader functionHeader) {
+		this((Class<RETURN>) new HashMap<String, Object>().getClass(),
+		     sdk,
+		     address,
+		     abi,
+		     credentials,
+		     functionName,
+		     functionInputs,
+		     functionHeader);
+	}
 
 	public FunctionHandle<RETURN> withSdk(Sdk sdk) {
 		return new FunctionHandle<>(
 				clazz(), sdk,
-		                            address(),
-		                            abi(),
-		                            credentials(),
-		                            functionName(),
-		                            functionInputs(),
-		                            functionHeader());
+				address(),
+				abi(),
+				credentials(),
+				functionName(),
+				functionInputs(),
+				functionHeader());
 	}
 
 	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
@@ -58,7 +65,7 @@ public record FunctionHandle<RETURN>(
 		                            functionName(),
 		                            functionInputs(),
 		                            functionHeader()
-		                            );
+		);
 	}
 
 	public FunctionHandle<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
@@ -69,7 +76,7 @@ public record FunctionHandle<RETURN>(
 		                            functionName(),
 		                            functionInputs,
 		                            functionHeader()
-		                            );
+		);
 	}
 
 	public FunctionHandle<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
@@ -95,15 +102,17 @@ public record FunctionHandle<RETURN>(
 	public Abi.CallSet toCallSet() throws EverSdkException {
 		Map<String, Object> converted = abi().convertFunctionInputs(functionName(), functionInputs());
 		return new Abi.CallSet(functionName(),
-			                       functionHeader(),
-			                       converted);
+		                       functionHeader(),
+		                       converted);
 	}
 
 	public RETURN toOutput(Map<String, Object> outputMap) throws EverSdkException {
 		Map<String, Object> converted = abi().convertFunctionOutputs(functionName(), outputMap);
 		try {
 			JsonMapper mapper = JsonMapper.builder()
-			                              .addModules(new ParameterNamesModule(),new Jdk8Module(),new JavaTimeModule())
+			                              .addModules(new ParameterNamesModule(),
+			                                          new Jdk8Module(),
+			                                          new JavaTimeModule())
 			                              .build();
 			String jsonStr = mapper.writeValueAsString(converted);
 
@@ -130,16 +139,16 @@ public record FunctionHandle<RETURN>(
 	 * @throws EverSdkException
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-			return TvmCell.fromJava(Abi.encodeMessageBody(
-					sdk().context(),
-					abi().ABI(),
-					toCallSet(),
-					true,
-					toSigner(),
-					null,
-					address(),
-					null
-			).body());
+		return TvmCell.fromJava(Abi.encodeMessageBody(
+				sdk().context(),
+				abi().ABI(),
+				toCallSet(),
+				true,
+				toSigner(),
+				null,
+				address(),
+				null
+		).body());
 	}
 
 	public Abi.Signer toSigner() {
@@ -160,7 +169,7 @@ public record FunctionHandle<RETURN>(
 		Net.ResultOfQueryCollection result = Net.queryCollection(sdk().context(),
 		                                                         "accounts",
 		                                                         filter,
-		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
+		                                                         "id boc",
 		                                                         null,
 		                                                         null);
 		Abi.ResultOfEncodeMessage msg =
@@ -174,17 +183,19 @@ public record FunctionHandle<RETURN>(
 						null,
 						null
 				);
-		String boc = result.result()[0].get("boc").toString();
-		var resultMap = Optional.ofNullable(Tvm.runTvm(
-				                       sdk().context(),
-				                       msg.message(),
-				                       boc,
-				                       null,
-				                       abi().ABI(),
-				                       null,
-				                       false).decoded()
-		                       .output()).orElse(new HashMap<>());
-		return resultMap;
+		for (var map : result.result()) {
+			String boc = map.get("boc").toString();
+			return Optional.ofNullable(Tvm.runTvm(
+					                              sdk().context(),
+					                              msg.message(),
+					                              boc,
+					                              null,
+					                              abi().ABI(),
+					                              null,
+					                              false).decoded()
+			                              .output()).orElse(new HashMap<>());
+		}
+		return new HashMap<>();
 	}
 
 	/**
@@ -243,7 +254,9 @@ public record FunctionHandle<RETURN>(
 	 * Important! When you run external call locally, directly on Account boc,
 	 * your blockchain real info remains unchanged.
 	 */
-	public Map<String, Object> callLocalAsMap(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+	public Map<String, Object> callLocalAsMap(String boc,
+	                                          Tvm.ExecutionOptions options,
+	                                          boolean unlimitedBalance) throws EverSdkException {
 		Abi.ResultOfEncodeMessage msg =
 				Abi.encodeMessage(
 						sdk().context(),
@@ -256,14 +269,14 @@ public record FunctionHandle<RETURN>(
 						null
 				);
 		return Optional.ofNullable(Tvm.runExecutor(sdk().context(),
-		                       msg.message(),
-		                       new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
-		                       options,
-		                       abi().ABI(),
-		                       false,
-		                       null,
-		                       true).decoded()
-		          .output()).orElse(new HashMap<>());
+		                                           msg.message(),
+		                                           new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
+		                                           options,
+		                                           abi().ABI(),
+		                                           false,
+		                                           null,
+		                                           true).decoded()
+		                              .output()).orElse(new HashMap<>());
 	}
 
 	/**
@@ -272,7 +285,9 @@ public record FunctionHandle<RETURN>(
 	 *
 	 * @throws EverSdkException
 	 */
-	public RETURN callLocal(String boc, Tvm.ExecutionOptions options, boolean unlimitedBalance) throws EverSdkException {
+	public RETURN callLocal(String boc,
+	                        Tvm.ExecutionOptions options,
+	                        boolean unlimitedBalance) throws EverSdkException {
 		return toOutput(callLocalAsMap(boc, options, unlimitedBalance));
 	}
 
@@ -325,8 +340,8 @@ public record FunctionHandle<RETURN>(
 	 * returns a set of messages and transactions, logs everything and throws exceptions on errors
 	 * encountered in a tree.
 	 *
-	 * @param throwOnTreeError If 'true' method will throw on any internal non-0 exit_code encountered in tree.
-	 * @param otherAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
+	 * @param throwOnTreeError   If 'true' method will throw on any internal non-0 exit_code encountered in tree.
+	 * @param otherAbisForDecode Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
@@ -386,8 +401,8 @@ public record FunctionHandle<RETURN>(
 	 * returns a set of messages and transactions, logs everything and throws exceptions on errors
 	 * encountered in a tree.
 	 *
-	 * @param throwOnTreeError If 'true' method will throw on any internal non-0 exit_code encountered in tree.
-	 * @param otherAbisForDecode     Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
+	 * @param throwOnTreeError   If 'true' method will throw on any internal non-0 exit_code encountered in tree.
+	 * @param otherAbisForDecode Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
 	 * @return
 	 * @throws EverSdkException
 	 */
@@ -406,7 +421,7 @@ public record FunctionHandle<RETURN>(
 		                                 toCallSet(),
 		                                 toSigner(),
 		                                 null,
-										 null,
+		                                 null,
 		                                 false);
 	}
 

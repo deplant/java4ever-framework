@@ -2,6 +2,10 @@
 
 - Added FunctionHandle::getLocal and FunctionHandle::getLocalAsMap for getters run locally on downloadad bocs
 - Added Contract::decodeMessageBoc to decode events and other messages produced by contract
+- Fixed Address type serialization
+- Improved output serialization
+- Fixed getAsMap() NullPointerException
+- Improved type conversion
 
 ### 1.6.2
 

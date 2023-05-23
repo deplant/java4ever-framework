@@ -49,7 +49,7 @@ Java ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:1.6.2'
+    implementation 'tech.deplant.java4ever:java4ever-framework:1.7.0'
 }
 ```
 
@@ -60,7 +60,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>1.6.2</version>
+    <version>1.7.0</version>
 </dependency>
 ```
 

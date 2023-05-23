@@ -8,7 +8,8 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 	static AbiType of(TypePrefix prefix, int size, Object inputValue) throws EverSdkException {
 		return switch (prefix) {
 			case UINT, INT -> Uint.fromJava(size, inputValue);
-			case STRING, BYTES, BYTE -> ByteString.fromJava(inputValue);
+			case STRING-> SolString.fromJava(inputValue);
+			case BYTES, BYTE -> SolBytes.fromJava(inputValue);
 			case ADDRESS -> Address.fromJava(inputValue);
 			case BOOL -> Bool.fromJava(inputValue);
 			case CELL, SLICE, BUILDER -> TvmCell.fromJava(inputValue);
@@ -25,8 +26,8 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 	static AbiType ofABI(TypePrefix prefix, int size, Object inputValue) throws EverSdkException {
 		return switch (prefix) {
 			case UINT, INT -> Uint.fromJava(size, inputValue);
-			case STRING-> ByteString.fromJava(inputValue.toString());
-			case BYTES, BYTE -> ByteString.fromABI(inputValue.toString());
+			case STRING -> SolString.fromABI(inputValue.toString());
+			case BYTES, BYTE -> SolBytes.fromABI(inputValue.toString());
 			case ADDRESS -> Address.fromABI(inputValue);
 			case BOOL -> Bool.fromJava(inputValue);
 			case CELL, SLICE, BUILDER -> TvmCell.fromJava(inputValue);

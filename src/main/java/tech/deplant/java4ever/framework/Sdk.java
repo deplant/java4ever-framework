@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,6 +82,7 @@ public record Sdk(Context context,
 		// JavaConfig
 		private Integer timeout = 60_000;
 		private Integer debugTimeout = 60_000;
+
 		private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
 		//Context.NetworkConfig
 		private String[] endpoints = new String[]{"https://localhost"};

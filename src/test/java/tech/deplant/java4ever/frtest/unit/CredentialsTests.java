@@ -57,13 +57,20 @@ public class CredentialsTests {
 
 	@Test
 	public void make_seed_and_keys() throws Throwable {
+		var seed = Seed.RANDOM(Env.SDK_EMPTY);
+		Env.LOG.log(System.Logger.Level.DEBUG, seed.toString());
+		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
+		                                                          seed).toString());
+	}
+
+	@Test
+	public void make_seed_and_keys_old() throws Throwable {
 		Env.LOG.log(System.Logger.Level.DEBUG, Seed.RANDOM(Env.SDK_EMPTY).toString());
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          new Seed(
-				                                                      "object burger primary dish harbor luxury morning mystery sausage wide this time",
-				                                                      12)).toString());
+				                                                          "object burger primary dish harbor luxury morning mystery sausage wide this time",
+				                                                          12)).toString());
 	}
-
 
 	@Test
 	public void all_keys_from_one_seed_should_be_equal() throws Throwable {

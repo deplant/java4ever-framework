@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
+import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -26,6 +27,12 @@ public record FunctionHandle<RETURN>(
 		String functionName,
 		Map<String, Object> functionInputs,
 		Abi.FunctionHeader functionHeader) {
+
+	private static JsonMapper MAPPER = JsonMapper.builder()
+	                              .addModules(new ParameterNamesModule(),
+	                                          new Jdk8Module(),
+	                                          new JavaTimeModule())
+	                              .build();
 
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
@@ -109,17 +116,10 @@ public record FunctionHandle<RETURN>(
 	public RETURN toOutput(Map<String, Object> outputMap) throws EverSdkException {
 		Map<String, Object> converted = abi().convertFunctionOutputs(functionName(), outputMap);
 		try {
-			JsonMapper mapper = JsonMapper.builder()
-			                              .addModules(new ParameterNamesModule(),
-			                                          new Jdk8Module(),
-			                                          new JavaTimeModule())
-			                              .build();
-			String jsonStr = mapper.writeValueAsString(converted);
-
-			return mapper.readValue(jsonStr, clazz());
+			return MAPPER.convertValue(converted, clazz());
 		} catch (Throwable e) {
 			try {
-				trace(logger, String.format("Original: %s, Converted: %s",
+				error(logger, String.format("Original: %s, Converted: %s",
 				                            sdk().mapper().writeValueAsString(outputMap),
 				                            sdk().mapper().writeValueAsString(converted)
 				      )
@@ -152,7 +152,7 @@ public record FunctionHandle<RETURN>(
 	}
 
 	public Abi.Signer toSigner() {
-		return requireNonNullElse(credentials(), Credentials.NONE).signer();
+		return Objs.notNullElse(credentials(), Credentials.NONE).signer();
 	}
 
 	/**

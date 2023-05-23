@@ -37,7 +37,7 @@ class TvmCellTest {
 
 		List<AbiType> types = List.of(Uint.fromJava(32, "200"),
 		                              Uint.fromJava(64, "300"),
-		                              ByteString.fromJava(source));
+		                              SolBytes.fromJava(source));
 
 		var builder = new TvmBuilder();
 		builder.store(types.toArray(AbiType[]::new));

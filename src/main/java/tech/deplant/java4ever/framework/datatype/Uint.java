@@ -16,10 +16,10 @@ public record Uint(int size, BigInteger bigInteger) implements AbiType<BigIntege
 			case BigInteger bi -> new Uint(size, bi.abs());
 			case BigDecimal bd -> new Uint(size, bd.toBigInteger().abs());
 			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()).abs());
-			case String strPrefixed
-					when strPrefixed.length() >= 2 && "0x".equals(strPrefixed.substring(0, 2)) ->
-					new Uint(size, new BigInteger(strPrefixed.substring(2), 16).abs());
-			case String str -> new Uint(size, new BigInteger(str, 16).abs());
+			case String str
+					when str.length() >= 2 && "0x".equals(str.substring(0, 2)) ->
+					new Uint(size, new BigInteger(str.substring(2), 16).abs()); // hex value
+			case String str -> new Uint(size, new BigInteger(str).abs()); // not hex value
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + input + " class: " + input.getClass().getName());
 		};

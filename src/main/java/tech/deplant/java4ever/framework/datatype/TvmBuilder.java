@@ -22,7 +22,7 @@ public class TvmBuilder {
 			this.operations.add(switch (type) {
 				case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
 				case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
-				case ByteString str -> {
+				case SolBytes str -> {
 					incrementRefCounter();
 					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
 				}

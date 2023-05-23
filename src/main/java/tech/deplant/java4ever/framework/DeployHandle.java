@@ -1,11 +1,16 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -26,6 +31,12 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	//TODO Add DeployHandle.Builder and method toBuilder()
 
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
+
+	private static JsonMapper MAPPER = JsonMapper.builder()
+	                                             .addModules(new ParameterNamesModule(),
+	                                                         new Jdk8Module(),
+	                                                         new JavaTimeModule())
+	                                             .build();
 
 	public <T> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,
@@ -100,8 +111,8 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		                       abi().convertFunctionInputs("constructor", constructorInputs()));
 	}
 
-	public Abi.Signer sign() {
-		return requireNonNullElse(credentials(), Credentials.NONE).signer();
+	public Abi.Signer toSigner() {
+		return Objs.notNullElse(credentials(), Credentials.NONE).signer();
 	}
 
 	public String toAddress() throws EverSdkException {
@@ -111,7 +122,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 				null,
 				toDeploySet(),
 				null,
-				sign(),
+				toSigner(),
 				null,
 				null
 		).address();
@@ -140,12 +151,19 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 					address,
 					deploySetFuture.resultNow(),
 					callSetFuture.resultNow(),
-					sign(),
+					toSigner(),
 					null,
 					null,
 					false
 			);
-			return Contract.instantiate(clazz(), sdk(), address, abi(), credentials());
+			Map<String,Object> contractMap = Map.of(
+					"sdk", sdk(),
+					"address", address,
+					"abi",abi(),
+					"credentials",credentials()
+			);
+			//return MAPPER.convertValue(contractMap, clazz());
+			return  Contract.instantiate(clazz(), sdk(), address, abi(), credentials());
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

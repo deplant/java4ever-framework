@@ -42,9 +42,9 @@ class TvmCellTest {
 		var builder = new TvmBuilder();
 		builder.store(types.toArray(AbiType[]::new));
 
-		var result = builder.toCell(SDK_EMPTY).decodeAndGet(SDK_EMPTY, types.stream()
-		                                               .map(AbiType::abiTypeName)
-		                                               .toArray(String[]::new), 2);
+		String[] outTypeNames = new String[]{"uint32","uint64","string"};
+
+		var result = builder.toCell(SDK_EMPTY).decodeAndGet(SDK_EMPTY, outTypeNames, 2);
 
 		assertEquals(source,result.toString());
 	}

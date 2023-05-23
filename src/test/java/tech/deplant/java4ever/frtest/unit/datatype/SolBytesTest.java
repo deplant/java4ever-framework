@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
-public class ByteStringTest {
+public class SolBytesTest {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
@@ -24,8 +24,13 @@ public class ByteStringTest {
 	}
 
 	@Test
-	public void hex_to_string_equals() throws EverSdkException {
+	public void bytes_to_string_equals() {
 		assertEquals("hello!", SolBytes.fromABI("68656C6C6F21").toJava());
+	}
+
+	@Test
+	public void string_to_bytes_equals() {
+		assertEquals("68656C6C6F21", SolBytes.fromJava("hello!").toABI());
 	}
 
 }

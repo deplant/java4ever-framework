@@ -10,6 +10,7 @@ import tech.deplant.java4ever.binding.generator.javapoet.*;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.datatype.SolStruct;
 import tech.deplant.java4ever.framework.datatype.TvmBuilder;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.Template;
@@ -30,7 +31,7 @@ public class ContractWrapper {
 	private static System.Logger logger = System.getLogger(ContractWrapper.class.getName());
 
 	private static TypeName typeSwitch(String abiTypeString) throws EverSdkException {
-		var details = ContractAbi.typeParser(abiTypeString);
+		var details = SolStruct.typeParser(abiTypeString);
 		TypeName resultTypeName = switch (details.type()) {
 			case INT, UINT -> {
 				if (details.size() <= 32) {

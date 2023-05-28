@@ -28,7 +28,7 @@ public class TIP3Builder {
 
 	private boolean burnPaused = false;
 
-	public TIP3Builder() throws EverSdkException {
+	public TIP3Builder() {
 	}
 
 	public TIP3TokenRoot build(Sdk sdk,

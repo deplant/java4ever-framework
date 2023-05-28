@@ -373,14 +373,14 @@ public record FunctionHandle<RETURN>(
 			                                                            Convert.hexToDecOrZero(msg.value(), 9)
 			                                                                   .toPlainString(),
 			                                                            LogUtils.destOfMessage(msg),
-			                                                            tr.exitCode().intValue(),
+			                                                            tr.exitCode(),
 			                                                            LogUtils.nameOfMessage(msg),
 			                                                            Convert.hexToDecOrZero(tr.totalFees(), 9)
 			                                                                   .toPlainString(),
 			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
 			if (tr.aborted() && throwOnTreeError) {
 				error(logger, lazyFormatLogMessage);
-				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode().intValue(),
+				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode(),
 				                                                            "One of the message tree transaction was aborted!"),
 				                           new Exception());
 			} else if (tr.aborted()) {

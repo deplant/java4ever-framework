@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) implements AbiType<Map<String, Object>, Map<String, Object>> {
+public record SolStruct(Abi.AbiParam[] abiParams,
+                        Map<String, Object> values) implements AbiType<Map<String, Object>, Map<String, Object>> {
 
 	private final static System.Logger logger = System.getLogger(SolStruct.class.getName());
 
@@ -80,26 +81,6 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 		}
 	}
 
-	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, "tuple", abiParams());
-	}
-
-	@Override
-	public String abiTypeName() {
-		return "tuple";
-	}
-
-	@Override
-	public Map<String, Object> toJava() {
-		return values();
-	}
-
-	@Override
-	public Map<String, Object> toABI() {
-		return values();
-	}
-
 	public static ContractAbi.AbiTypeDetails typeParser(String typeString) throws EverSdkException {
 		// Size pattern matching
 		var expr = new Then(
@@ -121,7 +102,7 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
 		                                                               "ABI Type parsing failed! Type: " + typeString),
 		                              new RuntimeException());
-		logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+		logger.log(System.Logger.Level.WARNING, () -> "ABI type parsing failed! Type: " + typeString);
 		throw ex;
 	}
 
@@ -185,7 +166,9 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
 				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
 				                                                               mapValue), new RuntimeException());
-				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+				logger.log(System.Logger.Level.WARNING,
+				           () -> "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+				                 mapValue);
 				throw ex;
 			}
 		} else {
@@ -282,7 +265,9 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
 				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
 				                                                               mapValue), new RuntimeException());
-				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+				logger.log(System.Logger.Level.WARNING,
+				           () -> "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+				                 mapValue);
 				throw ex;
 			}
 		} else {
@@ -332,5 +317,25 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 				return AbiType.ofABI(rootDetails.type(), rootDetails.size(), outputValue).toJava();
 			}
 		}
+	}
+
+	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, "tuple", abiParams());
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "tuple";
+	}
+
+	@Override
+	public Map<String, Object> toJava() {
+		return values();
+	}
+
+	@Override
+	public Map<String, Object> toABI() {
+		return values();
 	}
 }

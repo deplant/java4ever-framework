@@ -380,9 +380,13 @@ public record FunctionHandle<RETURN>(
 			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
 			if (tr.aborted() && throwOnTreeError) {
 				error(logger, lazyFormatLogMessage);
-				throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode(),
-				                                                            "One of the message tree transaction was aborted!"),
-				                           new Exception());
+				if (Objs.isNull(tr.exitCode())) {
+					throw new EverSdkException(new EverSdkException.ErrorResult(-404, tr.toString()),
+					                           "ABORTED! Exit code: -404. Target contract " + LogUtils.destOfMessage(msg) + " is not deployed!");
+				} else {
+					throw new EverSdkException(new EverSdkException.ErrorResult(tr.exitCode(), tr.toString()),
+					                           "ABORTED! Exit code: %s. Transaction: %s".formatted(tr.exitCode().toString(), tr.id()));
+				}
 			} else if (tr.aborted()) {
 				warn(logger, lazyFormatLogMessage);
 			} else {

@@ -250,26 +250,35 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			// Key Parse
 			final var keyDetails = typeParser(keyTypeString);
 
-			Map<Object, Object> mapValue = (Map<Object, Object>) outputValue;
-			if (mapValue.size() == 1) {
-				final Object key = mapValue.keySet().toArray()[0];
-				final Object value = mapValue.values().toArray()[0];
-				return Map.of(AbiType.ofABI(keyDetails.type(), keyDetails.size(), key).toJava(),
-				              // serializeTree is used for map(type,tuple) cases,
-				              // thus it will continue to serialize tuple part
-				              serializeOutputTree(new Abi.AbiParam(valueTypeString,
+			Map<Object, Object> outputMap = (Map<Object, Object>) outputValue;
+			Map<Object, Object> convertedMap = new HashMap<>();
+			for (var entry : outputMap.entrySet()) {
+				convertedMap.put(AbiType.ofABI(keyDetails.type(), keyDetails.size(), entry.getKey()).toJava(),
+				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
 				                                                   valueTypeString,
 				                                                   param.components()),
-				                                  value));
-			} else {
-				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
-				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
-				                                                               mapValue), new RuntimeException());
-				logger.log(System.Logger.Level.WARNING,
-				           () -> "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
-				                 mapValue);
-				throw ex;
+				                                  entry.getValue()));
 			}
+			return convertedMap;
+//			if (mapValue.size() == 1) {
+//				final Object key = mapValue.keySet().toArray()[0];
+//				final Object value = mapValue.values().toArray()[0];
+//				return Map.of(AbiType.ofABI(keyDetails.type(), keyDetails.size(), key).toJava(),
+//				              // serializeTree is used for map(type,tuple) cases,
+//				              // thus it will continue to serialize tuple part
+//				              serializeOutputTree(new Abi.AbiParam(valueTypeString,
+//				                                                   valueTypeString,
+//				                                                   param.components()),
+//				                                  value));
+//			} else {
+//				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
+//				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+//				                                                               mapValue), new RuntimeException());
+//				logger.log(System.Logger.Level.WARNING,
+//				           () -> "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
+//				                 mapValue);
+//				throw ex;
+//			}
 		} else {
 			// Normal (not map) root types
 			final var rootDetails = typeParser(rootTypeString);

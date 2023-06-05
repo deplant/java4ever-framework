@@ -6,11 +6,15 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
+import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
+import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -346,17 +350,15 @@ public record FunctionHandle<RETURN>(
 	 * @throws EverSdkException
 	 */
 	public ResultOfTree<Map<String, Object>> callTreeAsMap(boolean throwOnTreeError,
-	                                                       List<ContractAbi> otherAbisForDecode) throws EverSdkException {
-		Abi.ABI[] abiArray = Stream
-				.concat(Stream.of(abi()),
-				        otherAbisForDecode.stream()) // adding THIS contract abi to decode list
-				.map(ContractAbi::ABI).
-				toArray(Abi.ABI[]::new);
+	                                                       ContractAbi... otherAbisForDecode) throws EverSdkException {
+		Abi.ABI[] finalABIArray = Arrays.stream(concatAbiSet(otherAbisForDecode, abi()))
+		                                .map(ContractAbi::ABI)
+		                                .toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall();
 		var msgId = resultOfProcess.transaction().get("in_msg").toString();
 		var debugOutResult = Net.queryTransactionTree(sdk().context(),
 		                                              msgId,
-		                                              abiArray,
+		                                              finalABIArray,
 		                                              sdk().debugTreeTimeout(),
 		                                              0);
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
@@ -411,10 +413,51 @@ public record FunctionHandle<RETURN>(
 	 * @throws EverSdkException
 	 */
 	public ResultOfTree<RETURN> callTree(boolean throwOnTreeError,
-	                                     List<ContractAbi> otherAbisForDecode) throws EverSdkException {
+	                                     ContractAbi... otherAbisForDecode) throws EverSdkException {
 		var result = callTreeAsMap(throwOnTreeError, otherAbisForDecode);
 		return new ResultOfTree<>(result.queryTree(),
 		                          toOutput(result.decodedOutput()));
+	}
+
+	public Map<String, Object> sendFromAsMap(String address, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
+		return new SafeMultisigWallet(sdk(),address).sendTransaction(new Address(address), value, bounce, flag.flag(), toPayload())
+		                              .callAsMap();
+	}
+
+	public Map<String, Object> sendFromAsMap(String address, BigInteger value) throws EverSdkException, JsonProcessingException {
+		return sendFromAsMap(address, value, true, MessageFlag.EXACT_VALUE_GAS);
+	}
+
+	public RETURN sendFrom(String address, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
+		return toOutput(sendFromAsMap(address, value, bounce, flag));
+	}
+
+	public RETURN sendFrom(String address, BigInteger value) throws EverSdkException, JsonProcessingException {
+		return toOutput(sendFromAsMap(address, value));
+	}
+
+	public ResultOfTree<Map<String, Object>> sendFromTreeAsMap(String address, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
+	                                             ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
+		return new SafeMultisigWallet(sdk(),address).sendTransaction(new Address(address), value, bounce, flag.flag(), toPayload())
+		                                            .callTreeAsMap(throwOnTreeError, concatAbiSet(otherAbisForDecode, SafeMultisigWalletTemplate.DEFAULT_ABI()));
+	}
+
+	public ResultOfTree<RETURN> sendFromTree(String address, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
+	                                                           ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
+		var result = sendFromTreeAsMap(address, value, bounce, flag, throwOnTreeError, otherAbisForDecode);
+		return new ResultOfTree<>(result.queryTree(),
+		                          toOutput(result.decodedOutput()));
+	}
+
+	private	ContractAbi[] concatAbiSet(ContractAbi[] currentAbis, ContractAbi... moreAbis) {
+		Set<ContractAbi> abiSet = new HashSet<>();
+		for (var contractAbi : currentAbis) {
+			abiSet.add(contractAbi);
+		}
+		for (var contractAbi : moreAbis) {
+			abiSet.add(contractAbi);
+		}
+		return abiSet.toArray(ContractAbi[]::new);
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {

@@ -43,7 +43,7 @@ public interface TIP3 {
 		                      CurrencyUnit.VALUE(CurrencyUnit.Ever.EVER,"2"),
 		                      true,
 		                      MessageFlag.FEE_EXTRA.flag(),
-		                      payload).callTree(true, List.of(TIP3TokenRootTemplate.DEFAULT_ABI(),TIP3TokenWalletTemplate.DEFAULT_ABI()));
+		                      payload).callTree(true, TIP3TokenRootTemplate.DEFAULT_ABI(),TIP3TokenWalletTemplate.DEFAULT_ABI());
 		var walletAddress = result.extractDeployAddress(root.address());
 		return new TIP3TokenWallet(sdk,walletAddress);
 	}

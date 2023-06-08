@@ -27,7 +27,7 @@ public class MultisigBuilder {
 
 	public MultisigWallet build(Sdk sdk, Credentials deployKeys, Giver giver, BigInteger value) throws JsonProcessingException, EverSdkException {
 		BigInteger[] owners = null;
-		if (publicKeys.size() < 1) {
+		if (publicKeys.size() == 0) {
 			owners = new BigInteger[]{deployKeys.publicBigInt()};
 		} else {
 			owners = publicKeys.toArray(BigInteger[]::new);

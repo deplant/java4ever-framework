@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.framework.contract.Contract;
+import tech.deplant.java4ever.framework.contract.MultisigWallet;
 import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
@@ -419,32 +421,32 @@ public record FunctionHandle<RETURN>(
 		                          toOutput(result.decodedOutput()));
 	}
 
-	public Map<String, Object> sendFromAsMap(String address, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
-		return new SafeMultisigWallet(sdk(),address).sendTransaction(new Address(address), value, bounce, flag.flag(), toPayload())
+	public Map<String, Object> sendFromAsMap(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
+		return sender.sendTransaction(new Address(sender.address()), value, bounce, flag.flag(), toPayload())
 		                              .callAsMap();
 	}
 
-	public Map<String, Object> sendFromAsMap(String address, BigInteger value) throws EverSdkException, JsonProcessingException {
-		return sendFromAsMap(address, value, true, MessageFlag.EXACT_VALUE_GAS);
+	public Map<String, Object> sendFromAsMap(MultisigWallet sender, BigInteger value) throws EverSdkException, JsonProcessingException {
+		return sendFromAsMap(sender, value, true, MessageFlag.EXACT_VALUE_GAS);
 	}
 
-	public RETURN sendFrom(String address, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
-		return toOutput(sendFromAsMap(address, value, bounce, flag));
+	public RETURN sendFrom(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag) throws EverSdkException, JsonProcessingException {
+		return toOutput(sendFromAsMap(sender, value, bounce, flag));
 	}
 
-	public RETURN sendFrom(String address, BigInteger value) throws EverSdkException, JsonProcessingException {
-		return toOutput(sendFromAsMap(address, value));
+	public RETURN sendFrom(MultisigWallet sender, BigInteger value) throws EverSdkException, JsonProcessingException {
+		return toOutput(sendFromAsMap(sender, value));
 	}
 
-	public ResultOfTree<Map<String, Object>> sendFromTreeAsMap(String address, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
-	                                             ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
-		return new SafeMultisigWallet(sdk(),address).sendTransaction(new Address(address), value, bounce, flag.flag(), toPayload())
+	public ResultOfTree<Map<String, Object>> sendFromTreeAsMap(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
+	                                                           ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
+		return sender.sendTransaction(new Address(sender.address()), value, bounce, flag.flag(), toPayload())
 		                                            .callTreeAsMap(throwOnTreeError, concatAbiSet(otherAbisForDecode, SafeMultisigWalletTemplate.DEFAULT_ABI()));
 	}
 
-	public ResultOfTree<RETURN> sendFromTree(String address, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
+	public ResultOfTree<RETURN> sendFromTree(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
 	                                                           ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
-		var result = sendFromTreeAsMap(address, value, bounce, flag, throwOnTreeError, otherAbisForDecode);
+		var result = sendFromTreeAsMap(sender, value, bounce, flag, throwOnTreeError, otherAbisForDecode);
 		return new ResultOfTree<>(result.queryTree(),
 		                          toOutput(result.decodedOutput()));
 	}

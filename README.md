@@ -64,7 +64,7 @@ dependencies {
 </dependency>
 ```
 
-#### Add Sdk lib to your code
+#### Add custom EVER-SDK library to your code
 
 You can add "ton_client" lib by multiple ways:
 
@@ -97,6 +97,10 @@ var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
 ### Configuration
 
 #### Specify endpoints
+
+You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
+
+If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
 
 ```java
 var sdkDev = new SdkBuilder()
@@ -228,4 +232,10 @@ ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk,template.abi(),initialD
 ## Logging
 
 java4ever-framework uses the JDK Platform Loggging (JEP 264: Platform Logging API and Service),
-so can be easily bridged to any logging framework.
+so can be easily bridged to any logging framework. For example, to use log4j2, just add *org.apache.logging.log4j:log4j-jpl* to your Maven/Gradle build.
+
+## Getting Help
+
+If you can't answer in this readme or have a bug/improvement to report:
+* Ask in our [Telegram](https://t.me/deplant_chat_en) support chat
+* Open a new [Issue](https://github.com/deplant/java4ever-framework/issues/new)

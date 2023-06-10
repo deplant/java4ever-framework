@@ -441,7 +441,7 @@ public record FunctionHandle<RETURN>(
 	public ResultOfTree<Map<String, Object>> sendFromTreeAsMap(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,
 	                                                           ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
 		return sender.sendTransaction(new Address(address()), value, bounce, flag.flag(), toPayload())
-		                                            .callTreeAsMap(throwOnTreeError, concatAbiSet(otherAbisForDecode, SafeMultisigWalletTemplate.DEFAULT_ABI()));
+		                                            .callTreeAsMap(throwOnTreeError, concatAbiSet(otherAbisForDecode, abi(), SafeMultisigWalletTemplate.DEFAULT_ABI()));
 	}
 
 	public ResultOfTree<RETURN> sendFromTree(MultisigWallet sender, BigInteger value, boolean bounce, MessageFlag flag, boolean throwOnTreeError,

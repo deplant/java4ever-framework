@@ -101,6 +101,8 @@ Also, you can check JsonFile, JsonResource, ByteFile, ByteResource helpers for c
 
 ### Contract Wrappers Generation
 
+Contract Wrapper Generator will create java wrapper classes for all your contracts. Run the following:
+
 ```java
 ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
                          Tvc.ofResource("mycontract.tvc"),
@@ -110,6 +112,8 @@ ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContra
                          "org.example.template",
                          new String[]{});
 ```
+
+Contract and template wrappers will appear in packages that you specified.
 
 ### Crypto
 

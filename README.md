@@ -43,7 +43,7 @@ Java ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
 * Build **EVER-SDK** binary lib "**ton_client**"(.so/.dll) (or
   get [precomiled one](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries))
 
-#### Add java4ever to your Maven of Gradle setup:
+#### Add java4ever to your Maven or Gradle setup:
 
 * Gradle
 
@@ -95,7 +95,7 @@ Variants of loading ton_client lib:
 * `Tvc.ofFile("/path/to/your.tvc")` - reads tvc from file (can be relative)
 * `Tvc.ofResource("yourresource.tvc")` - reads tvc from resources of your project
 * `Tvc.ofBase64String("")` -reads tvc from base64 encoded string
-* `new Tvc(bytes)` - reads tvc from JSON node
+* `new Tvc(bytes)` - reads tvc from byte array
 
 Also, you can check JsonFile, JsonResource, ByteFile, ByteResource helpers for custom artifacts.
 

@@ -135,7 +135,8 @@ String pk = keys.publicKey();
 
 ### Contracts
 
-If you generated MyContract previously, all its methods are now available from MyContract.class.
+If you generated MyContract via [generator](#contract-wrappers-generation), all its methods are now available from MyContract.class.
+If you're working with standard contracts, all wrappers are already generated (for multisig wallets, givers, TIP3 and TIP4 contracts and so on)
 
 #### Create Contract Object
 

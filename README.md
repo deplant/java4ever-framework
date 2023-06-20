@@ -75,7 +75,7 @@ You can find a list of endpoints here: https://docs.evercloud.dev/products/everc
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
 
 ```java
-var sdkDev = Sdk.builder().networkEndpoints("localhost")
+var sdk = Sdk.builder().networkEndpoints("localhost")
 			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 ```
 You can add "ton_client" lib by multiple ways.
@@ -145,13 +145,13 @@ If you're working with standard contracts, all wrappers are already generated (f
 #### Create Contract Object
 
 ```java
-MyContract contr = new MyContract(SDK, "0:your_contract_address");
+MyContract contr = new MyContract(sdk, "0:your_contract_address");
 ```
 
 or with credentials for external calls:
 
 ```java
-MyContract contr = new MyContract(SDK, "0:your_contract_address", keys);
+MyContract contr = new MyContract(sdk, "0:your_contract_address", keys);
 ```
 
 #### Accessing Functions

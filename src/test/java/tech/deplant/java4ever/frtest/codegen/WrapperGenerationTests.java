@@ -8,6 +8,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.generator.ContractWrapper;
@@ -27,6 +28,7 @@ public class WrapperGenerationTests {
 	@Test
 	public void generate() throws IOException, EverSdkException {
 
+		var seed = Seed.
 
 		var mapper = ContextBuilder.DEFAULT_MAPPER;
 

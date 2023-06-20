@@ -8,6 +8,7 @@ import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.utils.Convert;
 
 import java.math.BigInteger;
 

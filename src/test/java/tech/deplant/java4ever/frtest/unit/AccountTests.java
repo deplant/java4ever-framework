@@ -8,8 +8,6 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Convert;
-import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
@@ -18,7 +16,6 @@ import java.math.BigInteger;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)

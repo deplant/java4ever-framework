@@ -1,7 +1,7 @@
 # java4ever-framework
 
-[![JDK version](https://img.shields.io/badge/Java-19+-green.svg)](https://shields.io/)
-[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.42.1-orange)](https://github.com/tonlabs/ever-sdk)
+[![JDK version](https://img.shields.io/badge/Java-19-green.svg)](https://shields.io/)
+[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.43.2-orange)](https://github.com/tonlabs/ever-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 
 * Discuss in
@@ -96,16 +96,47 @@ var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
 
 ### Configuration
 
-#### Specify endpoints
+#### Create SDK Provider
 
 You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
 
 ```java
-var sdkDev = new SdkBuilder()
-                  .networkEndpoints("https://devnet-sandbox.evercloud.dev/graphql")
-                  .create(JavaLibraryPathLoader.TON_CLIENT);
+var sdkDev = Sdk.builder().networkEndpoints("localhost")
+			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+```
+
+Variants of loading ton_client lib:
+* `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
+* `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
+* `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path
+* `new JavaLibraryPathLoader("ton_client");` - gets library from java.library.path JVM argument
+
+### Reading ABI, TVC & other artifacts
+
+* `ContractAbi.ofFile("/path/to/your.abi.json")` - reads abi from file (can be relative)
+* `ContractAbi.ofResource("yourresource.abi.json")` - reads abi from resources of your project
+* `ContractAbi.ofString("")` -reads abi from JSON string
+* `ContractAbi.ofJsonNode(node)` - reads abi from JSON node
+
+* `Tvc.ofFile("/path/to/your.tvc")` - reads tvc from file (can be relative)
+* `Tvc.ofResource("yourresource.tvc")` - reads tvc from resources of your project
+* `Tvc.ofBase64String("")` -reads tvc from base64 encoded string
+* `new Tvc(bytes)` - reads tvc from JSON node
+
+Also, you can check JsonFile, JsonResource, ByteFile, ByteResource helpers for custom artifacts.
+
+### Contract Wrappers Generation
+
+```java
+ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
+                         Tvc.ofResource("mycontract.tvc"),
+                         Path.of("src/gen/java"),
+                         "MyContract",
+                         "org.example.contract",
+                         "org.example.template",
+                         new String[]{});
 ```
 
 ### Crypto
@@ -132,102 +163,109 @@ String pk = keys.publicKey();
 
 ### Contracts
 
-#### Describe a contract
+If you generated MyContract previously, all its methods are now available from MyContract.class.
+
+#### Create Contract Object
 
 ```java
-var keysOfContract = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
-                                     "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
-OwnedContract myContract = new OwnedContract(sdk,
-                                             new Address("0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0"),
-                                             ContractAbi.ofFile("~/MyContract.abi.json"),
-                                             keysOfContract);
+MyContract contr = new MyContract(SDK, "0:your_contract_address");
 ```
 
-#### Run getter
+or with credentials for external calls:
 
 ```java
-Map<String, Object> functionInputs = Map.of();
-Abi.FunctionHeader header = null;
-myContract.runGetter("getOwner",functionInputs,header).get("value0");
+MyContract contr = new MyContract(SDK, "0:your_contract_address", keys);
 ```
 
-#### Call a contract
+#### Accessing Functions
 
 ```java
-Map<String, Object> functionInputs = Map.of();
-Abi.FunctionHeader header = null;
-myContract.callExternal("getOwner",functionInputs,header).get("value0");
+FunctionHandle getCustodiansFunctionHandle = contr.getCustodians();
 ```
+
+Function in this example doesn't have params, but yours can have.
+
+#### Now you can call it as you like
+
+```java
+MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.get();
+
+Map<String,Object> custodiansMap = getCustodiansFunctionHandle.getAsMap();
+
+MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.call();
+
+Map<String,Object> custodiansMap = getCustodiansFunctionHandle.callAsMap();
+
+MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.getLocal(locallySavedBoc);
+```
+
+All the described functions, handles and return types are auto-generated when you generate contract wrapper
+
+Variants of calls to function:
+
+* **get()** - runs getter method and returns auto-generated type
+* **call()** - makes external call (make sure you added credentials to contract object if contract checks signatures)
+* **getLocal()** - runs getter against provided boc
+* **...AsMap()** - each method have AsMap variant that returns Map<String, Object> insted of type
 
 #### Send internal message with Msig
 
 ```java
-Map<String, Object> functionInputs = Map.of();
-Abi.FunctionHeader header = null;
-String payload = myContract.encodeInternalPayload("publishCustomTask",functionInputs,header);
-var addressOfMsig = new Address("0:273642fe57e282432bda8f16c69ea19a94b13db05986e11585a5121bcfec3fe0");
-var keysOfMsig = new Credentials("1fae0df1eee24bc61fbb9230bdac07503b77ceac7700651bec8250df97b6f94f",
-                                 "8b55abc280dd0b741d78961b0f8f4d8d235f30f122bc5829b6e598e71331c01c");
-BigInteger sendValue = EVER.amount();
-Msig msig = new Msig(sdk,addressOfMsig,keysOfMsig);
-msig.send(myContract.address(),sendValue,true,0,payload); // sends internal message with payload
+var walletContract = new SafeMultisigWallet(sdk,"", walletKeys);
+getCustodiansFunctionHandle.sendFrom(walletContract, CurrencyUnit.VALUE(EVER,"1.25"), true, MessageFlag.FEE_EXTRA);
 ```
 
-### Templates
+**sendFrom()** method also has **sendFromAsMap()** variant.
 
-#### Describe a template
+Calls and sends also has **...Tree()** variants that can be used to monitor transaction tree execution and collect errors.
+
+### Deployment
+
+#### Create ContractTemplate Object
 
 ```java
-ContractTemplate template = new ContractTemplate(ContractAbi.ofFile("~/MyContract.abi.json"),
-                                                 ContractTvc.ofFile("~/MyContract.tvc"));
-MsigTemplate safeTemplate = MsigTemplate.SAFE(); // msig templates are included
+MyContractTemplate myTemplate = new MyContractTemplate();
 ```
 
-#### Deploy template
+#### Accessing deploy initial data
 
 ```java
-Credentials keys = Credentials.RANDOM(sdk);
-Map<String, Object> initialData = Map.of("initDataParam1","helloWorld!"); // one static initData var
-Map<String, Object> constructorInputs = Map.of(); // no inputs
-OwnedContract contract = template.deploy(sdk,0,initialData,keys,constructorInputs);
+DeployHandle deployHandle = myTemplate.prepareDeploy(sdk, Credentials.NONE,"hello_world");
 ```
+
+As with FunctionHandle, prepareDeploy() of your contract DeployHandle can have additional params - your static variables and constructor params.
+
+#### Deployment Variations
+
+```java
+MyContract myContract = deployHandle.deploy();
+
+MyContract myContract = deployHandle.deployWithGiver(walletContract, CurrencyUnit.VALUE(EVER,"1.25"));
+
+MyContract myContract = deployHandle.deployWithGiver(EverOSGiver.V2(sdk), CurrencyUnit.VALUE(EVER,"1.25"));
+```
+
+Each deployment creates a ready contract object after deploy is done. 
+Also, you can use `deployHandle.toAddress()` if you need only address calculation.
 
 #### Switch giver
 
+Here's the example of universal deployment that switches 
+between Local Node giver & real wallet without any additional code:
+
 ```java
-MsigTemplate safeTemplate = MsigTemplate.SAFE();
 Giver giver = null;
+
 if(isEverOsNet()){
-  giver = new EverOSGiver(SDK);
+  giver = EverOSGiver.V2(sdk);
 }else{
-  giver = Msig.ofSafe(SDK,
-                          new Address("0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef"),
-                          keysOfMsig);
+  giver = walletContract;
 }
-safeTemplate.deploySingleSig(SDK,
-                             Credentials.RANDOM(SDK),
-                             giver,
-                             EVER.amount());
+
+deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 ```
 
-#### Check ABI
-
-```java
-ContractAbi abi1 = template.abi();
-ContractAbi abi2 = ContractAbi.ofFile("~/MyContract.abi.json");
-boolean hasSend = abi1.hasFunction("sendTransaction");
-String abiType = abi2.functionOutputType("getBalance","value0").type();
-```
-
-#### Encode data to TVC
-
-```java
-ContractTvc tvc1 = template.tvc();
-ContractTvc tvc2 = ContractTvc.ofFile("~/MyContract.tvc");
-Credentials keys = Credentials.RANDOM(sdk);
-Map<String, Object> initialData = Map.of("initDataParam1","helloWorld!"); // one static initData var
-ContractTvc tvc1update = tvc1.withUpdatedInitialData(sdk,template.abi(),initialData,keys.publicKey());
-```
+This is possible as standard wallet contracts are implementing Giver interface.
 
 ## Logging
 

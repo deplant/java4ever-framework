@@ -1,3 +1,11 @@
+### 1.8.0
+
+- Added support of EVER-SDK 1.43.2 changes
+- Better exceptions for FunctionHandle::callTreeAsMap
+- Fixes for large map(type,tuple) conversions
+- New sendFrom methods for easier sending internal messages from multisigs
+- Updated README examples
+
 ### 1.7.0
 
 - Added FunctionHandle::getLocal and FunctionHandle::getLocalAsMap for getters run locally on downloadad bocs

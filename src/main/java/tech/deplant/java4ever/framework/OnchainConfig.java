@@ -13,11 +13,25 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static tech.deplant.java4ever.framework.LogUtils.warn;
+
 public record OnchainConfig(Artifact<String,String> artifact, OnchainInfo info) {
 
 	public record OnchainInfo(Map<String, SavedContract> contracts,Map<String, Credentials> credentials) {}
 
 	private static System.Logger logger = System.getLogger(OnchainConfig.class.getName());
+
+
+	public static OnchainConfig LOAD_IF_EXISTS(String serializationPath) throws IOException {
+		OnchainConfig conf = null;
+		try {
+			conf = OnchainConfig.LOAD(serializationPath);
+		} catch (Exception e) {
+			conf = OnchainConfig.EMPTY(serializationPath);
+			warn(logger, e.getMessage());
+		}
+		return conf;
+	}
 
 	public static OnchainConfig EMPTY(String serializationPath) throws IOException {
 		var path = Paths.get(serializationPath);

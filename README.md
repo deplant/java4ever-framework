@@ -64,34 +64,6 @@ dependencies {
 </dependency>
 ```
 
-#### Add custom EVER-SDK library to your code
-
-You can add "ton_client" lib by multiple ways:
-
-* Specify absolute path to your library in code:
-
-```java
-var sdk1 = new SdkBuilder().create(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
-```
-
-* Specify absolute path in system env variables:
-
-```java
-var sdk2 = new SdkBuilder().create(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB_PATH"));
-```
-
-* Place it in build current dir and specify filename in code:
-
-```java
-var sdk3 = new SdkBuilder().create(AbsolutePathLoader.ofUserDir("ton_client.so"));
-```
-
-* Use `-Djava.library.path` parameter to VM and then specify only lib name:
-
-```java
-var sdk4 = new SdkBuilder().create(new JavaLibraryPathLoader("ton_client"));
-```
-
 ## Examples
 
 ### Configuration
@@ -106,7 +78,7 @@ If you're working with Everscale mainnet, here you can register your app and rec
 var sdkDev = Sdk.builder().networkEndpoints("localhost")
 			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 ```
-
+You can add "ton_client" lib by multiple ways.
 Variants of loading ton_client lib:
 * `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
 * `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)

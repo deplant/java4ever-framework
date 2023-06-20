@@ -51,8 +51,8 @@ public record Tvc(byte[] bytes) {
 		return TvmCell.fromJava(decode(sdk).code());
 	}
 
-	public Boc.ResultOfDecodeTvc decode(Sdk sdk) throws EverSdkException {
-		return Boc.decodeTvc(sdk.context(), base64String(), null);
+	public Boc.ResultOfDecodeStateInit decode(Sdk sdk) throws EverSdkException {
+		return Boc.decodeStateInit(sdk.context(), base64String(), null);
 	}
 
 	public String data(Sdk sdk) throws EverSdkException {
@@ -86,14 +86,14 @@ public record Tvc(byte[] bytes) {
 		                                                 publicKey,
 		                                                 null).data();
 		var decoded = decode(sdk);
-		var newTvcString = Boc.encodeTvc(sdk.context(),
+		var newTvcString = Boc.encodeStateInit(sdk.context(),
 		                                 decoded.code(),
 		                                 updatedDataString,
 		                                 decoded.library(),
 		                                 decoded.tick(),
 		                                 decoded.tock(),
 		                                 decoded.splitDepth(),
-		                                 null).tvc();
+		                                 null).stateInit();
 		return Tvc.ofBase64String(newTvcString);
 	}
 
@@ -177,14 +177,14 @@ public record Tvc(byte[] bytes) {
 		}
 
 		public Tvc build(Sdk sdk) throws EverSdkException {
-			return Tvc.ofBase64String(Boc.encodeTvc(sdk.context(),
+			return Tvc.ofBase64String(Boc.encodeStateInit(sdk.context(),
 			                                        this.code,
 			                                        this.data,
 			                                        this.library,
 			                                        this.tick,
 			                                        this.tock,
 			                                        this.splitDepth,
-			                                        null).tvc());
+			                                        null).stateInit());
 		}
 	}
 }

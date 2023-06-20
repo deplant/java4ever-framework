@@ -8,9 +8,12 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Convert;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
+import tech.deplant.java4ever.framework.MessageFlag;
+import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
+import tech.deplant.java4ever.framework.contract.TIP3TokenWallet;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
@@ -33,6 +36,8 @@ public class MsigTests {
 	@Test
 	public void first_msig_deploy_passes_second_throws() throws Throwable {
 		var keys = Env.RNG_KEYS();
+
+
 
 		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,
 		                                                                     keys,

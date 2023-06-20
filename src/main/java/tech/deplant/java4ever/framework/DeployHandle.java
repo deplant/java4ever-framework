@@ -100,6 +100,8 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 
 	public Abi.DeploySet toDeploySet() throws EverSdkException {
 		return new Abi.DeploySet(tvc().base64String(),
+								 null,
+								 null,
 		                         workchainId(),
 		                         abi().convertInitDataInputs(initialDataFields()),
 		                         requireNonNullElse(credentials(), Credentials.NONE).publicKey());

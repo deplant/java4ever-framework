@@ -1,12 +1,20 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.Tvm;
 import tech.deplant.java4ever.framework.Sdk;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.Map;
+
 
 public record TvmCell(String cellBoc) implements AbiType<String, String> {
 
@@ -27,16 +35,16 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 		};
 	}
 
-	public Map<String,Object> decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
+	public Map<String, Object> decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
 		return Abi.decodeBoc(sdk.context(), types, cellBoc(), true).data();
 	}
 
-	public Map<String,Object> decode(Sdk sdk, String[] types) throws EverSdkException {
+	public Map<String, Object> decode(Sdk sdk, String[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
 			String type = types[i];
 			String name = String.valueOf(i);
-			params[i] = new Abi.AbiParam(name,type,null);
+			params[i] = new Abi.AbiParam(name, type, null);
 		}
 		return decode(sdk, params);
 	}
@@ -65,4 +73,5 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 	public String toABI() {
 		return cellBoc();
 	}
+
 }

@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) implements AbiType<Map<String, Object>, Map<String, Object>> {
+public record SolStruct(Abi.AbiParam[] abiParams,
+                        Map<String, Object> values) implements AbiType<Map<String, Object>, Map<String, Object>> {
 
 	private final static System.Logger logger = System.getLogger(SolStruct.class.getName());
 
@@ -80,26 +81,6 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 		}
 	}
 
-	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, "tuple", abiParams());
-	}
-
-	@Override
-	public String abiTypeName() {
-		return "tuple";
-	}
-
-	@Override
-	public Map<String, Object> toJava() {
-		return values();
-	}
-
-	@Override
-	public Map<String, Object> toABI() {
-		return values();
-	}
-
 	public static ContractAbi.AbiTypeDetails typeParser(String typeString) throws EverSdkException {
 		// Size pattern matching
 		var expr = new Then(
@@ -121,7 +102,7 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
 		                                                               "ABI Type parsing failed! Type: " + typeString),
 		                              new RuntimeException());
-		logger.log(System.Logger.Level.WARNING, () -> ex.toString());
+		logger.log(System.Logger.Level.WARNING, () -> "ABI type parsing failed! Type: " + typeString);
 		throw ex;
 	}
 
@@ -172,22 +153,16 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 			// Key Parse
 			final var keyDetails = typeParser(keyTypeString);
 
-			Map<Object, Object> mapValue = (Map<Object, Object>) inputValue;
-			if (mapValue.size() == 1) {
-				final Object key = mapValue.keySet().toArray()[0];
-				final Object value = mapValue.values().toArray()[0];
-				return Map.of(AbiType.of(keyDetails.type(), keyDetails.size(), key).toABI(),
-				              // serializeTree is used for map(type,tuple) cases,
-				              // thus it will continue to serialize tuple part
-				              serializeInputTree(new Abi.AbiParam(valueTypeString, valueTypeString, param.components()),
-				                                 value));
-			} else {
-				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
-				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
-				                                                               mapValue), new RuntimeException());
-				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
-				throw ex;
+			Map<Object, Object> inputMap = (Map<Object, Object>) inputValue;
+			Map<Object, Object> convertedMap = new HashMap<>();
+			for (var entry : inputMap.entrySet()) {
+				convertedMap.put(AbiType.of(keyDetails.type(), keyDetails.size(), entry.getKey()).toABI(),
+				                 serializeInputTree(new Abi.AbiParam(valueTypeString,
+				                                                      valueTypeString,
+				                                                      param.components()),
+				                                     entry.getValue()));
 			}
+			return convertedMap;
 		} else {
 			// Normal (not map) root types
 			final var rootDetails = typeParser(rootTypeString);
@@ -267,24 +242,16 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 			// Key Parse
 			final var keyDetails = typeParser(keyTypeString);
 
-			Map<Object, Object> mapValue = (Map<Object, Object>) outputValue;
-			if (mapValue.size() == 1) {
-				final Object key = mapValue.keySet().toArray()[0];
-				final Object value = mapValue.values().toArray()[0];
-				return Map.of(AbiType.ofABI(keyDetails.type(), keyDetails.size(), key).toJava(),
-				              // serializeTree is used for map(type,tuple) cases,
-				              // thus it will continue to serialize tuple part
-				              serializeOutputTree(new Abi.AbiParam(valueTypeString,
+			Map<Object, Object> outputMap = (Map<Object, Object>) outputValue;
+			Map<Object, Object> convertedMap = new HashMap<>();
+			for (var entry : outputMap.entrySet()) {
+				convertedMap.put(AbiType.ofABI(keyDetails.type(), keyDetails.size(), entry.getKey()).toJava(),
+				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
 				                                                   valueTypeString,
 				                                                   param.components()),
-				                                  value));
-			} else {
-				var ex = new EverSdkException(new EverSdkException.ErrorResult(-302,
-				                                                               "ABI Type Conversion fails. Wrong argument! Too many keys provided for single map(type,type) " +
-				                                                               mapValue), new RuntimeException());
-				logger.log(System.Logger.Level.WARNING, () -> ex.toString());
-				throw ex;
+				                                  entry.getValue()));
 			}
+			return convertedMap;
 		} else {
 			// Normal (not map) root types
 			final var rootDetails = typeParser(rootTypeString);
@@ -332,5 +299,25 @@ public record SolStruct(Abi.AbiParam[] abiParams, Map<String, Object> values) im
 				return AbiType.ofABI(rootDetails.type(), rootDetails.size(), outputValue).toJava();
 			}
 		}
+	}
+
+	@Override
+	public Abi.AbiParam toAbiParam(String name) {
+		return new Abi.AbiParam(name, "tuple", abiParams());
+	}
+
+	@Override
+	public String abiTypeName() {
+		return "tuple";
+	}
+
+	@Override
+	public Map<String, Object> toJava() {
+		return values();
+	}
+
+	@Override
+	public Map<String, Object> toABI() {
+		return values();
 	}
 }

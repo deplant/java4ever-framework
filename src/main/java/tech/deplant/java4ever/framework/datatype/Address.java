@@ -3,10 +3,10 @@ package tech.deplant.java4ever.framework.datatype;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.template.Template;
+import tech.deplant.java4ever.utils.Convert;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -54,6 +54,8 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 				template.abi().ABI(),
 				null,
 				new Abi.DeploySet(template.tvc().base64String(),
+								  null,
+								  null,
 				                  workchainId,
 				                  initialData,
 				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),

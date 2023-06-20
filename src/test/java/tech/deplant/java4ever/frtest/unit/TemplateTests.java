@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Convert;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
@@ -21,6 +20,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -77,7 +77,7 @@ public class TemplateTests {
 				sdk,
 				RNG_KEYS(), new BigInteger[]{keys.publicBigInt()}, 1
 		).deployWithGiver(giver,
-		                  Convert.toValue("1", CurrencyUnit.Ever.EVER));
+		                  CurrencyUnit.VALUE(EVER,"1"));
 	}
 
 }

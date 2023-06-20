@@ -5,6 +5,7 @@
 - Fixes for large map(type,tuple) conversions
 - New sendFrom methods for easier sending internal messages from multisigs
 - Updated README examples
+- New builders for multisigs and TIP3 contracts
 
 ### 1.7.0
 

@@ -28,8 +28,6 @@ public class WrapperGenerationTests {
 	@Test
 	public void generate() throws IOException, EverSdkException {
 
-		var seed = Seed.
-
 		var mapper = ContextBuilder.DEFAULT_MAPPER;
 
 		var config = mapper.readValue(new JsonResource("codegen/generator-config.json").get(), GeneratorConfig.class);

@@ -1,4 +1,4 @@
-# java4ever-framework
+# Java4Ever
 
 [![JDK version](https://img.shields.io/badge/Java-19-green.svg)](https://shields.io/)
 [![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.43.2-orange)](https://github.com/tonlabs/ever-sdk)
@@ -25,33 +25,9 @@ Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library
 * Complete typed latest [EVER-SDK](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md) API support
 * Pluggable EVER-SDK library support (no rebuild needed, just plug-in SDK lib you like with special Loaders)
 
-<!-- TOC -->
-* [java4ever-framework](#java4ever-framework)
-  * [Features](#features)
-  * [Quick start](#quick-start)
-    * [Prerequisites](#prerequisites)
-    * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
-  * [Examples](#examples)
-    * [Configuration](#configuration)
-      * [Create SDK Provider](#create-sdk-provider)
-    * [Reading ABI, TVC & other artifacts](#reading-abi-tvc--other-artifacts)
-    * [Contract Wrappers Generation](#contract-wrappers-generation)
-    * [Crypto](#crypto)
-      * [Create a random keypair](#create-a-random-keypair)
-      * [Create a random seed and keys from it](#create-a-random-seed-and-keys-from-it)
-    * [Contracts](#contracts)
-      * [Create Contract Object](#create-contract-object)
-      * [Accessing Functions](#accessing-functions)
-      * [Now you can call it as you like](#now-you-can-call-it-as-you-like)
-      * [Send internal message with Msig](#send-internal-message-with-msig)
-    * [Deployment](#deployment)
-      * [Create ContractTemplate Object](#create-contracttemplate-object)
-      * [Accessing deploy initial data](#accessing-deploy-initial-data)
-      * [Deployment Variations](#deployment-variations)
-      * [Switch giver](#switch-giver)
-  * [Logging](#logging)
-  * [Getting Help](#getting-help)
-<!-- TOC -->
+## Contents
+
+
 
 ## Quick start
 
@@ -155,24 +131,27 @@ String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
 
-### Contracts
+### Working with existing contracts
 
 If you generated MyContract via [generator](#contract-wrappers-generation), all its methods are now available from MyContract.class.
 If you're working with standard contracts, all wrappers are already generated (for multisig wallets, givers, TIP3 and TIP4 contracts and so on - check [javadoc](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework/latest/java4ever.framework/tech/deplant/java4ever/framework/contract/package-summary.html))
 
-#### Create Contract Object
+#### Accessing Contract
 
 ```java
 MyContract contr = new MyContract(sdk, "0:your_contract_address");
+
+contr.accountBalance(); // currency balance on account
+contr.account().isActive(); // contract status
 ```
 
-or with credentials for external calls:
+or with credentials for signing external calls:
 
 ```java
 MyContract contr = new MyContract(sdk, "0:your_contract_address", keys);
 ```
 
-#### Accessing Functions
+#### Accessing Function
 
 ```java
 FunctionHandle getCustodiansFunctionHandle = contr.getCustodians();
@@ -180,7 +159,7 @@ FunctionHandle getCustodiansFunctionHandle = contr.getCustodians();
 
 Function in this example doesn't have params, but yours can have.
 
-#### Now you can call it as you like
+#### Calling Functions in various ways
 
 ```java
 MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.get();
@@ -196,33 +175,48 @@ MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.getLoc
 
 All the described functions, handles and return types are auto-generated when you generate contract wrapper
 
-Variants of calls to function:
+**Variants of calls to function**:
 
 * **get()** - runs getter method and returns auto-generated type
 * **call()** - makes external call (make sure you added credentials to contract object if contract checks signatures)
 * **getLocal()** - runs getter against provided boc
 * **...AsMap()** - each method have AsMap variant that returns Map<String, Object> insted of type
 
-#### Send internal message with Msig
+#### Sending Internal Message from Multisig Wallet
 
 ```java
 var walletContract = new SafeMultisigWallet(sdk,"", walletKeys);
 getCustodiansFunctionHandle.sendFrom(walletContract, CurrencyUnit.VALUE(EVER,"1.25"), true, MessageFlag.FEE_EXTRA);
 ```
-
 **sendFrom()** method also has **sendFromAsMap()** variant.
 
 Calls and sends also has **...Tree()** variants that can be used to monitor transaction tree execution and collect errors.
 
-### Deployment
 
-#### Create ContractTemplate Object
+#### Encoding as Payload
+
+```java
+var payload = getCustodiansFunctionHandle.toPayload();
+```
+
+### Deploying new contracts
+
+#### Accessing Template
 
 ```java
 MyContractTemplate myTemplate = new MyContractTemplate();
+
+var abi = myTemplate.abi(); // getting ABI from template
+var tvc = myTemplate.tvc(); // getting TVC from template
+
+myTemplate.tvc().code() // getting code cell
+myTemplate.tvc().codeHash() // getting code hash
 ```
 
-#### Accessing deploy initial data
+There are much more methods for TVC and ABI, including decoding and encoding 
+initial data, various helpers for all sort of interactions.
+
+#### Accessing Deployment Set
 
 ```java
 DeployHandle deployHandle = myTemplate.prepareDeploy(sdk, Credentials.NONE,"hello_world");
@@ -230,7 +224,7 @@ DeployHandle deployHandle = myTemplate.prepareDeploy(sdk, Credentials.NONE,"hell
 
 As with FunctionHandle, prepareDeploy() of your contract DeployHandle can have additional params - your static variables and constructor params.
 
-#### Deployment Variations
+#### Variations of deploy
 
 ```java
 MyContract myContract = deployHandle.deploy();
@@ -243,24 +237,24 @@ MyContract myContract = deployHandle.deployWithGiver(EverOSGiver.V2(sdk), Curren
 Each deployment creates a ready contract object after deploy is done. 
 Also, you can use `deployHandle.toAddress()` if you need only address calculation.
 
-#### Switch giver
+#### Switching Givers
 
 Here's the example of universal deployment that switches 
-between Local Node giver & real wallet without any additional code:
+between **evernode-se** giver & **msig wallet** without any additional code:
 
 ```java
 Giver giver = null;
 
-if(isEverOsNet()){
+if (isEverOsNet()) {
   giver = EverOSGiver.V2(sdk);
-}else{
-  giver = walletContract;
+} else {
+  giver = new SafeMultisigWallet(sdk,"0:your_address");
 }
 
 deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 ```
 
-This is possible as standard wallet contracts are implementing Giver interface.
+This is possible as all Java4Ever wallet classes are implementing Giver interface.
 
 ## Logging
 

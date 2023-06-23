@@ -16,14 +16,16 @@ Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library
 
 ## Features
 
-* Auto-generation of Java classes for your contracts
-* Auto-conversion of ABI types to Java
+* Auto-generation of Java smart contract wrappers to create, deploy, transact with and call smart contracts from native Java code
+* Auto-conversion of ABI types to Java native types for any input/output
 * Easy work with TIP 3.2 Fungible Tokens
 * Easy work with Multisig Wallets
 * Easy work with EverNode-SE Givers (with easy polymorph to giving from wallet on production)
-* Access to transaction tree of a call
-* Complete typed latest [EVER-SDK](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md) API support
+* Access to transaction tree of complex calls
+* Complete typed implementation of latest [EVER-SDK](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md) JSON-RPC client API
 * Pluggable EVER-SDK library support (no rebuild needed, just plug-in SDK lib you like with special Loaders)
+
+Java4Ever only runtime dependencies are its own binding and utils libs and Jackson Core for fast JSON serialisation/deserialization It also uses JavaPoet for generating smart contract wrappers.
 
 ## Contents
 

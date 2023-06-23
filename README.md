@@ -27,7 +27,35 @@ Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library
 
 ## Contents
 
-
+<!-- TOC -->
+* [Java4Ever](#java4ever)
+  * [Features](#features)
+  * [Contents](#contents)
+  * [Quick start](#quick-start)
+    * [Prerequisites](#prerequisites)
+    * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
+  * [Examples](#examples)
+    * [Configuration](#configuration)
+      * [Create SDK Provider](#create-sdk-provider)
+    * [Reading ABI, TVC & other artifacts](#reading-abi-tvc--other-artifacts)
+    * [Contract Wrappers Generation](#contract-wrappers-generation)
+    * [Crypto](#crypto)
+      * [Create a random keypair](#create-a-random-keypair)
+      * [Create a random seed and keys from it](#create-a-random-seed-and-keys-from-it)
+    * [Working with existing contracts](#working-with-existing-contracts)
+      * [Accessing Contract](#accessing-contract)
+      * [Accessing Function](#accessing-function)
+      * [Calling Functions in various ways](#calling-functions-in-various-ways)
+      * [Sending Internal Message from Multisig Wallet](#sending-internal-message-from-multisig-wallet)
+      * [Encoding as Payload](#encoding-as-payload)
+    * [Deploying new contracts](#deploying-new-contracts)
+      * [Accessing Template](#accessing-template)
+      * [Accessing Deployment Set](#accessing-deployment-set)
+      * [Variations of deploy](#variations-of-deploy)
+      * [Switching Givers](#switching-givers)
+  * [Logging](#logging)
+  * [Getting Help](#getting-help)
+<!-- TOC -->
 
 ## Quick start
 

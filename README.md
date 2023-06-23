@@ -9,41 +9,59 @@
 * Read full
   docs: [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
 
-**java4ever** is a Java 19 suite for smart-contracts development, testing & accessing DApps for
-[Everscale](https://everscale.network/) blockchain network much like [web3j](https://github.com/web3j/web3j) for
-Ethereum and close to Truffle, Hardhat & [locklift](https://github.com/broxus/locklift).
+**Java4Ever** is a feature-rich framework for smart-contracts development, testing & accessing 
+TVM-compatible blockchains like [Everscale](https://everscale.network/), [Venom](https://venom.network/), [GOSH](https://gosh.sh/) and so on. Closest alternative is a TypeScript-based [locklift](https://github.com/broxus/locklift) framework by Broxus.
 
-With **java4ever** you can connect your enterprise services on **Java** to
-most scalable smart-contract network. It is also suitable for any Everscale forks like GOSH or Venom.
+Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
 
-With java4ever you get:
+## Features
 
-* Complete implementation of
-  Everscale [EVER-SDK JSON-RPC API](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md)
-* All main Multisig Wallets variations support (easy deploy & calls)
-* Pluggable EVER-SDK client library support (no rebuild needed, just plug-in SDK lib you like)
-* Maven/Gradle support (deployed
-  to [Maven Central](https://mvnrepository.com/artifact/tech.deplant.java4ever/java4ever-framework))
-* TIP 3.2 Fungible Tokens helpers (easy deploy & calls)
-* EverNodeSE Giver helpers (and you can polymorph to Multisig Givers with no code change or implement custom)
-* Powerful auto-conversion between Java types & ABI expectations
-* Transaction tree of a complex call can be accessed
+* Auto-generation of Java classes for your contracts
+* Auto-conversion of ABI types to Java
+* Easy work with TIP 3.2 Fungible Tokens
+* Easy work with Multisig Wallets
+* Easy work with EverNode-SE Givers (with easy polymorph to giving from wallet on production)
+* Access to transaction tree of a call
+* Complete typed latest [EVER-SDK](https://github.com/tonlabs/ever-sdk/blob/master/docs/SUMMARY.md) API support
+* Pluggable EVER-SDK library support (no rebuild needed, just plug-in SDK lib you like with special Loaders)
 
-**java4ever** uses blocking code (that is now
-a [best practice](https://github.com/alexcheng1982/jdk-loom-faq#structured-concurrency)
-due to Loom [Structured Concurrency](https://openjdk.org/jeps/428)).
-Framework internally uses JSON-RPC connection to native EVER-SDK library binded to
-Java ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
+<!-- TOC -->
+* [java4ever-framework](#java4ever-framework)
+  * [Features](#features)
+  * [Quick start](#quick-start)
+    * [Prerequisites](#prerequisites)
+    * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
+  * [Examples](#examples)
+    * [Configuration](#configuration)
+      * [Create SDK Provider](#create-sdk-provider)
+    * [Reading ABI, TVC & other artifacts](#reading-abi-tvc--other-artifacts)
+    * [Contract Wrappers Generation](#contract-wrappers-generation)
+    * [Crypto](#crypto)
+      * [Create a random keypair](#create-a-random-keypair)
+      * [Create a random seed and keys from it](#create-a-random-seed-and-keys-from-it)
+    * [Contracts](#contracts)
+      * [Create Contract Object](#create-contract-object)
+      * [Accessing Functions](#accessing-functions)
+      * [Now you can call it as you like](#now-you-can-call-it-as-you-like)
+      * [Send internal message with Msig](#send-internal-message-with-msig)
+    * [Deployment](#deployment)
+      * [Create ContractTemplate Object](#create-contracttemplate-object)
+      * [Accessing deploy initial data](#accessing-deploy-initial-data)
+      * [Deployment Variations](#deployment-variations)
+      * [Switch giver](#switch-giver)
+  * [Logging](#logging)
+  * [Getting Help](#getting-help)
+<!-- TOC -->
 
 ## Quick start
 
-#### Prerequisites
+### Prerequisites
 
 * Install **JDK 19** or higher ([link](https://adoptium.net/temurin/releases?version=19))
 * Build **EVER-SDK** binary lib "**ton_client**"(.so/.dll) (or
   get [precomiled one](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries))
 
-#### Add java4ever to your Maven or Gradle setup:
+### Add java4ever to your Maven or Gradle setup:
 
 * Gradle
 

@@ -171,7 +171,7 @@ var keys = new Credentials("publickey_string","secretkey_string");
 
 ### Working with existing contracts
 
-If you generated MyContract via [generator](#contract-wrappers-generation), all its methods are now available from MyContract.class.
+If you generated MyContract via [generator](#generating-classes-for-your-contracts), all its methods are now available from MyContract.class.
 If you're working with standard contracts, all wrappers are already generated (for multisig wallets, givers, TIP3 and TIP4 contracts and so on - check [javadoc](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework/latest/java4ever.framework/tech/deplant/java4ever/framework/contract/package-summary.html))
 
 #### Accessing Contract

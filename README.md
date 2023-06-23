@@ -36,12 +36,13 @@ Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library
     * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
   * [Examples](#examples)
     * [Configuration](#configuration)
-      * [Create SDK Provider](#create-sdk-provider)
+      * [Creating SDK Provider](#creating-sdk-provider)
     * [Reading ABI, TVC & other artifacts](#reading-abi-tvc--other-artifacts)
-    * [Contract Wrappers Generation](#contract-wrappers-generation)
+    * [Generating classes for your contracts](#generating-classes-for-your-contracts)
     * [Crypto](#crypto)
-      * [Create a random keypair](#create-a-random-keypair)
-      * [Create a random seed and keys from it](#create-a-random-seed-and-keys-from-it)
+      * [Creating a random keypair](#creating-a-random-keypair)
+      * [Creating a random seed](#creating-a-random-seed)
+      * [Using existing keys & seeds](#using-existing-keys--seeds)
     * [Working with existing contracts](#working-with-existing-contracts)
       * [Accessing Contract](#accessing-contract)
       * [Accessing Function](#accessing-function)
@@ -90,7 +91,7 @@ dependencies {
 
 ### Configuration
 
-#### Create SDK Provider
+#### Creating SDK Provider
 
 You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
@@ -121,9 +122,11 @@ Variants of loading ton_client lib:
 
 Also, you can check JsonFile, JsonResource, ByteFile, ByteResource helpers for custom artifacts.
 
-### Contract Wrappers Generation
+### Generating classes for your contracts
 
-Contract Wrapper Generator will create java wrapper classes for all your contracts. Run the following:
+Contract Wrapper Generator will create java wrapper classes for all your contracts. You need only `abi.json` and `.tvc` artifacts of your contracts. 
+
+Run the following, specifying your artifacts and where to place generated classes:
 
 ```java
 ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
@@ -139,7 +142,7 @@ Contract and template wrappers will appear in packages that you specified.
 
 ### Crypto
 
-#### Create a random keypair
+#### Creating a random keypair
 
 ```java
 var keys = Credentials.RANDOM(sdk);
@@ -147,7 +150,7 @@ String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
 
-#### Create a random seed and keys from it
+#### Creating a random seed
 
 ```java
 var seed = Seed.RANDOM(sdk);
@@ -157,6 +160,13 @@ int wordsCount = seed.words();
 var keys = Credentials.ofSeed(sdk,seed);
 String sk = keys.secretKey();
 String pk = keys.publicKey();
+```
+
+#### Using existing keys & seeds
+
+```java
+var seed = new Seed("your seed phrase with 12 words or 24 with second constructor param");
+var keys = new Credentials("publickey_string","secretkey_string");
 ```
 
 ### Working with existing contracts

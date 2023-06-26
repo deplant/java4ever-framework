@@ -6,7 +6,6 @@ import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.contract.CustomContract;
 
 import java.io.IOException;
 import java.nio.file.Paths;

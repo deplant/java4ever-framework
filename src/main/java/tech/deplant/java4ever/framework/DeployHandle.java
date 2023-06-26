@@ -10,6 +10,8 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.template.AbstractTemplate;
+import tech.deplant.java4ever.framework.template.Template;
 import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigInteger;
@@ -18,31 +20,60 @@ import java.util.concurrent.Future;
 
 import static java.util.Objects.requireNonNullElse;
 
+/**
+ * Representation of prepared deployment set. Usually this object is returned by template's prepareDeploy() method.
+ *
+ * @param clazz class of contract wrapper
+ * @param sdk
+ * @param template
+ * @param workchainId
+ * @param credentials
+ * @param initialDataFields
+ * @param constructorInputs
+ * @param constructorHeader
+ * @param <RETURN>
+ */
 public record DeployHandle<RETURN>(Class<RETURN> clazz,
                                    Sdk sdk,
-                                   ContractAbi abi,
-                                   Tvc tvc,
+                                   Template template,
                                    int workchainId,
                                    Credentials credentials,
                                    Map<String, Object> initialDataFields,
                                    Map<String, Object> constructorInputs,
                                    Abi.FunctionHeader constructorHeader) {
 
-	//TODO Add DeployHandle.Builder and method toBuilder()
-
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
+	//TODO Add DeployHandle.Builder and method toBuilder()
 	private static JsonMapper MAPPER = JsonMapper.builder()
 	                                             .addModules(new ParameterNamesModule(),
 	                                                         new Jdk8Module(),
 	                                                         new JavaTimeModule())
 	                                             .build();
 
+	public DeployHandle(Class<RETURN> clazz,
+	                    Sdk sdk,
+	                    ContractAbi abi,
+	                    Tvc tvc,
+	                    int workchainId,
+	                    Credentials credentials,
+	                    Map<String, Object> initialDataFields,
+	                    Map<String, Object> constructorInputs,
+	                    Abi.FunctionHeader constructorHeader) {
+		this(clazz,
+		     sdk,
+		     new AbstractTemplate(abi, tvc),
+		     workchainId,
+		     credentials,
+		     initialDataFields,
+		     constructorInputs,
+		     constructorHeader);
+	}
+
 	public <T> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,
 		                          sdk(),
-		                          abi(),
-		                          tvc(),
+		                          template(),
 		                          workchainId(),
 		                          credentials(),
 		                          initialDataFields(),
@@ -53,8 +84,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	public DeployHandle<RETURN> withConstructorHeader(Abi.FunctionHeader constructorHeader) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
-		                          abi(),
-		                          tvc(),
+		                          template(),
 		                          workchainId(),
 		                          credentials(),
 		                          initialDataFields(),
@@ -65,8 +95,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	public DeployHandle<RETURN> withConstructorInputs(Map<String, Object> constructorInputs) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
-		                          abi(),
-		                          tvc(),
+		                          template(),
 		                          workchainId(),
 		                          credentials(),
 		                          initialDataFields(),
@@ -77,8 +106,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	public DeployHandle<RETURN> withInitDataFields(Map<String, Object> initialDataFields) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
-		                          abi(),
-		                          tvc(),
+		                          template(),
 		                          workchainId(),
 		                          credentials(),
 		                          initialDataFields,
@@ -89,8 +117,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	public DeployHandle<RETURN> withCredentials(Credentials credentials) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
-		                          abi(),
-		                          tvc(),
+		                          template(),
 		                          workchainId(),
 		                          credentials,
 		                          initialDataFields(),
@@ -99,18 +126,18 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	public Abi.DeploySet toDeploySet() throws EverSdkException {
-		return new Abi.DeploySet(tvc().base64String(),
-								 null,
-								 null,
+		return new Abi.DeploySet(template().tvc().base64String(),
+		                         null,
+		                         null,
 		                         workchainId(),
-		                         abi().convertInitDataInputs(initialDataFields()),
+		                         template().abi().convertInitDataInputs(initialDataFields()),
 		                         requireNonNullElse(credentials(), Credentials.NONE).publicKey());
 	}
 
 	public Abi.CallSet toConstructorCallSet() throws EverSdkException {
 		return new Abi.CallSet("constructor",
 		                       constructorHeader(),
-		                       abi().convertFunctionInputs("constructor", constructorInputs()));
+		                       template().abi().convertFunctionInputs("constructor", constructorInputs()));
 	}
 
 	public Abi.Signer toSigner() {
@@ -120,7 +147,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	public String toAddress() throws EverSdkException {
 		return Abi.encodeMessage(
 				sdk().context(),
-				abi().ABI(),
+				template().abi().ABI(),
 				null,
 				toDeploySet(),
 				null,
@@ -149,7 +176,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 			scope.join();
 			Processing.processMessage(
 					sdk().context(),
-					abi().ABI(),
+					template().abi().ABI(),
 					address,
 					deploySetFuture.resultNow(),
 					callSetFuture.resultNow(),
@@ -158,14 +185,14 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 					null,
 					false
 			);
-			Map<String,Object> contractMap = Map.of(
+			Map<String, Object> contractMap = Map.of(
 					"sdk", sdk(),
 					"address", address,
-					"abi",abi(),
-					"credentials",credentials()
+					"abi", template().abi(),
+					"credentials", credentials()
 			);
 			//return MAPPER.convertValue(contractMap, clazz());
-			return  Contract.instantiate(clazz(), sdk(), address, abi(), credentials());
+			return Contract.instantiate(clazz(), sdk(), address, template().abi(), credentials());
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

@@ -11,8 +11,8 @@ import tech.deplant.java4ever.framework.Sdk;
  * If it's foreign contract, use shorter constructor oe explicit Credentials.NONE.
  * You can make calls to contract with prepareCall() method.
  */
-public record CustomContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) implements Contract {
-	public CustomContract(Sdk sdk, String address, ContractAbi abi) {
+public record AbstractContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) implements Contract {
+	public AbstractContract(Sdk sdk, String address, ContractAbi abi) {
 		this(sdk, address, abi, Credentials.NONE);
 	}
 }

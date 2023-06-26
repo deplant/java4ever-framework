@@ -1,19 +1,16 @@
 package tech.deplant.java4ever.framework;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
-import tech.deplant.java4ever.framework.artifact.Solc;
-import tech.deplant.java4ever.framework.artifact.TvmLinker;
-import tech.deplant.java4ever.framework.contract.CustomContract;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public record Sdk(Context context,
                   Integer debugTreeTimeout,
@@ -57,7 +54,7 @@ public record Sdk(Context context,
 		return context().mapper().writeValueAsString(inputObject);
 	}
 
-	public void saveContract(String name, CustomContract contract) throws IOException {
+	public void saveContract(String name, AbstractContract contract) throws IOException {
 		onchainConfig().addContract(name, contract);
 	}
 
@@ -301,6 +298,10 @@ public record Sdk(Context context,
 		public Builder mapper(ObjectMapper mapper) {
 			this.mapper = mapper;
 			return this;
+		}
+
+		public Sdk build() throws IOException {
+			return build(new DefaultLoader());
 		}
 
 		public Sdk build(LibraryLoader loader) throws IOException {

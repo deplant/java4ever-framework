@@ -82,7 +82,6 @@ public class DevTests {
 	}
 
 
-
 	@Test
 	public void get_graphql_schema() throws IOException, InterruptedException {
 

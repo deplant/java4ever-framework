@@ -10,7 +10,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.LocalConfig;
 import tech.deplant.java4ever.framework.OnchainConfig;
-import tech.deplant.java4ever.framework.contract.CustomContract;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
@@ -32,13 +32,13 @@ public class ConfigTests {
 	@Test
 	public void serialized_then_deserialized_onchain_configs_are_equal() throws IOException, EverSdkException {
 		var keys = Credentials.RANDOM(SDK_EMPTY);
-		var contract = new CustomContract(SDK_EMPTY, Address.ZERO.makeAddrStd(), SafeMultisigWalletTemplate.DEFAULT_ABI());
+		var contract = new AbstractContract(SDK_EMPTY, Address.ZERO.makeAddrStd(), SafeMultisigWalletTemplate.DEFAULT_ABI());
 		var conf = OnchainConfig.EMPTY("config/onchain-config.json");
 		conf.addKeys("test_keys", keys);
 		conf.addContract("test_contract", contract);
 		conf = OnchainConfig.LOAD("config/onchain-config.json");
 		assertEquals(keys.publicKey(), conf.keys("test_keys").publicKey());
-		assertEquals(contract.abi().json(), conf.contract(CustomContract.class,SDK_EMPTY,"test_contract").abi().json());
+		assertEquals(contract.abi().json(), conf.contract(AbstractContract.class, SDK_EMPTY, "test_contract").abi().json());
 	}
 
 	@Test

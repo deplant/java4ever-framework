@@ -60,11 +60,7 @@ public class ContractWrapper {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
-		var mapPattern = Pattern.compile("(map\\()" +
-		                                 typeStringPattern +
-		                                 "(,)" +
-		                                 typeStringPattern +
-		                                 "(\\))");
+		var mapPattern = Pattern.compile("(map\\()" + typeStringPattern + "(,)" + typeStringPattern + "(\\))");
 		boolean rootIsMap = false;
 		String rootTypeString = abiTypeString;
 		String keyTypeString = null;
@@ -93,30 +89,24 @@ public class ContractWrapper {
 	                            String contractName,
 	                            String wrapperPackage,
 	                            String templatePackage,
+								boolean externalOutputs,
 	                            String[] superInterfaces) throws IOException, EverSdkException {
 
 		boolean hasTvc = Objs.isNotNull(tvc);
 
 		String wrapperName = ParserUtils.capitalize(contractName);
 
-		var wrapperDocs = CodeBlock
-				.builder()
-				.add(String.format("""
-						                   Java wrapper class for usage of <strong>%s</strong> contract for Everscale blockchain.
-						                   """,
-				                   wrapperName));
+		var wrapperDocs = CodeBlock.builder().add(String.format("""
+				                                                        Java wrapper class for usage of <strong>%s</strong> contract for Everscale blockchain.
+				                                                        """, wrapperName));
 
-		var templateDocs = CodeBlock
-				.builder()
-				.add(String.format("""
-						                   Java template class for deploy of <strong>%s</strong> contract for Everscale blockchain.
-						                   """,
-				                   wrapperName));
+		var templateDocs = CodeBlock.builder().add(String.format("""
+				                                                         Java template class for deploy of <strong>%s</strong> contract for Everscale blockchain.
+				                                                         """, wrapperName));
 
-		final TypeSpec.Builder wrapperBuilder = TypeSpec
-				.recordBuilder(wrapperName)
-				.addJavadoc(wrapperDocs.build())
-				.addModifiers(Modifier.PUBLIC);
+		final TypeSpec.Builder wrapperBuilder = TypeSpec.recordBuilder(wrapperName)
+		                                                .addJavadoc(wrapperDocs.build())
+		                                                .addModifiers(Modifier.PUBLIC);
 
 		if (Objs.isNull(superInterfaces) || superInterfaces.length == 0) {
 			wrapperBuilder.addSuperinterface(Contract.class);
@@ -156,11 +146,10 @@ public class ContractWrapper {
 		                                   .addModifiers(Modifier.PUBLIC)
 		                                   .build());
 
-		final TypeSpec.Builder templateBuilder = TypeSpec
-				.recordBuilder(wrapperName + "Template")
-				.addSuperinterface(Template.class)
-				.addJavadoc(templateDocs.build())
-				.addModifiers(Modifier.PUBLIC);
+		final TypeSpec.Builder templateBuilder = TypeSpec.recordBuilder(wrapperName + "Template")
+		                                                 .addSuperinterface(Template.class)
+		                                                 .addJavadoc(templateDocs.build())
+		                                                 .addModifiers(Modifier.PUBLIC);
 
 		templateBuilder.addRecordComponent(ContractAbi.class, "abi");
 		templateBuilder.addRecordComponent(Tvc.class, "tvc");
@@ -171,18 +160,16 @@ public class ContractWrapper {
 		                                   .addException(JsonProcessingException.class)
 		                                   .addStatement("return ContractAbi.ofString($S)",
 		                                                 ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(
-				                                                               JsonInclude.Include.NON_NULL)
-		                                                                              .writeValueAsString(abi))
+				                                                 JsonInclude.Include.NON_NULL).writeValueAsString(abi))
 		                                   .build();
 		wrapperBuilder.addMethod(defaultAbiFunction);
 		templateBuilder.addMethod(defaultAbiFunction);
 
 		var tvcOnlyConstructorBuilder = MethodSpec.constructorBuilder();
-		tvcOnlyConstructorBuilder
-				.addStatement("this(DEFAULT_ABI(), tvc)")
-				.addParameter(ParameterSpec.builder(Tvc.class, "tvc").build())
-				.addModifiers(Modifier.PUBLIC)
-				.addException(JsonProcessingException.class);
+		tvcOnlyConstructorBuilder.addStatement("this(DEFAULT_ABI(), tvc)")
+		                         .addParameter(ParameterSpec.builder(Tvc.class, "tvc").build())
+		                         .addModifiers(Modifier.PUBLIC)
+		                         .addException(JsonProcessingException.class);
 		templateBuilder.addMethod(tvcOnlyConstructorBuilder.build());
 
 		if (hasTvc) {
@@ -193,10 +180,9 @@ public class ContractWrapper {
 			                                    .build());
 
 			var noArgsConstructorBuilder = MethodSpec.constructorBuilder();
-			noArgsConstructorBuilder
-					.addStatement("this(DEFAULT_ABI(),DEFAULT_TVC())")
-					.addModifiers(Modifier.PUBLIC)
-					.addException(JsonProcessingException.class);
+			noArgsConstructorBuilder.addStatement("this(DEFAULT_ABI(),DEFAULT_TVC())")
+			                        .addModifiers(Modifier.PUBLIC)
+			                        .addException(JsonProcessingException.class);
 			templateBuilder.addMethod(noArgsConstructorBuilder.build());
 		}
 		//public static final Tvc SAFE_MULTISIG_TVC = Tvc.ofResource(
@@ -251,9 +237,8 @@ public class ContractWrapper {
 			TypeSpec resultOfFunctionType = null;
 			if (func.outputs().length > 0) {
 
-				final TypeSpec.Builder resultTypeBuilder = TypeSpec
-						.recordBuilder("ResultOf" + ParserUtils.capitalize(func.name()))
-						.addModifiers(Modifier.PUBLIC);
+				final TypeSpec.Builder resultTypeBuilder = TypeSpec.recordBuilder(
+						"ResultOf" + ParserUtils.capitalize(func.name())).addModifiers(Modifier.PUBLIC);
 
 				for (var param : func.outputs()) {
 					TypeName resultTypeName = toTypeName(param.type());
@@ -261,7 +246,12 @@ public class ContractWrapper {
 					resultTypeBuilder.addRecordComponent(paramSpec);
 				}
 				resultOfFunctionType = resultTypeBuilder.build();
-				wrapperBuilder.addType(resultOfFunctionType);
+				if (externalOutputs) {
+					JavaFile outputTypeFile = JavaFile.builder(wrapperPackage, resultOfFunctionType).build();
+					outputTypeFile.writeTo(targetDirectory);
+				} else {
+					wrapperBuilder.addType(resultOfFunctionType);
+				}
 			}
 
 			for (var param : func.inputs()) {
@@ -306,24 +296,21 @@ public class ContractWrapper {
 				methodBuilder.addCode(bodyBuilder.build());
 				templateBuilder.addMethod(methodBuilder.build());
 			} else {
-				bodyBuilder.addStatement("return new $T($T.class, sdk(), address(), abi(), credentials(), $S, params, null)",
-				                         resultName,
-				                         handleParamTypeName,
-				                         func.name());
+				bodyBuilder.addStatement(
+						"return new $T($T.class, sdk(), address(), abi(), credentials(), $S, params, null)",
+						resultName,
+						handleParamTypeName,
+						func.name());
 				methodBuilder.addCode(bodyBuilder.build());
 				wrapperBuilder.addMethod(methodBuilder.build());
 			}
 		}
 
 		// file writing loop
-		JavaFile contractFile = JavaFile
-				.builder(wrapperPackage, wrapperBuilder.build())
-				.build();
+		JavaFile contractFile = JavaFile.builder(wrapperPackage, wrapperBuilder.build()).build();
 		contractFile.writeTo(targetDirectory);
 
-		JavaFile templateFile = JavaFile
-				.builder(templatePackage, templateBuilder.build())
-				.build();
+		JavaFile templateFile = JavaFile.builder(templatePackage, templateBuilder.build()).build();
 		templateFile.writeTo(targetDirectory);
 	}
 }

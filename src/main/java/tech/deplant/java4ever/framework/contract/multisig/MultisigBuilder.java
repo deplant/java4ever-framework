@@ -1,9 +1,10 @@
-package tech.deplant.java4ever.framework.contract;
+package tech.deplant.java4ever.framework.contract.multisig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.contract.Giver;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;

@@ -11,6 +11,7 @@
       ]
     },
     {
+      "contract_pkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SafeMultisigWallet",
       "abi": "artifacts/multisig/SafeMultisigWallet.abi.json",
       "tvc": "artifacts/multisig/SafeMultisigWallet.tvc",
@@ -19,6 +20,7 @@
       ]
     },
     {
+      "contract_pkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SetcodeMultisigWallet",
       "abi": "artifacts/multisig/SetcodeMultisigWallet.abi.json",
       "tvc": "artifacts/multisig/SetcodeMultisigWallet.tvc",
@@ -27,6 +29,7 @@
       ]
     },
     {
+      "contract_pkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SurfMultisigWallet",
       "abi": "artifacts/multisig/SurfMultisigWallet.abi.json",
       "tvc": "artifacts/multisig/SurfMultisigWallet.tvc",

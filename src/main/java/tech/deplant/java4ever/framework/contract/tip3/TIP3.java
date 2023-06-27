@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.contract;
+package tech.deplant.java4ever.framework.contract.tip3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -6,13 +6,14 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.MessageFlag;
 import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.contract.*;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenWalletTemplate;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public interface TIP3 {
 

@@ -1,10 +1,12 @@
-package tech.deplant.java4ever.framework.contract;
+package tech.deplant.java4ever.framework.contract.tip3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
+import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.TIP3TokenRoot;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenWalletTemplate;

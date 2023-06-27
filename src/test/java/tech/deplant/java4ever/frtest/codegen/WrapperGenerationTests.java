@@ -8,7 +8,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.generator.ContractWrapper;
@@ -35,16 +34,17 @@ public class WrapperGenerationTests {
 		String contractPackage = config.contractPkg();
 		String templatePackage = config.templatePkg();
 
-		for (var contr : config.contractList()) {
-			logger.log(System.Logger.Level.INFO, contr);
-			var tvc = Objs.isNull(contr.tvc()) ? null : Tvc.ofResource(contr.tvc());
-			ContractWrapper.generate(mapper.readValue(new JsonResource(contr.abi()).get(), Abi.AbiContract.class),
+		for (var contract : config.contractList()) {
+			logger.log(System.Logger.Level.INFO, contract);
+			var tvc = Objs.isNull(contract.tvc()) ? null : Tvc.ofResource(contract.tvc());
+			ContractWrapper.generate(mapper.readValue(new JsonResource(contract.abi()).get(), Abi.AbiContract.class),
 			                         tvc,
 			                         targetDirectory,
-			                         contr.name(),
-			                         contractPackage,
+			                         contract.name(),
+			                         Objs.notNullElse(contract.contractPkg(),contractPackage),
 			                         templatePackage,
-			                         contr.interfaces());
+			                         Objs.notNullElse(contract.shareOutputs(), false),
+			                         contract.interfaces());
 		}
 	}
 

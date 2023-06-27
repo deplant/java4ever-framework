@@ -301,7 +301,7 @@ public record Sdk(Context context,
 		}
 
 		public Sdk build() throws IOException {
-			return build(new DefaultLoader());
+			return build(new DefaultLoader(this.getClass().getClassLoader()));
 		}
 
 		public Sdk build(LibraryLoader loader) throws IOException {

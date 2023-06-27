@@ -8,6 +8,10 @@ import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Seed;
 import tech.deplant.java4ever.framework.contract.*;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3Builder;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 import java.io.IOException;
@@ -78,7 +82,7 @@ public class Env {
 		LOCAL_KEYS_WALLET2 = RNG_KEYS();
 
 		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigWallet.Type.SAFE)
-		                     .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));
+		                                       .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));
 
 		LOCAL_MSIG_WALLET1 =new MultisigBuilder().setType(MultisigWallet.Type.SURF)
 		                                         .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));

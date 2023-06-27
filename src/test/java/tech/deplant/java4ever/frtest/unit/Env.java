@@ -7,11 +7,12 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Seed;
-import tech.deplant.java4ever.framework.contract.*;
+import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
-import tech.deplant.java4ever.framework.contract.tip3.TIP3;
 import tech.deplant.java4ever.framework.contract.tip3.TIP3Builder;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenRoot;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 import java.io.IOException;
@@ -82,13 +83,22 @@ public class Env {
 		LOCAL_KEYS_WALLET2 = RNG_KEYS();
 
 		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigWallet.Type.SAFE)
-		                                       .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));
+		                                       .build(SDK_LOCAL,
+		                                              LOCAL_KEYS_ROOT,
+		                                              GIVER_LOCAL,
+		                                              CurrencyUnit.VALUE(EVER, "4.5"));
 
-		LOCAL_MSIG_WALLET1 =new MultisigBuilder().setType(MultisigWallet.Type.SURF)
-		                                         .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));
+		LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigWallet.Type.SURF)
+		                                          .build(SDK_LOCAL,
+		                                                 LOCAL_KEYS_ROOT,
+		                                                 GIVER_LOCAL,
+		                                                 CurrencyUnit.VALUE(EVER, "4.5"));
 
 		LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigWallet.Type.SETCODE)
-		                                          .build(SDK_LOCAL, LOCAL_KEYS_ROOT, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "4.5"));
+		                                          .build(SDK_LOCAL,
+		                                                 LOCAL_KEYS_ROOT,
+		                                                 GIVER_LOCAL,
+		                                                 CurrencyUnit.VALUE(EVER, "4.5"));
 	}
 
 	public static void INIT_LOCAL_TIP3() throws IOException, EverSdkException {
@@ -102,14 +112,20 @@ public class Env {
 				.setRandomNonce(new Random().nextInt())
 				.build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
 
-		LOCAL_TIP3_WALLET1 = TIP3.deployWallet(SDK_LOCAL,
-		                                       LOCAL_TIP3_ROOT,
-		                                       LOCAL_MSIG_ROOT,
-		                                       new Address(LOCAL_MSIG_WALLET1.address()));
-		LOCAL_TIP3_WALLET2 = TIP3.deployWallet(SDK_LOCAL,
-		                                       LOCAL_TIP3_ROOT,
-		                                       LOCAL_MSIG_ROOT,
-		                                       new Address(LOCAL_MSIG_WALLET2.address()));
+		LOCAL_TIP3_WALLET1 = new TIP3TokenWallet(SDK_LOCAL,
+		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
+		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
+		                                                        .sendFrom(LOCAL_MSIG_ROOT,
+		                                                                  CurrencyUnit.VALUE(EVER, "0.5"))
+		                                                        .tokenWallet()
+		                                                        .makeAddrStd());
+		LOCAL_TIP3_WALLET2 = new TIP3TokenWallet(SDK_LOCAL,
+		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
+		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
+		                                                        .sendFrom(LOCAL_MSIG_ROOT,
+		                                                                  CurrencyUnit.VALUE(EVER, "0.5"))
+		                                                        .tokenWallet()
+		                                                        .makeAddrStd());
 	}
 
 	public static Credentials RNG_KEYS() throws EverSdkException {

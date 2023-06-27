@@ -18,17 +18,11 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 	private final static System.Logger logger = System.getLogger(SolStruct.class.getName());
 
 	public static boolean hasParam(Abi.AbiParam[] params, String paramName) {
-		return Arrays.stream(params)
-		             .anyMatch(param ->
-				                       paramName.equals(param.name()));
+		return Arrays.stream(params).anyMatch(param -> paramName.equals(param.name()));
 	}
 
 	public static Abi.AbiParam getParam(Abi.AbiParam[] params, String paramName) {
-		return Arrays.stream(params)
-		             .filter(param ->
-				                     paramName.equals(param.name()))
-		             .findFirst()
-		             .orElseThrow();
+		return Arrays.stream(params).filter(param -> paramName.equals(param.name())).findFirst().orElseThrow();
 	}
 
 	public static SolStruct fromJava(Abi.AbiParam[] params, Map<String, Object> inputs) {
@@ -46,8 +40,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 						converted.put(key, value);
 					}
 				} else {
-					logger.log(System.Logger.Level.ERROR, () ->
-							"ABI params spec doesn't contain key '" + key + "'");
+					logger.log(System.Logger.Level.ERROR, () -> "ABI params spec doesn't contain key '" + key + "'");
 				}
 			}
 			return new SolStruct(params, converted);
@@ -71,8 +64,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 						converted.put(key, value);
 					}
 				} else {
-					logger.log(System.Logger.Level.ERROR, () ->
-							"ABI params spec doesn't contain key '" + key + "'");
+					logger.log(System.Logger.Level.ERROR, () -> "ABI params spec doesn't contain key '" + key + "'");
 				}
 			}
 			return new SolStruct(params, converted);
@@ -82,22 +74,25 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 	}
 
 	public static ContractAbi.AbiTypeDetails typeParser(String typeString) throws EverSdkException {
+		if (typeString.contains("optional")) {
+			return new ContractAbi.AbiTypeDetails(TypePrefix.OPTIONAL, 0, false);
+		}
+
 		// Size pattern matching
-		var expr = new Then(
-				new GroupOf(new Occurences(new AnyOf(new Word("a-zA-Z")), 1)),
-				new GroupOf(new Occurences(Special.DIGIT, 1, 3)))
-				.toPattern();
+		var expr = new Then(new GroupOf(new Occurences(new AnyOf(new Word("a-zA-Z")), 1)),
+		                    new GroupOf(new Occurences(Special.DIGIT, 1, 3))).toPattern();
 		var matcher = expr.matcher(typeString);
 		while (matcher.find()) {
 			return new ContractAbi.AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
-			                                      Integer.parseInt(matcher.group(2))
-					, arrayMatcher(typeString));
+			                                      Integer.parseInt(matcher.group(2)),
+			                                      arrayMatcher(typeString));
 		}
 		// Type pattern  matching
 		matcher = Pattern.compile("([a-zA-Z]+)").matcher(typeString);
 		while (matcher.find()) {
 			return new ContractAbi.AbiTypeDetails(TypePrefix.valueOf(matcher.group(1).toUpperCase()),
-			                                      0, arrayMatcher(typeString));
+			                                      0,
+			                                      arrayMatcher(typeString));
 		}
 		var ex = new EverSdkException(new EverSdkException.ErrorResult(-300,
 		                                                               "ABI Type parsing failed! Type: " + typeString),
@@ -107,15 +102,9 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 	}
 
 	public static boolean arrayMatcher(String typeString) {
-		var arrayPattern = new Then(
-				new GroupOf(
-						new Then(
-								new Occurences(new AnyOf(new Word("a-zA-Z")), 1),
-								new Occurences(Special.DIGIT, 0, 3)
-						)
-				),
-				new GroupOf(new Then(new Symbol('['), new Symbol(']'))))
-				.toPattern();
+		var arrayPattern = new Then(new GroupOf(new Then(new Occurences(new AnyOf(new Word("a-zA-Z")), 1),
+		                                                 new Occurences(Special.DIGIT, 0, 3))),
+		                            new GroupOf(new Then(new Symbol('['), new Symbol(']')))).toPattern();
 		var matcher = arrayPattern.matcher(typeString);
 		while (matcher.find()) {
 			return true;
@@ -127,11 +116,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
-		var mapPattern = Pattern.compile("(map\\()" +
-		                                 typeStringPattern +
-		                                 "(,)" +
-		                                 typeStringPattern +
-		                                 "(\\))");
+		var mapPattern = Pattern.compile("(map\\()" + typeStringPattern + "(,)" + typeStringPattern + "(\\))");
 		boolean rootIsMap = false;
 		String rootTypeString = param.type();
 		String keyTypeString = null;
@@ -158,9 +143,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			for (var entry : inputMap.entrySet()) {
 				convertedMap.put(AbiType.of(keyDetails.type(), keyDetails.size(), entry.getKey()).toABI(),
 				                 serializeInputTree(new Abi.AbiParam(valueTypeString,
-				                                                      valueTypeString,
-				                                                      param.components()),
-				                                     entry.getValue()));
+				                                                     valueTypeString,
+				                                                     param.components()), entry.getValue()));
 			}
 			return convertedMap;
 		} else {
@@ -170,17 +154,15 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			if (rootDetails.type().equals(TypePrefix.TUPLE)) {
 				// tuple = Map<String,Object> from components
 				Map<String, Object> mapValue = (Map<String, Object>) inputValue;
-				return Arrays.stream(param.components()).collect(
-						Collectors.toMap(component -> component.name(),
-						                 component -> {
-							                 try {
-								                 return serializeInputTree(component, mapValue.get(component.name()));
-							                 } catch (EverSdkException e) {
-								                 // in the complex cases, if we can't serialize, we can try to put object as is
-								                 return mapValue.get(component.name());
-							                 }
-						                 }
-						));
+				return Arrays.stream(param.components())
+				             .collect(Collectors.toMap(component -> component.name(), component -> {
+					             try {
+						             return serializeInputTree(component, mapValue.get(component.name()));
+					             } catch (EverSdkException e) {
+						             // in the complex cases, if we can't serialize, we can try to put object as is
+						             return mapValue.get(component.name());
+					             }
+				             }));
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (inputValue) {
@@ -201,9 +183,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 							return element;
 						}
 					}).toArray();
-					default -> new Object[]{AbiType.of(rootDetails.type(),
-					                                   rootDetails.size(),
-					                                   inputValue).toABI()};
+					default -> new Object[]{AbiType.of(rootDetails.type(), rootDetails.size(), inputValue).toABI()};
 				};
 			} else {
 				// all others
@@ -216,11 +196,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
 
-		var mapPattern = Pattern.compile("(map\\()" +
-		                                 typeStringPattern +
-		                                 "(,)" +
-		                                 typeStringPattern +
-		                                 "(\\))");
+		var mapPattern = Pattern.compile("(map\\()" + typeStringPattern + "(,)" + typeStringPattern + "(\\))");
 		boolean rootIsMap = false;
 		String rootTypeString = param.type();
 		String keyTypeString = null;
@@ -247,9 +223,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			for (var entry : outputMap.entrySet()) {
 				convertedMap.put(AbiType.ofABI(keyDetails.type(), keyDetails.size(), entry.getKey()).toJava(),
 				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
-				                                                   valueTypeString,
-				                                                   param.components()),
-				                                  entry.getValue()));
+				                                                      valueTypeString,
+				                                                      param.components()), entry.getValue()));
 			}
 			return convertedMap;
 		} else {
@@ -259,17 +234,15 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			if (rootDetails.type().equals(TypePrefix.TUPLE)) {
 				// tuple = Map<String,Object> from components
 				Map<String, Object> mapValue = (Map<String, Object>) outputValue;
-				return Arrays.stream(param.components()).collect(
-						Collectors.toMap(component -> component.name(),
-						                 component -> {
-							                 try {
-								                 return serializeOutputTree(component, mapValue.get(component.name()));
-							                 } catch (EverSdkException e) {
-								                 // in the complex cases, if we can't serialize, we can try to put object as is
-								                 return mapValue.get(component.name());
-							                 }
-						                 }
-						));
+				return Arrays.stream(param.components())
+				             .collect(Collectors.toMap(component -> component.name(), component -> {
+					             try {
+						             return serializeOutputTree(component, mapValue.get(component.name()));
+					             } catch (EverSdkException e) {
+						             // in the complex cases, if we can't serialize, we can try to put object as is
+						             return mapValue.get(component.name());
+					             }
+				             }));
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (outputValue) {
@@ -290,9 +263,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 							return element;
 						}
 					}).toArray();
-					default -> new Object[]{AbiType.ofABI(rootDetails.type(),
-					                                      rootDetails.size(),
-					                                      outputValue).toJava()};
+					default ->
+							new Object[]{AbiType.ofABI(rootDetails.type(), rootDetails.size(), outputValue).toJava()};
 				};
 			} else {
 				// all others

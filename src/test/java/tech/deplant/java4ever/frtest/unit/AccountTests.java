@@ -8,7 +8,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
@@ -34,8 +35,7 @@ public class AccountTests {
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
-		SafeMultisigWallet msig = deployStatement.deployWithGiver(GIVER_LOCAL,
-		                                                          EVER_ONE);
+		MultisigWallet msig = new MultisigBuilder().setType(MultisigWallet.Type.SAFE).build(SDK_LOCAL,keys,GIVER_LOCAL,EVER_ONE);
 		assertTrue(msig.account().isActive());
 		Account acc = Account.ofAddress(SDK_LOCAL, msig.address());
 		Map<String, Object> params = Map.of(

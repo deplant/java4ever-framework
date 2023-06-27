@@ -22,5 +22,9 @@ module java4ever.framework {
 	opens tech.deplant.java4ever.framework.contract.multisig to com.fasterxml.jackson.databind;
 	exports tech.deplant.java4ever.framework.contract.tip3;
 	opens tech.deplant.java4ever.framework.contract.tip3 to com.fasterxml.jackson.databind;
+	//exports tech.deplant.java4ever.framework.contract.multisig;
+	//opens tech.deplant.java4ever.framework.contract.multisig to com.fasterxml.jackson.databind;
+	//exports tech.deplant.java4ever.framework.contract.tip3;
+	//opens tech.deplant.java4ever.framework.contract.tip3 to com.fasterxml.jackson.databind;
 
 }

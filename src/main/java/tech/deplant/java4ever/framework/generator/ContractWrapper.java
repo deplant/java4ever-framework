@@ -8,6 +8,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.binding.generator.javapoet.*;
 import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.SolStruct;
@@ -21,9 +22,11 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ContractWrapper {
@@ -49,6 +52,7 @@ public class ContractWrapper {
 			case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
 			case BUILDER -> ClassName.get(TvmBuilder.class);
 			case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
+			case OPTIONAL -> ParameterizedTypeName.get(ClassName.get(Optional.class), typeSwitch(abiTypeString));
 		};
 		if (details.isArray()) {
 			resultTypeName = ArrayTypeName.of(resultTypeName);
@@ -62,6 +66,7 @@ public class ContractWrapper {
 
 		var mapPattern = Pattern.compile("(map\\()" + typeStringPattern + "(,)" + typeStringPattern + "(\\))");
 		boolean rootIsMap = false;
+		boolean rootIsOptional = false;
 		String rootTypeString = abiTypeString;
 		String keyTypeString = null;
 		String valueTypeString = null;
@@ -73,13 +78,44 @@ public class ContractWrapper {
 			valueTypeString = matcher.group(4);
 		}
 
+		var optionalPattern = Pattern.compile("(optional\\()" + typeStringPattern + "(\\))");
+		var optionalMatcher = optionalPattern.matcher(rootTypeString);
+		while (optionalMatcher.find()) {
+			rootIsOptional = true;
+			valueTypeString = optionalMatcher.group(2);
+		}
+
 		if (rootIsMap) {
-			var keyName = typeSwitch(keyTypeString);
-			var valueName = typeSwitch(valueTypeString);
-			return ParameterizedTypeName.get(ClassName.get(Map.class), keyName, valueName);
+			return ParameterizedTypeName.get(ClassName.get(Map.class),
+			                                 typeSwitch(keyTypeString),
+			                                 typeSwitch(valueTypeString));
+		} else if (rootIsOptional) {
+			return ParameterizedTypeName.get(ClassName.get(Optional.class), typeSwitch(valueTypeString));
 		} else {
-			var typeName = typeSwitch(abiTypeString);
-			return typeName;
+			return typeSwitch(abiTypeString);
+		}
+	}
+
+	public static void generateFromConfig(String resourcePath) throws IOException, EverSdkException {
+
+		var mapper = ContextBuilder.DEFAULT_MAPPER;
+
+		var config = mapper.readValue(new JsonResource(resourcePath).get(), GeneratorConfig.class);
+		Path targetDirectory = Paths.get(config.targetDir());
+		String contractPackage = config.contractPkg();
+		String templatePackage = config.templatePkg();
+
+		for (var contract : config.contractList()) {
+			logger.log(System.Logger.Level.INFO, contract);
+			var tvc = Objs.isNull(contract.tvc()) ? null : Tvc.ofResource(contract.tvc());
+			ContractWrapper.generate(mapper.readValue(new JsonResource(contract.abi()).get(), Abi.AbiContract.class),
+			                         tvc,
+			                         targetDirectory,
+			                         contract.name(),
+			                         Objs.notNullElse(contract.contractPkg(),contractPackage),
+			                         templatePackage,
+			                         Objs.notNullElse(contract.shareOutputs(), false),
+			                         contract.interfaces());
 		}
 	}
 
@@ -89,7 +125,7 @@ public class ContractWrapper {
 	                            String contractName,
 	                            String wrapperPackage,
 	                            String templatePackage,
-								boolean externalOutputs,
+	                            boolean externalOutputs,
 	                            String[] superInterfaces) throws IOException, EverSdkException {
 
 		boolean hasTvc = Objs.isNotNull(tvc);

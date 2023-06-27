@@ -10,7 +10,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.MessageFlag;
-import tech.deplant.java4ever.framework.contract.TIP3TokenWallet;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 

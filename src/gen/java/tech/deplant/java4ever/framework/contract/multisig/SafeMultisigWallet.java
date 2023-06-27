@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.contract;
+package tech.deplant.java4ever.framework.contract.multisig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
@@ -13,7 +13,6 @@ import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 
@@ -98,27 +97,5 @@ public record SafeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
   public FunctionHandle<ResultOfGetCustodians> getCustodians() {
     Map<String, Object> params = Map.of();
     return new FunctionHandle<ResultOfGetCustodians>(ResultOfGetCustodians.class, sdk(), address(), abi(), credentials(), "getCustodians", params, null);
-  }
-
-  public record ResultOfSubmitTransaction(Long transId) {
-  }
-
-  public record ResultOfIsConfirmed(Boolean confirmed) {
-  }
-
-  public record ResultOfGetParameters(Integer maxQueuedTransactions, Integer maxCustodianCount,
-      Long expirationTime, BigInteger minValue, Integer requiredTxnConfirms) {
-  }
-
-  public record ResultOfGetTransaction(Map<String, Object> trans) {
-  }
-
-  public record ResultOfGetTransactions(Map<String, Object>[] transactions) {
-  }
-
-  public record ResultOfGetTransactionIds(Long[] ids) {
-  }
-
-  public record ResultOfGetCustodians(Map<String, Object>[] custodians) {
   }
 }

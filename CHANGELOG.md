@@ -1,3 +1,11 @@
+### 1.9.0
+
+- Support of Optional in code generation
+- Support of Multisig2 set of contracts
+- Support of writing external output types classes for common types of multiple contracts
+- Renamed CustomContract -> AbstractContract
+- Renamed CustomTemplate -> AbstractTemplate
+
 ### 1.8.0
 
 - Added support of EVER-SDK 1.43.2 changes

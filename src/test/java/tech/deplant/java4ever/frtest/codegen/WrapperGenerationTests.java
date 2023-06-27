@@ -26,26 +26,7 @@ public class WrapperGenerationTests {
 
 	@Test
 	public void generate() throws IOException, EverSdkException {
-
-		var mapper = ContextBuilder.DEFAULT_MAPPER;
-
-		var config = mapper.readValue(new JsonResource("codegen/generator-config.json").get(), GeneratorConfig.class);
-		Path targetDirectory = Paths.get(config.targetDir());
-		String contractPackage = config.contractPkg();
-		String templatePackage = config.templatePkg();
-
-		for (var contract : config.contractList()) {
-			logger.log(System.Logger.Level.INFO, contract);
-			var tvc = Objs.isNull(contract.tvc()) ? null : Tvc.ofResource(contract.tvc());
-			ContractWrapper.generate(mapper.readValue(new JsonResource(contract.abi()).get(), Abi.AbiContract.class),
-			                         tvc,
-			                         targetDirectory,
-			                         contract.name(),
-			                         Objs.notNullElse(contract.contractPkg(),contractPackage),
-			                         templatePackage,
-			                         Objs.notNullElse(contract.shareOutputs(), false),
-			                         contract.interfaces());
-		}
+		ContractWrapper.generateFromConfig("codegen/generator-config.json");
 	}
 
 }

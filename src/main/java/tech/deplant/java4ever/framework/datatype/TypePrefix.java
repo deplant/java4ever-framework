@@ -11,6 +11,7 @@ public enum TypePrefix {
 	CELL,
 	SLICE,
 	BUILDER,
+	OPTIONAL,
 	TUPLE
 	// MAP is a special type that is unpacked during conversion
 	// Address, bytes, string, bool, contract, enum, fixed bytes, integer and struct types can be used as a KeyType

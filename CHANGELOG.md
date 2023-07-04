@@ -1,10 +1,13 @@
 ### 1.9.0
 
-- Support of Optional in code generation
-- Support of Multisig2 set of contracts
-- Support of writing external output types classes for common types of multiple contracts
+- Added support of Optional in code generation
+- Added support of Multisig2 set of contracts
+- Added support of writing external output types classes for common types of multiple contracts
 - Renamed CustomContract -> AbstractContract
 - Renamed CustomTemplate -> AbstractTemplate
+- Reworked FunctionHandle for better decoupling 
+- Reworked DeployHandle for better decoupling
+- Added support of DefaultLoader (included EVER-SDK)
 
 ### 1.8.0
 

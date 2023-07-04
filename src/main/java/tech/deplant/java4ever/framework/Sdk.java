@@ -306,7 +306,7 @@ public record Sdk(Context context,
 
 		public Sdk build(LibraryLoader loader) throws IOException {
 			var config = new Client.ClientConfig(
-					new Client.BindingConfig("java4ever","1.5.0"),
+					new Client.BindingConfig("java4ever","1.8.0"),
 					new Client.NetworkConfig(
 							this.serverAddress,
 							this.endpoints,

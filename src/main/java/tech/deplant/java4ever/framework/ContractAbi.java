@@ -4,22 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.framework.datatype.AbiType;
 import tech.deplant.java4ever.framework.datatype.SolStruct;
 import tech.deplant.java4ever.framework.datatype.TypePrefix;
 import tech.deplant.java4ever.framework.datatype.Uint;
-import tech.deplant.java4ever.utils.regex.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Holds entire ABI structure and has helper methods to check functions availability or
@@ -30,7 +24,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	private final static System.Logger logger = System.getLogger(ContractAbi.class.getName());
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
-		return new ContractAbi(ContextBuilder.DEFAULT_MAPPER.readValue(jsonString, Abi.AbiContract.class));
+		return new ContractAbi(EverSdkContext.Builder.DEFAULT_MAPPER.readValue(jsonString, Abi.AbiContract.class));
 	}
 
 	public static ContractAbi ofResource(String resourceName) throws JsonProcessingException {
@@ -42,12 +36,12 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public static ContractAbi ofJsonNode(JsonNode node) throws JsonProcessingException {
-		return ofString(ContextBuilder.DEFAULT_MAPPER.writeValueAsString(node));
+		return ofString(EverSdkContext.Builder.DEFAULT_MAPPER.writeValueAsString(node));
 	}
 
 	public String json() throws JsonProcessingException {
-		return ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-		                                    .writeValueAsString(abiContract());
+		return EverSdkContext.Builder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		                                            .writeValueAsString(abiContract());
 	}
 
 	public String functionId(Sdk sdk, String name) throws EverSdkException {
@@ -63,25 +57,21 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public boolean hasInitDataParam(String initDataName) {
-		return Arrays.stream(data())
-		             .anyMatch(data ->
-				                       initDataName.equals(data.name()));
+		return Arrays.stream(data()).anyMatch(data -> initDataName.equals(data.name()));
 	}
 
 	public boolean hasInput(String functionName, String inputName) {
 		return Arrays.stream(functions())
-		             .anyMatch(function ->
-				                       functionName.equals(function.name()) &&
-				                       Arrays.stream(function.inputs())
-				                             .anyMatch(input -> inputName.equals(input.name())));
+		             .anyMatch(function -> functionName.equals(function.name()) && Arrays.stream(function.inputs())
+		                                                                                 .anyMatch(input -> inputName.equals(
+				                                                                                 input.name())));
 	}
 
 	public boolean hasOutput(String functionName, String outputName) {
 		return Arrays.stream(functions())
-		             .anyMatch(function ->
-				                       functionName.equals(function.name()) &&
-				                       Arrays.stream(function.outputs())
-				                             .anyMatch(output -> outputName.equals(output.name())));
+		             .anyMatch(function -> functionName.equals(function.name()) && Arrays.stream(function.outputs())
+		                                                                                 .anyMatch(output -> outputName.equals(
+				                                                                                 output.name())));
 	}
 
 	private Abi.AbiFunction findFunction(Abi.AbiFunction[] functionArr, String name) {
@@ -101,9 +91,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public Abi.AbiParam initDataType(String initDataName) {
-		var dataParam = Arrays.stream(data())
-		                      .filter(data ->
-				                              initDataName.equals(data.name())).findAny().orElseThrow();
+		var dataParam = Arrays.stream(data()).filter(data -> initDataName.equals(data.name())).findAny().orElseThrow();
 		return new Abi.AbiParam(dataParam.name(), dataParam.type(), dataParam.components());
 	}
 
@@ -136,9 +124,6 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 
-
-
-
 	/**
 	 * Checks and converts provided Java Map containing inputs for function call
 	 * to correct representation that will be accepted by ABI. If map doesn't meet
@@ -151,13 +136,15 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	 * @throws EverSdkException
 	 */
 	public Map<String, Object> convertFunctionOutputs(String functionName,
-	                                                 Map<String, Object> functionOutputs) throws EverSdkException {
+	                                                  Map<String, Object> functionOutputs) throws EverSdkException {
 		var functionParams = Arrays.stream(functions())
-		                           .filter(function ->
-				                                   functionName.equals(function.name()))
-		                           .findAny().orElseThrow(() -> new EverSdkException(new EverSdkException.ErrorResult(-303,
-		                                                                                                              "No such function: " + functionName +
-		                                                                                                              " in ABI"), new Exception()))
+		                           .filter(function -> functionName.equals(function.name()))
+		                           .findAny()
+		                           .orElseThrow(() -> new EverSdkException(new EverSdkException.ErrorResult(-303,
+		                                                                                                    "No such function: " +
+		                                                                                                    functionName +
+		                                                                                                    " in ABI"),
+		                                                                   new Exception()))
 		                           .outputs();
 		return SolStruct.fromABI(functionParams, functionOutputs).values();
 	}
@@ -177,13 +164,15 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	public Map<String, Object> convertFunctionInputs(String functionName,
 	                                                 Map<String, Object> functionInputs) throws EverSdkException {
 		var functionParams = Arrays.stream(functions())
-		      .filter(function ->
-				                functionName.equals(function.name()))
-				.findAny().orElseThrow(() -> new EverSdkException(new EverSdkException.ErrorResult(-303,
-		                                                                                           "No such function: " + functionName +
-		                                                                                           " in ABI"), new Exception()))
-				.inputs();
-			return SolStruct.fromJava(functionParams, functionInputs).values();
+		                           .filter(function -> functionName.equals(function.name()))
+		                           .findAny()
+		                           .orElseThrow(() -> new EverSdkException(new EverSdkException.ErrorResult(-303,
+		                                                                                                    "No such function: " +
+		                                                                                                    functionName +
+		                                                                                                    " in ABI"),
+		                                                                   new Exception()))
+		                           .inputs();
+		return SolStruct.fromJava(functionParams, functionInputs).values();
 	}
 
 	/**

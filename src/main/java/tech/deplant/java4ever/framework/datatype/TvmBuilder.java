@@ -20,7 +20,7 @@ public class TvmBuilder {
 	public void store(AbiType... types) throws EverSdkException {
 		for (var type : types) {
 			this.operations.add(switch (type) {
-				case Uint(int size, BigInteger bigInteger) intVal -> new Boc.BuilderOp.Integer(size, intVal.toABI());
+				case Uint intVal -> new Boc.BuilderOp.Integer(intVal.size(), intVal.toABI());
 				case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
 				case SolString str -> {
 					incrementRefCounter();

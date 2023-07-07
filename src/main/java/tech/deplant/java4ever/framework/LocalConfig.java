@@ -1,7 +1,7 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.*;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
@@ -17,14 +17,6 @@ import static tech.deplant.java4ever.framework.LogUtils.error;
 public record LocalConfig(Artifact<String, String> artifact,
                           LocalInfo info) {
 
-	public record LocalInfo(Solc compiler,
-	                 TvmLinker linker,
-	                 String sourcePath,
-	                 String buildPath,
-	                 Map<String, String> abis,
-	                 Map<String, String> tvcs,
-	                 Map<String, String> keys) {}
-
 	private static System.Logger logger = System.getLogger(LocalConfig.class.getName());
 
 	public static LocalConfig EMPTY(
@@ -35,33 +27,33 @@ public record LocalConfig(Artifact<String, String> artifact,
 			String sourcePath,
 			String buildPath) throws IOException {
 		var path = Paths.get(serializationPath);
-		Artifact<String,String> jsonArtifact = null;
+		Artifact<String, String> jsonArtifact = null;
 		switch (Artifact.pathType(serializationPath)) {
 			case ABSOLUTE, RELATIONAL -> jsonArtifact = new JsonFile(serializationPath);
 			case RESOURCE -> jsonArtifact = new JsonResource(serializationPath);
 		}
 		var config = new LocalConfig(jsonArtifact,
 		                             new LocalInfo(new Solc(solcPath),
-		                             new TvmLinker(linkerPath, stdLibPath),
-		                             sourcePath,
-		                             buildPath,
-		                             new ConcurrentHashMap<>(),
-		                             new ConcurrentHashMap<>(),
-		                             new ConcurrentHashMap<>()));
+		                                           new TvmLinker(linkerPath, stdLibPath),
+		                                           sourcePath,
+		                                           buildPath,
+		                                           new ConcurrentHashMap<>(),
+		                                           new ConcurrentHashMap<>(),
+		                                           new ConcurrentHashMap<>()));
 		config.sync();
 		return config;
 	}
 
 	public static LocalConfig LOAD(String serializationPath) throws JsonProcessingException {
-		var mapper = ContextBuilder.DEFAULT_MAPPER;
+		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
 		//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-		Artifact<String,String> jsonArtifact = null;
+		Artifact<String, String> jsonArtifact = null;
 		switch (Artifact.pathType(serializationPath)) {
 			case ABSOLUTE, RELATIONAL -> jsonArtifact = new JsonFile(serializationPath);
 			case RESOURCE -> jsonArtifact = new JsonResource(serializationPath);
 		}
-		return new LocalConfig(jsonArtifact,mapper.readValue(new JsonFile(serializationPath).get(),
-		                                               LocalInfo.class));
+		return new LocalConfig(jsonArtifact, mapper.readValue(new JsonFile(serializationPath).get(),
+		                                                      LocalInfo.class));
 	}
 
 	public Template compileTemplate(String filename,
@@ -129,8 +121,17 @@ public record LocalConfig(Artifact<String, String> artifact,
 	}
 
 	public void sync() throws IOException {
-		var mapper = ContextBuilder.DEFAULT_MAPPER;
+		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
 		artifact().accept(mapper.writerWithDefaultPrettyPrinter()
-		                                                                      .writeValueAsString(info()));
+		                        .writeValueAsString(info()));
+	}
+
+	public record LocalInfo(Solc compiler,
+	                        TvmLinker linker,
+	                        String sourcePath,
+	                        String buildPath,
+	                        Map<String, String> abis,
+	                        Map<String, String> tvcs,
+	                        Map<String, String> keys) {
 	}
 }

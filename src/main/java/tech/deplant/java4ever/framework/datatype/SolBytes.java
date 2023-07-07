@@ -1,7 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.utils.Convert;
+import tech.deplant.java4ever.utils.Strings;
 
 public record SolBytes(String text) implements AbiType<String, String> {
 
@@ -10,7 +10,7 @@ public record SolBytes(String text) implements AbiType<String, String> {
 	}
 
 	public static SolBytes fromABI(String hexString) {
-		return new SolBytes(Convert.hexToStr(hexString.toUpperCase()));
+		return new SolBytes(Strings.fromHexString(hexString.toUpperCase()));
 	}
 
 	@Override
@@ -30,6 +30,6 @@ public record SolBytes(String text) implements AbiType<String, String> {
 
 	@Override
 	public String toABI() {
-		return Convert.strToHex(text());
+		return Strings.toHexString(text());
 	}
 }

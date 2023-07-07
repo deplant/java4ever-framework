@@ -3,7 +3,7 @@ package tech.deplant.java4ever.framework.generator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.ContextBuilder;
+import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.binding.generator.javapoet.*;
@@ -98,7 +98,7 @@ public class ContractWrapper {
 
 	public static void generateFromConfig(String resourcePath) throws IOException, EverSdkException {
 
-		var mapper = ContextBuilder.DEFAULT_MAPPER;
+		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
 
 		var config = mapper.readValue(new JsonResource(resourcePath).get(), GeneratorConfig.class);
 		Path targetDirectory = Paths.get(config.targetDir());
@@ -112,7 +112,7 @@ public class ContractWrapper {
 			                         tvc,
 			                         targetDirectory,
 			                         contract.name(),
-			                         Objs.notNullElse(contract.contractPkg(),contractPackage),
+			                         Objs.notNullElse(contract.contractPkg(), contractPackage),
 			                         templatePackage,
 			                         Objs.notNullElse(contract.shareOutputs(), false),
 			                         contract.interfaces());
@@ -195,7 +195,7 @@ public class ContractWrapper {
 		                                   .returns(ClassName.get(ContractAbi.class))
 		                                   .addException(JsonProcessingException.class)
 		                                   .addStatement("return ContractAbi.ofString($S)",
-		                                                 ContextBuilder.DEFAULT_MAPPER.setSerializationInclusion(
+		                                                 EverSdkContext.Builder.DEFAULT_MAPPER.setSerializationInclusion(
 				                                                 JsonInclude.Include.NON_NULL).writeValueAsString(abi))
 		                                   .build();
 		wrapperBuilder.addMethod(defaultAbiFunction);

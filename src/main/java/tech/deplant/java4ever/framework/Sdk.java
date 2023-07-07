@@ -12,11 +12,19 @@ import tech.deplant.java4ever.framework.contract.AbstractContract;
 import java.io.IOException;
 import java.util.Map;
 
-public record Sdk(Context context,
+public record Sdk(EverSdkContext context,
                   Integer debugTreeTimeout,
                   Client.ClientConfig clientConfig,
                   OnchainConfig onchainConfig,
                   LocalConfig localConfig) {
+
+	public static Sdk DEFAULT() throws IOException {
+		return Sdk.builder().build();
+	}
+
+	public static Sdk DEFAULT(String endpoint) throws IOException {
+		return Sdk.builder().networkEndpoints(endpoint).build();
+	}
 
 	public static Builder builder() {
 		return new Builder();
@@ -80,7 +88,7 @@ public record Sdk(Context context,
 		private Integer timeout = 60_000;
 		private Integer debugTimeout = 60_000;
 
-		private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
+		private ObjectMapper mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
 		//Context.NetworkConfig
 		private String[] endpoints = new String[]{"https://localhost"};
 		@Deprecated
@@ -348,7 +356,7 @@ public record Sdk(Context context,
 					this.soliditySourcesDefaultPath,
 					this.solidityArtifactsBuildPath) : this.localConfig;
 			return new Sdk(
-					new ContextBuilder()
+					EverSdkContext.builder()
 							.setConfigJson(this.mapper.writeValueAsString(config))
 							.setTimeout(this.timeout)
 							.setMapper(this.mapper)
@@ -358,7 +366,7 @@ public record Sdk(Context context,
 		}
 
 		public Sdk load(int contextId, int contextRequestCount) throws EverSdkException, IOException {
-			var context = new ContextBuilder()
+			var context = EverSdkContext.builder()
 					.setTimeout(this.timeout)
 					.setMapper(this.mapper)
 					.buildFromExisting(contextId, contextRequestCount);

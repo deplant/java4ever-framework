@@ -59,19 +59,12 @@ public class Env {
 		if (!isInitialized) {
 
 			// should be first
-			SDK_EMPTY = Sdk.builder().build(LOADER);
+			SDK_EMPTY = Sdk.DEFAULT();
+			SDK_LOCAL = Sdk.DEFAULT(LOCAL_ENDPOINT);
+			SDK_DEV = Sdk.DEFAULT(DEV_ENDPOINT);
+			SDK_MAIN = Sdk.DEFAULT(MAIN_ENDPOINT);
 
-			SDK_LOCAL = Sdk.builder()
-			               .networkEndpoints(LOCAL_ENDPOINT)
-			               .build();
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
-
-			SDK_DEV = Sdk.builder()
-			             .networkEndpoints(DEV_ENDPOINT)
-			             .build();
-			SDK_MAIN = Sdk.builder()
-			              .networkEndpoints(MAIN_ENDPOINT)
-			              .build();
 
 			isInitialized = true;
 		}

@@ -6,14 +6,14 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.java4ever.binding.*;
-import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
+import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
-import tech.deplant.java4ever.utils.Convert;
+import tech.deplant.java4ever.utils.Numbers;
 import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigDecimal;
@@ -290,7 +290,8 @@ public record FunctionHandle<RETURN>(
 
 	public Map<String, Object> callAsMap() throws EverSdkException {
 		var resultOfProcess = processExternalCall();
-		var balanceDeltaStr = Convert.hexToDec(resultOfProcess.transaction().get("balance_delta").toString(), 9);
+		var balanceDeltaStr = Numbers.hexStringToBigDec(resultOfProcess.transaction().get("balance_delta").toString(),
+		                                                9);
 		Supplier<String> lazyFormatLogMessage = () -> String.format(LogUtils.CALL_LOG_BLOCK,
 		                                                            "EXTERNAL CALL",
 		                                                            this.functionName,
@@ -365,12 +366,12 @@ public record FunctionHandle<RETURN>(
 			                                                            tr.id(),
 			                                                            msg.id(),
 			                                                            LogUtils.sourceOfMessage(msg),
-			                                                            Convert.hexToDecOrZero(msg.value(), 9)
+			                                                            Numbers.hexStringToBigDec(msg.value(), 9)
 			                                                                   .toPlainString(),
 			                                                            LogUtils.destOfMessage(msg),
 			                                                            tr.exitCode(),
 			                                                            LogUtils.nameOfMessage(msg),
-			                                                            Convert.hexToDecOrZero(tr.totalFees(), 9)
+			                                                            Numbers.hexStringToBigDec(tr.totalFees(), 9)
 			                                                                   .toPlainString(),
 			                                                            LogUtils.enquotedListAgg(tr.outMsgs()));
 			if (tr.aborted() && throwOnTreeError) {

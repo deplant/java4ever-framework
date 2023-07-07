@@ -100,8 +100,8 @@ dependencies {
 
 ```java
 var sdk1 = Sdk.DEFAULT();
-var sdk2 = Sdk.DEFAULT(LOCAL_ENDPOINT);
-var sdk3 = Sdk.builder().networkEndpoints("localhost/graphql").build();
+var sdk2 = Sdk.DEFAULT("http://localhost/graphql");
+var sdk3 = Sdk.builder().networkEndpoints("http://localhost/graphql").build();
 ```
 You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
@@ -110,7 +110,7 @@ If you're working with Everscale mainnet, here you can register your app and rec
 Sdk.Builder is a builder-style config for EVER-SDK, so you can easily config only needed parts of library.
 ```java
 var sdk = Sdk.builder()
-             .networkEndpoints("localhost/graphql")
+             .networkEndpoints("http://localhost/graphql")
              .abiWorkchain(-1)
              .networkRetriesCount(10)
              .abiMessageExpirationTimeout(30000)
@@ -120,8 +120,9 @@ var sdk = Sdk.builder()
 If you want to use custom "ton-client" lib or have some problem with included ones, specify their location as:
 
 ```java
-var sdk = Sdk.builder().networkEndpoints("localhost")
-			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
+var sdk = Sdk.builder()
+             .networkEndpoints("http://localhost/graphql")
+             .build(new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so")));
 ```
 By the way, you can find [precomiled lib files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here. 
 Specifying path to downloaded custom "ton_client" libs can be done in multiple ways by using different loaders.

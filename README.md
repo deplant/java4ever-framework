@@ -70,8 +70,6 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 ### Prerequisites
 
 * Install **JDK 20** ([link](https://adoptium.net/temurin/releases?version=20))
-* Build **EVER-SDK** binary lib "**ton_client**"(.so/.dll) (or
-  get [precomiled one](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries))
 
 ### Add java4ever to your Maven or Gradle setup:
 
@@ -125,7 +123,8 @@ If you want to use custom "ton-client" lib or have some problem with included on
 var sdk = Sdk.builder().networkEndpoints("localhost")
 			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 ```
-You can add "ton_client" lib by multiple ways by using different loaders.
+By the way, you can find [precomiled lib files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here. 
+Specifying path to downloaded custom "ton_client" libs can be done in multiple ways by using different loaders.
 
 Variants of loading ton_client lib are:
 * `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable

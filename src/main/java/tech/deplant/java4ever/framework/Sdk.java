@@ -1,25 +1,30 @@
 package tech.deplant.java4ever.framework;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
-import tech.deplant.java4ever.framework.artifact.Solc;
-import tech.deplant.java4ever.framework.artifact.TvmLinker;
-import tech.deplant.java4ever.framework.contract.CustomContract;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public record Sdk(Context context,
+public record Sdk(EverSdkContext context,
                   Integer debugTreeTimeout,
                   Client.ClientConfig clientConfig,
                   OnchainConfig onchainConfig,
                   LocalConfig localConfig) {
+
+	public static Sdk DEFAULT() throws IOException {
+		return Sdk.builder().build();
+	}
+
+	public static Sdk DEFAULT(String endpoint) throws IOException {
+		return Sdk.builder().networkEndpoints(endpoint).build();
+	}
 
 	public static Builder builder() {
 		return new Builder();
@@ -57,7 +62,7 @@ public record Sdk(Context context,
 		return context().mapper().writeValueAsString(inputObject);
 	}
 
-	public void saveContract(String name, CustomContract contract) throws IOException {
+	public void saveContract(String name, AbstractContract contract) throws IOException {
 		onchainConfig().addContract(name, contract);
 	}
 
@@ -83,7 +88,7 @@ public record Sdk(Context context,
 		private Integer timeout = 60_000;
 		private Integer debugTimeout = 60_000;
 
-		private ObjectMapper mapper = ContextBuilder.DEFAULT_MAPPER;
+		private ObjectMapper mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
 		//Context.NetworkConfig
 		private String[] endpoints = new String[]{"https://localhost"};
 		@Deprecated
@@ -303,9 +308,13 @@ public record Sdk(Context context,
 			return this;
 		}
 
+		public Sdk build() throws IOException {
+			return build(new DefaultLoader(this.getClass().getClassLoader()));
+		}
+
 		public Sdk build(LibraryLoader loader) throws IOException {
 			var config = new Client.ClientConfig(
-					new Client.BindingConfig("java4ever","1.5.0"),
+					new Client.BindingConfig("java4ever","1.8.0"),
 					new Client.NetworkConfig(
 							this.serverAddress,
 							this.endpoints,
@@ -347,7 +356,7 @@ public record Sdk(Context context,
 					this.soliditySourcesDefaultPath,
 					this.solidityArtifactsBuildPath) : this.localConfig;
 			return new Sdk(
-					new ContextBuilder()
+					EverSdkContext.builder()
 							.setConfigJson(this.mapper.writeValueAsString(config))
 							.setTimeout(this.timeout)
 							.setMapper(this.mapper)
@@ -357,7 +366,7 @@ public record Sdk(Context context,
 		}
 
 		public Sdk load(int contextId, int contextRequestCount) throws EverSdkException, IOException {
-			var context = new ContextBuilder()
+			var context = EverSdkContext.builder()
 					.setTimeout(this.timeout)
 					.setMapper(this.mapper)
 					.buildFromExisting(contextId, contextRequestCount);

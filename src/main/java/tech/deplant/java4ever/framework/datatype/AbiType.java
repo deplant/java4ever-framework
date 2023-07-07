@@ -13,7 +13,7 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 			case ADDRESS -> Address.fromJava(inputValue);
 			case BOOL -> Bool.fromJava(inputValue);
 			case CELL, SLICE, BUILDER -> TvmCell.fromJava(inputValue);
-			case TUPLE -> {
+			case TUPLE, OPTIONAL -> {
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-301,
 				                                                               "ABI Parsing unexpected! Shouldn't get here!"),
 				                              new RuntimeException());
@@ -31,7 +31,7 @@ public interface AbiType<JAVA_TYPE, JSON_TYPE> {
 			case ADDRESS -> Address.fromABI(inputValue);
 			case BOOL -> Bool.fromJava(inputValue);
 			case CELL, SLICE, BUILDER -> TvmCell.fromJava(inputValue);
-			case TUPLE -> {
+			case TUPLE, OPTIONAL -> {
 				var ex = new EverSdkException(new EverSdkException.ErrorResult(-301,
 				                                                               "ABI Parsing unexpected! Shouldn't get here!"),
 				                              new RuntimeException());

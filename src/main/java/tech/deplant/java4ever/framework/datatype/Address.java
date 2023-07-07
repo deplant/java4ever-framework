@@ -6,7 +6,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.template.Template;
-import tech.deplant.java4ever.utils.Convert;
+import tech.deplant.java4ever.utils.Strings;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -54,8 +54,8 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 				template.abi().ABI(),
 				null,
 				new Abi.DeploySet(template.tvc().base64String(),
-								  null,
-								  null,
+				                  null,
+				                  null,
 				                  workchainId,
 				                  initialData,
 				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
@@ -84,7 +84,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 		return
 				wid() +
 				":" +
-				Convert.padLeftZeros(value().toString(16), 64);
+				Strings.padLeftZeros(value().toString(16), 64);
 	}
 
 	@Override

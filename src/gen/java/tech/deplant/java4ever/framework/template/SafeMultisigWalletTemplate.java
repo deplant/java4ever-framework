@@ -11,7 +11,7 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.DeployHandle;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
-import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
+import tech.deplant.java4ever.framework.contract.multisig.SafeMultisigWallet;
 
 /**
  * Java template class for deploy of <strong>SafeMultisigWallet</strong> contract for Everscale blockchain.

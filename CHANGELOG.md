@@ -1,3 +1,18 @@
+### 2.1.0
+
+- Updated EVER-SDK -> 1.43.3
+- Updated Gradle -> 8.2
+- Updated baseline JDK -> 20
+- Included EVER-SDK libs in distribution (Use DefaultLoader choice)
+- Added support of Optional in code generation
+- Added support of Multisig2 set of contracts
+- Added support of writing external output types classes for common types of multiple contracts
+- Renamed CustomContract -> AbstractContract
+- Renamed CustomTemplate -> AbstractTemplate
+- Reworked FunctionHandle for better decoupling 
+- Reworked DeployHandle for better decoupling
+- Added **generateEverscaleContracts** Gradle task for one-click contract wrappers re-generation
+
 ### 1.8.0
 
 - Added support of EVER-SDK 1.43.2 changes

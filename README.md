@@ -1,6 +1,6 @@
 # Java4Ever
 
-[![JDK version](https://img.shields.io/badge/Java-19-green.svg)](https://shields.io/)
+[![JDK version](https://img.shields.io/badge/Java-20-green.svg)](https://shields.io/)
 [![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.43.3-orange)](https://github.com/tonlabs/ever-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/deplant\_chat\_en)
@@ -69,7 +69,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ### Prerequisites
 
-* Install **JDK 19** or higher ([link](https://adoptium.net/temurin/releases?version=19))
+* Install **JDK 20** ([link](https://adoptium.net/temurin/releases?version=20))
 * Build **EVER-SDK** binary lib "**ton_client**"(.so/.dll) (or
   get [precomiled one](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries))
 
@@ -79,7 +79,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:1.8.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:2.1.0'
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>1.8.0</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -100,16 +100,34 @@ dependencies {
 
 #### Creating SDK Provider
 
+```java
+var sdk1 = Sdk.DEFAULT();
+var sdk2 = Sdk.DEFAULT(LOCAL_ENDPOINT);
+var sdk3 = Sdk.builder().networkEndpoints("localhost/graphql").build();
+```
 You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
+
+Sdk.Builder is a builder-style config for EVER-SDK, so you can easily config only needed parts of library.
+```java
+var sdk = Sdk.builder()
+             .networkEndpoints("localhost/graphql")
+             .abiWorkchain(-1)
+             .networkRetriesCount(10)
+             .abiMessageExpirationTimeout(30000)
+             .build();
+```
+
+If you want to use custom "ton-client" lib or have some problem with included ones, specify their location as:
 
 ```java
 var sdk = Sdk.builder().networkEndpoints("localhost")
 			              .build(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB"));
 ```
-You can add "ton_client" lib by multiple ways.
-Variants of loading ton_client lib:
+You can add "ton_client" lib by multiple ways by using different loaders.
+
+Variants of loading ton_client lib are:
 * `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
 * `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
 * `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.framework.contract;
+package tech.deplant.java4ever.framework.contract.multisig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
@@ -17,19 +17,19 @@ import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 /**
- * Java wrapper class for usage of <strong>SetcodeMultisigWallet</strong> contract for Everscale blockchain.
+ * Java wrapper class for usage of <strong>SurfMultisigWallet</strong> contract for Everscale blockchain.
  */
-public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
+public record SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     Credentials credentials) implements MultisigWallet {
-  public SetcodeMultisigWallet(Sdk sdk, String address) throws JsonProcessingException {
+  public SurfMultisigWallet(Sdk sdk, String address) throws JsonProcessingException {
     this(sdk,address,DEFAULT_ABI(),Credentials.NONE);
   }
 
-  public SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi) {
+  public SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi) {
     this(sdk,address,abi,Credentials.NONE);
   }
 
-  public SetcodeMultisigWallet(Sdk sdk, String address, Credentials credentials) throws
+  public SurfMultisigWallet(Sdk sdk, String address, Credentials credentials) throws
       JsonProcessingException {
     this(sdk,address,DEFAULT_ABI(),credentials);
   }
@@ -121,34 +121,5 @@ public record SetcodeMultisigWallet(Sdk sdk, String address, ContractAbi abi,
   public FunctionHandle<ResultOfGetUpdateRequests> getUpdateRequests() {
     Map<String, Object> params = Map.of();
     return new FunctionHandle<ResultOfGetUpdateRequests>(ResultOfGetUpdateRequests.class, sdk(), address(), abi(), credentials(), "getUpdateRequests", params, null);
-  }
-
-  public record ResultOfSubmitTransaction(Long transId) {
-  }
-
-  public record ResultOfIsConfirmed(Boolean confirmed) {
-  }
-
-  public record ResultOfGetParameters(Integer maxQueuedTransactions, Integer maxCustodianCount,
-      Long expirationTime, BigInteger minValue, Integer requiredTxnConfirms,
-      Integer requiredUpdConfirms) {
-  }
-
-  public record ResultOfGetTransaction(Map<String, Object> trans) {
-  }
-
-  public record ResultOfGetTransactions(Map<String, Object>[] transactions) {
-  }
-
-  public record ResultOfGetTransactionIds(Long[] ids) {
-  }
-
-  public record ResultOfGetCustodians(Map<String, Object>[] custodians) {
-  }
-
-  public record ResultOfSubmitUpdate(Long updateId) {
-  }
-
-  public record ResultOfGetUpdateRequests(Map<String, Object>[] updates) {
   }
 }

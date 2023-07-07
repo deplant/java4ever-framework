@@ -3,12 +3,12 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.ContextBuilder;
 import tech.deplant.java4ever.binding.Crypto;
+import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.utils.Convert;
+import tech.deplant.java4ever.utils.Numbers;
 
 import java.math.BigInteger;
 
@@ -22,13 +22,11 @@ import java.math.BigInteger;
  * @param publicKey
  * @param secretKey
  */
-public record Credentials(@JsonProperty("public") String publicKey,
-                          @JsonProperty("secret") String secretKey) {
+public record Credentials(@JsonProperty("public") String publicKey, @JsonProperty("secret") String secretKey) {
 
 	public static final Credentials NONE = new Credentials(
 			"0000000000000000000000000000000000000000000000000000000000000000",
-			"0000000000000000000000000000000000000000000000000000000000000000"
-	);
+			"0000000000000000000000000000000000000000000000000000000000000000");
 
 	/**
 	 * Generates new random KeyPair by using crypto.generate_random_sign_keys() method of SDK.
@@ -40,7 +38,8 @@ public record Credentials(@JsonProperty("public") String publicKey,
 
 	public static Credentials ofResource(String resourceName) {
 		try {
-			return ContextBuilder.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get(), Credentials.class);
+			return EverSdkContext.Builder.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get(),
+			                                                       Credentials.class);
 		} catch (JsonProcessingException e) {
 			return NONE;
 		}
@@ -48,7 +47,7 @@ public record Credentials(@JsonProperty("public") String publicKey,
 
 	public static Credentials ofFile(String filePath) {
 		try {
-			return ContextBuilder.DEFAULT_MAPPER.readValue(new JsonFile(filePath).get(), Credentials.class);
+			return EverSdkContext.Builder.DEFAULT_MAPPER.readValue(new JsonFile(filePath).get(), Credentials.class);
 		} catch (JsonProcessingException e) {
 			return NONE;
 		}
@@ -85,10 +84,10 @@ public record Credentials(@JsonProperty("public") String publicKey,
 	}
 
 	public BigInteger publicBigInt() {
-		return Convert.hexToBigInt(publicKey());
+		return Numbers.hexStringToBigInt(publicKey());
 	}
 
 	public BigInteger secretBigInt() {
-		return Convert.hexToBigInt(secretKey());
+		return Numbers.hexStringToBigInt(secretKey());
 	}
 }

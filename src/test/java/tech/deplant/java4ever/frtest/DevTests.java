@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.frtest;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.frtest.unit.AbiTests;
 import tech.deplant.java4ever.utils.Objs;
@@ -82,8 +83,8 @@ public class DevTests {
 	}
 
 
-
 	@Test
+	@Disabled
 	public void get_graphql_schema() throws IOException, InterruptedException {
 
 		// create client

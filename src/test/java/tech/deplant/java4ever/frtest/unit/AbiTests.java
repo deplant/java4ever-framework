@@ -6,16 +6,12 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import tech.deplant.java4ever.binding.ContextBuilder;
-import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
-
-import java.math.BigInteger;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,13 +22,12 @@ public class AbiTests {
 	private static System.Logger logger = System.getLogger(AbiTests.class.getName());
 
 
-
 	@Test
 	public void deserialized_abi_equals_original_json() throws JsonProcessingException {
 		var jsonStr = new JsonResource("artifacts/tip31/TokenRoot.abi.json").get();
 		var cachedStr = TIP3TokenRootTemplate.DEFAULT_ABI().json();
-		assertEquals(ContextBuilder.DEFAULT_MAPPER.readTree(jsonStr),
-		             ContextBuilder.DEFAULT_MAPPER.readTree(cachedStr));
+		assertEquals(EverSdkContext.Builder.DEFAULT_MAPPER.readTree(jsonStr),
+		             EverSdkContext.Builder.DEFAULT_MAPPER.readTree(cachedStr));
 	}
 
 	@Test

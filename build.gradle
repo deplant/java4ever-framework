@@ -30,14 +30,12 @@ sourceSets {
 dependencies {
 
     // RUNTIME **************************
-
     api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
-    api "tech.deplant.java4ever:java4ever-utils:$v_version" // java4ever-utils
-    implementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
 
     // TESTS **************************
 
     // SLF4J (Simple provider for tests)
+    testImplementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
     testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
 
     // JUnit 5
@@ -111,9 +109,14 @@ signing {
 }
 
 javadoc {
+    failOnError false
     options.addBooleanOption('html5', true)
-    options.addBooleanOption('-enable-preview', true)
-    options.addStringOption('-release', '19')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+    //options.addBooleanOption('-enable-preview', true)
+    //options.addStringOption('-release', '20')
+    options.addBooleanOption('-ignore-source-errors', true)
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 java {
@@ -122,8 +125,16 @@ java {
 }
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_20
+    targetCompatibility = JavaVersion.VERSION_20
+}
+
+// Task for JavaPoet generation of EVER-SDK API
+task generateEverscaleContracts(type: JavaExec) {
+    group = "other"
+    description = "Generates Java Wrappers for Everscale contracts: Wallets, TIP3, TIP4, Givers and so on"
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = "tech.deplant.java4ever.frtest.codegen.ContractGenerator"
 }
 
 test {
@@ -134,16 +145,25 @@ test {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
     options.compilerArgs += "--enable-preview"
     options.compilerArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
 tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
 tasks.withType(Test) {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }

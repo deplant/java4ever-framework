@@ -1,10 +1,8 @@
 package tech.deplant.java4ever.framework.template;
 
-import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.*;
-import tech.deplant.java4ever.framework.contract.CustomContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 import java.util.Map;
@@ -20,7 +18,7 @@ public interface Template {
 	default String calculateAddress(Sdk sdk,
 	                                Map<String, Object> initialData,
 	                                Credentials credentials) throws EverSdkException {
-		String address = Address.ofFutureDeploy(sdk, new CustomTemplate(abi(), tvc()), 0, initialData, credentials);
+		String address = Address.ofFutureDeploy(sdk, new AbstractTemplate(abi(), tvc()), 0, initialData, credentials);
 		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
 		return address;
 	}

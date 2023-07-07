@@ -10,7 +10,7 @@ import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.DeployHandle;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
-import tech.deplant.java4ever.framework.contract.TIP4Nft;
+import tech.deplant.java4ever.framework.contract.tip4.TIP4Nft;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 

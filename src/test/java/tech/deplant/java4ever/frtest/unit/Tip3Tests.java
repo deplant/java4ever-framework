@@ -1,28 +1,21 @@
 package tech.deplant.java4ever.frtest.unit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.MessageFlag;
-import tech.deplant.java4ever.framework.contract.*;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
-import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
-import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
-import tech.deplant.java4ever.framework.template.TIP3TokenWalletTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,13 +49,16 @@ public class Tip3Tests {
 	public void tip3_mint() throws Throwable {
 		var mintAmount = new BigInteger("9000000");
 		var receiverAddress = new Address(LOCAL_MSIG_WALLET1.address());
-		GIVER_LOCAL.give(LOCAL_TIP3_ROOT.address(),EVER_TEN);
-		GIVER_LOCAL.give(LOCAL_MSIG_ROOT.address(),EVER_TEN);
-		var payload = LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ONE, receiverAddress, false,
-		                                   TvmCell.EMPTY())
-		                             .toPayload();
-		LOCAL_MSIG_ROOT.sendTransaction(new Address(LOCAL_TIP3_ROOT.address()), EVER_TWO, true, MessageFlag.FEE_EXTRA.flag(), payload)
-		               .call();
+		GIVER_LOCAL.give(LOCAL_TIP3_ROOT.address(), EVER_TEN);
+		GIVER_LOCAL.give(LOCAL_MSIG_ROOT.address(), EVER_TEN);
+		LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ONE, receiverAddress, false,
+		                     TvmCell.EMPTY())
+		               .sendFromTree(LOCAL_MSIG_ROOT,
+		                             CurrencyUnit.VALUE(EVER, "0.3"),
+		                             true,
+		                             MessageFlag.FEE_EXTRA,
+		                             true,
+		                             TIP3TokenWallet.DEFAULT_ABI());
 		assertEquals(mintAmount, LOCAL_TIP3_ROOT.totalSupply().get().value0());
 		assertEquals(mintAmount, LOCAL_TIP3_WALLET1.balance().get().value0());
 	}

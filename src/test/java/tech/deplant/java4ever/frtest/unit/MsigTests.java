@@ -8,12 +8,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.CurrencyUnit;
-import tech.deplant.java4ever.framework.MessageFlag;
-import tech.deplant.java4ever.framework.contract.EverOSGiver;
-import tech.deplant.java4ever.framework.contract.SafeMultisigWallet;
-import tech.deplant.java4ever.framework.contract.TIP3TokenWallet;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
@@ -21,8 +17,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
-import static tech.deplant.java4ever.frtest.unit.Env.EVER_ONE;
+import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -43,7 +38,7 @@ public class MsigTests {
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
-		SafeMultisigWallet msig = deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);
+		MultisigWallet msig = new MultisigBuilder().setType(MultisigWallet.Type.SAFE).build(SDK_LOCAL, keys, GIVER_LOCAL, EVER_ONE);
 		assertTrue(Account.ofAddress(Env.SDK_LOCAL, msig.address()).isActive());
 		try {
 			deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);

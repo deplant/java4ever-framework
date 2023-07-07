@@ -42,15 +42,17 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
     * [Prerequisites](#prerequisites)
     * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
   * [Examples](#examples)
-    * [Configuration](#configuration)
-      * [Creating SDK Provider](#creating-sdk-provider)
-    * [Reading ABI, TVC & other artifacts](#reading-abi-tvc--other-artifacts)
-    * [Generating classes for your contracts](#generating-classes-for-your-contracts)
+    * [SDK Provider](#sdk-provider)
+      * [Creating SDK](#creating-sdk)
+      * [Configuring SDK with Builder](#configuring-sdk-with-builder)
+      * [Custom EVER-SDK Library loading variants](#custom-ever-sdk-library-loading-variants)
+    * [ABI, TVC & other artifacts](#abi-tvc--other-artifacts)
+    * [Contract Generation](#contract-generation)
     * [Crypto](#crypto)
       * [Creating a random keypair](#creating-a-random-keypair)
       * [Creating a random seed](#creating-a-random-seed)
       * [Using existing keys & seeds](#using-existing-keys--seeds)
-    * [Working with existing contracts](#working-with-existing-contracts)
+    * [Working with deployed contracts](#working-with-deployed-contracts)
       * [Accessing Contract](#accessing-contract)
       * [Accessing Function](#accessing-function)
       * [Calling Functions in various ways](#calling-functions-in-various-ways)
@@ -59,9 +61,9 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
     * [Deploying new contracts](#deploying-new-contracts)
       * [Accessing Template](#accessing-template)
       * [Accessing Deployment Set](#accessing-deployment-set)
-      * [Variations of deploy](#variations-of-deploy)
+      * [Variations of running deploy](#variations-of-running-deploy)
       * [Switching Givers](#switching-givers)
-  * [Logging](#logging)
+    * [Logging](#logging)
   * [Getting Help](#getting-help)
 <!-- TOC -->
 
@@ -94,9 +96,12 @@ dependencies {
 
 ## Examples
 
-### Configuration
+### SDK Provider
 
-#### Creating SDK Provider
+**Sdk** class is a provider of connection to EVER-SDK lib and TVM blockchain.
+It is a primary object that you need to run most interactions in **Java4Ever**:
+
+#### Creating SDK
 
 ```java
 var sdk1 = Sdk.DEFAULT();
@@ -107,7 +112,9 @@ You can find a list of endpoints here: https://docs.evercloud.dev/products/everc
 
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
 
-Sdk.Builder is a builder-style config for EVER-SDK, so you can easily config only needed parts of library.
+#### Configuring SDK with Builder
+
+**Sdk.Builder** is a Builder-style config for **EVER-SDK**, so you can easily config only needed parts of library.
 ```java
 var sdk = Sdk.builder()
              .networkEndpoints("http://localhost/graphql")
@@ -117,23 +124,29 @@ var sdk = Sdk.builder()
              .build();
 ```
 
-If you want to use custom "ton-client" lib or have some problem with included ones, specify their location as:
+If you want to use custom `ton-client` lib or have some problem with the included ones, specify custom location as:
 
 ```java
 var sdk = Sdk.builder()
              .networkEndpoints("http://localhost/graphql")
              .build(new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so")));
 ```
-By the way, you can find [precomiled lib files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here. 
-Specifying path to downloaded custom "ton_client" libs can be done in multiple ways by using different loaders.
+You can find [precompiled ton_client files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here. 
+Specifying path to downloaded custom "ton_client" libs can be done 
+in multiple ways by using different loaders.
 
-Variants of loading ton_client lib are:
+#### Custom EVER-SDK Library loading variants
+
 * `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
 * `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
 * `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path
 * `new JavaLibraryPathLoader("ton_client");` - gets library from java.library.path JVM argument
 
-### Reading ABI, TVC & other artifacts
+### ABI, TVC & other artifacts
+
+**Java4Ever** includes easy API to work with files and java resources
+(both json-based and byte[]-based). 
+Here are simple examples of getting contract ABIs and TVCs artifacts:
 
 * `ContractAbi.ofFile("/path/to/your.abi.json")` - reads abi from file (can be relative)
 * `ContractAbi.ofResource("yourresource.abi.json")` - reads abi from resources of your project
@@ -145,13 +158,16 @@ Variants of loading ton_client lib are:
 * `Tvc.ofBase64String("")` -reads tvc from base64 encoded string
 * `new Tvc(bytes)` - reads tvc from byte array
 
-Also, you can check JsonFile, JsonResource, ByteFile, ByteResource helpers for custom artifacts.
+Also, you can check `JsonFile`, `JsonResource`, `ByteFile`, `ByteResource` helpers for custom artifacts.
 
-### Generating classes for your contracts
+### Contract Generation
 
-Contract Wrapper Generator will create java wrapper classes for all your contracts. You need only `abi.json` and `.tvc` artifacts of your contracts. 
+`ContractWrapper` class is a generator that will create java wrapper 
+classes for all your contracts. You need only `abi.json` and `.tvc` 
+artifacts of your contracts as a source for code generation. 
 
-Run the following, specifying your artifacts and where to place generated classes:
+Run the following, specifying your artifacts and where to place 
+generated classes in params:
 
 ```java
 ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
@@ -166,6 +182,11 @@ ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContra
 Contract and template wrappers will appear in packages that you specified.
 
 ### Crypto
+
+**Java4Ever** includes basic helpers to 
+create your seeds, key pairs and signatures. If 
+you want some specific **EVER-SDK** functions, just use them 
+firectly as all **EVER-SDK** API is available from **Java4Ever**.
 
 #### Creating a random keypair
 
@@ -194,12 +215,20 @@ var seed = new Seed("your seed phrase with 12 words or 24 with second constructo
 var keys = new Credentials("publickey_string","secretkey_string");
 ```
 
-### Working with existing contracts
+### Working with deployed contracts
 
-If you generated MyContract via [generator](#generating-classes-for-your-contracts), all its methods are now available from MyContract.class.
-If you're working with standard contracts, all wrappers are already generated (for multisig wallets, givers, TIP3 and TIP4 contracts and so on - check [javadoc](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework/latest/java4ever.framework/tech/deplant/java4ever/framework/contract/package-summary.html))
+If you generated your contract wrappers via [generator](#generating-classes-for-your-contracts) 
+(`MyContract` in this example), 
+all its methods are now available from `MyContract.class`.
+If you're working with standard contracts, all wrappers are 
+already generated (for **Multisig Wallets**, **Givers**, **TIP3** and **TIP4** 
+contracts and so on - 
+check [javadoc](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework/latest/java4ever.framework/tech/deplant/java4ever/framework/contract/package-summary.html))
 
 #### Accessing Contract
+
+To access contract account, create instance of your contract class by 
+passing SDK Provider and address of deployed contract.
 
 ```java
 MyContract contr = new MyContract(sdk, "0:your_contract_address");
@@ -208,13 +237,16 @@ contr.accountBalance(); // currency balance on account
 contr.account().isActive(); // contract status
 ```
 
-or with credentials for signing external calls:
+or with additional `Credentials` param for signing external calls:
 
 ```java
 MyContract contr = new MyContract(sdk, "0:your_contract_address", keys);
 ```
 
 #### Accessing Function
+
+Now, when your contract object is created, just get handle of one 
+of functions by calling one of the contract methods.
 
 ```java
 FunctionHandle getCustodiansFunctionHandle = contr.getCustodians();
@@ -223,6 +255,8 @@ FunctionHandle getCustodiansFunctionHandle = contr.getCustodians();
 Function in this example doesn't have params, but yours can have.
 
 #### Calling Functions in various ways
+
+With `FunctionHandle` you can make external calls, run get methods using remote or local boc and so on like this:
 
 ```java
 MyContract.ResultOfGetCustodians custodians = getCustodiansFunctionHandle.get();
@@ -253,10 +287,12 @@ getCustodiansFunctionHandle.sendFrom(walletContract, CurrencyUnit.VALUE(EVER,"1.
 ```
 **sendFrom()** method also has **sendFromAsMap()** variant.
 
-Calls and sends also has **...Tree()** variants that can be used to monitor transaction tree execution and collect errors.
-
+Calls and sends also has **...Tree()** variants that can 
+be used to monitor transaction tree execution and collect errors.
 
 #### Encoding as Payload
+
+You can encode `FunctionHandle` as a payload for internal call like this:
 
 ```java
 var payload = getCustodiansFunctionHandle.toPayload();
@@ -264,7 +300,14 @@ var payload = getCustodiansFunctionHandle.toPayload();
 
 ### Deploying new contracts
 
+Second class created by contract generator is `MyContractTemplate.class`. 
+It's a companion class that stores ABI and TVC info for deployment.
+
 #### Accessing Template
+
+You can create template object with no additional params. 
+If you didn't use generator, use `AbstractTemplate` class and 
+pass ABI and TVC to it manually.
 
 ```java
 MyContractTemplate myTemplate = new MyContractTemplate();
@@ -281,13 +324,15 @@ initial data, various helpers for all sort of interactions.
 
 #### Accessing Deployment Set
 
+`DeployHandle` is a handle of prepared deployment with all needed params. 
+As with function handles, `Template::prepareDeploy` params may vary depending on your contract -
+your static variables and constructor params.
+
 ```java
 DeployHandle deployHandle = myTemplate.prepareDeploy(sdk, Credentials.NONE,"hello_world");
 ```
 
-As with FunctionHandle, prepareDeploy() of your contract DeployHandle can have additional params - your static variables and constructor params.
-
-#### Variations of deploy
+#### Variations of running deploy
 
 ```java
 MyContract myContract = deployHandle.deploy();
@@ -319,10 +364,10 @@ deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 
 This is possible as all Java4Ever wallet classes are implementing Giver interface.
 
-## Logging
+### Logging
 
-java4ever-framework uses the JDK Platform Loggging (JEP 264: Platform Logging API and Service),
-so can be easily bridged to any logging framework. For example, to use log4j2, just add *org.apache.logging.log4j:log4j-jpl* to your Maven/Gradle build.
+**Java4Ever** uses the JDK Platform Loggging (JEP 264: Platform Logging API and Service),
+so can be easily bridged to any logging framework. For example, to use log4j2, just add `org.apache.logging.log4j:log4j-jpl` to your Maven/Gradle build.
 
 ## Getting Help
 

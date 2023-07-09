@@ -79,7 +79,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:2.1.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:2.1.1'
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
 </dependency>
 ```
 

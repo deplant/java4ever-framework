@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.binding.generator.javapoet.*;
 import tech.deplant.java4ever.framework.*;
@@ -98,7 +99,7 @@ public class ContractWrapper {
 
 	public static void generateFromConfig(String resourcePath) throws IOException, EverSdkException {
 
-		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		var mapper = JsonContext.ABI_JSON_MAPPER();
 
 		var config = mapper.readValue(new JsonResource(resourcePath).get(), GeneratorConfig.class);
 		Path targetDirectory = Paths.get(config.targetDir());
@@ -195,7 +196,7 @@ public class ContractWrapper {
 		                                   .returns(ClassName.get(ContractAbi.class))
 		                                   .addException(JsonProcessingException.class)
 		                                   .addStatement("return ContractAbi.ofString($S)",
-		                                                 EverSdkContext.Builder.DEFAULT_MAPPER.setSerializationInclusion(
+		                                                 JsonContext.ABI_JSON_MAPPER().setSerializationInclusion(
 				                                                 JsonInclude.Include.NON_NULL).writeValueAsString(abi))
 		                                   .build();
 		wrapperBuilder.addMethod(defaultAbiFunction);

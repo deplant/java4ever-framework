@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.*;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
 import tech.deplant.java4ever.framework.template.Template;
@@ -45,7 +46,7 @@ public record LocalConfig(Artifact<String, String> artifact,
 	}
 
 	public static LocalConfig LOAD(String serializationPath) throws JsonProcessingException {
-		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		var mapper = JsonContext.ABI_JSON_MAPPER();
 		//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 		Artifact<String, String> jsonArtifact = null;
 		switch (Artifact.pathType(serializationPath)) {
@@ -121,7 +122,7 @@ public record LocalConfig(Artifact<String, String> artifact,
 	}
 
 	public void sync() throws IOException {
-		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		var mapper = JsonContext.ABI_JSON_MAPPER();
 		artifact().accept(mapper.writerWithDefaultPrettyPrinter()
 		                        .writeValueAsString(info()));
 	}

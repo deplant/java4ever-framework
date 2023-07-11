@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkContext;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
@@ -43,7 +44,7 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 	}
 
 	public static OnchainConfig LOAD(String serializationPath) throws JsonProcessingException {
-		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		var mapper = JsonContext.ABI_JSON_MAPPER();
 		//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 		Artifact<String, String> jsonArtifact = null;
 		switch (Artifact.pathType(serializationPath)) {
@@ -105,7 +106,7 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 	 * @throws IOException can be thrown by work with File
 	 */
 	public void sync() throws IOException {
-		var mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		var mapper = JsonContext.ABI_JSON_MAPPER();
 		//.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 		//.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		artifact().accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(info()));

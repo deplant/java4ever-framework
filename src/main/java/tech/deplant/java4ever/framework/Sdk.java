@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public record Sdk(EverSdkContext context,
-                  Integer debugTreeTimeout,
+                  long debugTreeTimeout,
                   Client.ClientConfig clientConfig,
                   OnchainConfig onchainConfig,
                   LocalConfig localConfig) {
@@ -88,37 +88,36 @@ public record Sdk(EverSdkContext context,
 		private Integer timeout = 60_000;
 		private Integer debugTimeout = 60_000;
 
-		private ObjectMapper mapper = EverSdkContext.Builder.DEFAULT_MAPPER;
+		private ObjectMapper mapper = JsonContext.SDK_JSON_MAPPER();
 		//Context.NetworkConfig
 		private String[] endpoints = new String[]{"https://localhost"};
-		@Deprecated
-		private String serverAddress; // deprecated, use endpoints
+		@Deprecated private String serverAddress; // deprecated, use endpoints
 		private Integer networkRetriesCount = 5;
 		private Integer messageRetriesCount = 5;
-		private Integer messageProcessingTimeout = 40000;
-		private Integer waitForTimeout = 40000;
-		private Integer outOfSyncThreshold = 15000;
-		private Integer reconnectTimeout = 12000;
+		private Long messageProcessingTimeout = 40000L;
+		private Long waitForTimeout = 40000L;
+		private Long outOfSyncThreshold = 15000L;
+		private Long reconnectTimeout = 12000L;
 		private String accessKey;
 		//Context.CryptoConfig
 		private Crypto.MnemonicDictionary mnemonicDictionary = Crypto.MnemonicDictionary.English;
 		private Integer mnemonicWordCount = 12;
 		private String hdkeyDerivationPath = "m/44'/396'/0'/0/0";
 		//Context.AbiConfig;
-		private Integer workchain = 0;
-		private Integer messageExpirationTimeout = 40000;
-		private Integer messageExpirationTimeoutGrowFactor = null;
-		private Integer cacheMaxSize = 10240;
-		private Integer maxReconnectTimeout = 120000;
+		private Long workchain = 0L;
+		private Long messageExpirationTimeout = 40000L;
+		private Long messageExpirationTimeoutGrowFactor = null;
+		private Long cacheMaxSize = 10240L;
+		private Long maxReconnectTimeout = 120000L;
 		private Integer sendingEndpointCount = 1;
-		private Integer latencyDetectionInterval = 60000;
-		private Integer maxLatency = 60000;
-		private Integer queryTimeout = 60000;
+		private Long latencyDetectionInterval = 60000L;
+		private Long maxLatency = 60000L;
+		private Long queryTimeout = 60000L;
 		private Client.NetworkQueriesProtocol queriesProtocol = Client.NetworkQueriesProtocol.HTTP;
-		private Integer firstRempStatusTimeout = 1000;
-		private Integer nextRempStatusTimeout = 5000;
+		private Long firstRempStatusTimeout = 1000L;
+		private Long nextRempStatusTimeout = 5000L;
 
-		private Integer signatureId = null;
+		private Long signatureId = null;
 
 		private OnchainConfig onchainConfig;
 
@@ -176,7 +175,7 @@ public record Sdk(EverSdkContext context,
 			return this;
 		}
 
-		public Builder networkMaxReconnectTimeout(Integer maxReconnectTimeout) {
+		public Builder networkMaxReconnectTimeout(Long maxReconnectTimeout) {
 			this.maxReconnectTimeout = maxReconnectTimeout;
 			return this;
 		}
@@ -186,17 +185,17 @@ public record Sdk(EverSdkContext context,
 			return this;
 		}
 
-		public Builder networkLatencyDetectionInterval(Integer latencyDetectionInterval) {
+		public Builder networkLatencyDetectionInterval(Long latencyDetectionInterval) {
 			this.latencyDetectionInterval = latencyDetectionInterval;
 			return this;
 		}
 
-		public Builder networkMaxLatency(Integer maxLatency) {
+		public Builder networkMaxLatency(Long maxLatency) {
 			this.maxLatency = maxLatency;
 			return this;
 		}
 
-		public Builder networkQueryTimeout(Integer queryTimeout) {
+		public Builder networkQueryTimeout(Long queryTimeout) {
 			this.queryTimeout = queryTimeout;
 			return this;
 		}
@@ -206,12 +205,12 @@ public record Sdk(EverSdkContext context,
 			return this;
 		}
 
-		public Builder networkFirstRempStatusTimeout(Integer firstRempStatusTimeout) {
+		public Builder networkFirstRempStatusTimeout(Long firstRempStatusTimeout) {
 			this.firstRempStatusTimeout = firstRempStatusTimeout;
 			return this;
 		}
 
-		public Builder networkNextRempStatusTimeout(Integer nextRempStatusTimeout) {
+		public Builder networkNextRempStatusTimeout(Long nextRempStatusTimeout) {
 			this.nextRempStatusTimeout = nextRempStatusTimeout;
 			return this;
 		}
@@ -236,27 +235,27 @@ public record Sdk(EverSdkContext context,
 			return this;
 		}
 
-		public Builder networkMessageProcessingTimeout(Integer message_processing_timeout) {
+		public Builder networkMessageProcessingTimeout(Long message_processing_timeout) {
 			this.messageProcessingTimeout = message_processing_timeout;
 			return this;
 		}
 
-		public Builder networkWaitForTimeout(Integer wait_for_timeout) {
+		public Builder networkWaitForTimeout(Long wait_for_timeout) {
 			this.waitForTimeout = wait_for_timeout;
 			return this;
 		}
 
-		public Builder networkOutOfSyncThreshold(Integer out_of_sync_threshold) {
+		public Builder networkOutOfSyncThreshold(Long out_of_sync_threshold) {
 			this.outOfSyncThreshold = out_of_sync_threshold;
 			return this;
 		}
 
-		public Builder networkReconnectTimeout(Integer reconnect_timeout) {
+		public Builder networkReconnectTimeout(Long reconnect_timeout) {
 			this.reconnectTimeout = reconnect_timeout;
 			return this;
 		}
 
-		public Builder networkSignatureId(Integer signatureId) {
+		public Builder networkSignatureId(Long signatureId) {
 			this.signatureId = signatureId;
 			return this;
 		}
@@ -283,17 +282,17 @@ public record Sdk(EverSdkContext context,
 		}
 
 		//abi
-		public Builder abiWorkchain(Integer workchain) {
+		public Builder abiWorkchain(Long workchain) {
 			this.workchain = workchain;
 			return this;
 		}
 
-		public Builder abiMessageExpirationTimeout(Integer message_expiration_timeout) {
+		public Builder abiMessageExpirationTimeout(Long message_expiration_timeout) {
 			this.messageExpirationTimeout = message_expiration_timeout;
 			return this;
 		}
 
-		public Builder abiMessageExpirationTimeoutGrowFactor(Integer message_expiration_timeout_grow_factor) {
+		public Builder abiMessageExpirationTimeoutGrowFactor(Long message_expiration_timeout_grow_factor) {
 			this.messageExpirationTimeoutGrowFactor = message_expiration_timeout_grow_factor;
 			return this;
 		}
@@ -313,78 +312,68 @@ public record Sdk(EverSdkContext context,
 		}
 
 		public Sdk build(LibraryLoader loader) throws IOException {
-			var config = new Client.ClientConfig(
-					new Client.BindingConfig("java4ever","1.8.0"),
-					new Client.NetworkConfig(
-							this.serverAddress,
-							this.endpoints,
-							this.networkRetriesCount,
-							this.maxReconnectTimeout,
-							this.reconnectTimeout,
-							this.messageRetriesCount,
-							this.messageProcessingTimeout,
-							this.waitForTimeout,
-							this.outOfSyncThreshold,
-							this.sendingEndpointCount,
-							this.latencyDetectionInterval,
-							this.maxLatency,
-							this.queryTimeout,
-							this.queriesProtocol,
-							this.firstRempStatusTimeout,
-							this.nextRempStatusTimeout,
-							this.signatureId,
-							this.accessKey),
-					new Client.CryptoConfig(
-							this.mnemonicDictionary,
-							this.mnemonicWordCount,
-							this.hdkeyDerivationPath),
-					new Client.AbiConfig(
-							this.workchain,
-							this.messageExpirationTimeout,
-							this.messageExpirationTimeoutGrowFactor),
-					new Client.BocConfig(this.cacheMaxSize),
-					new Client.ProofsConfig(this.cacheInLocalStorage),
-					this.localStoragePath
-			);
+			var config = new Client.ClientConfig(new Client.BindingConfig("java4ever", "2.1.1"),
+			                                     new Client.NetworkConfig(this.serverAddress,
+			                                                              this.endpoints,
+			                                                              this.networkRetriesCount,
+			                                                              this.maxReconnectTimeout,
+			                                                              this.reconnectTimeout,
+			                                                              this.messageRetriesCount,
+			                                                              this.messageProcessingTimeout,
+			                                                              this.waitForTimeout,
+			                                                              this.outOfSyncThreshold,
+			                                                              this.sendingEndpointCount,
+			                                                              this.latencyDetectionInterval,
+			                                                              this.maxLatency,
+			                                                              this.queryTimeout,
+			                                                              this.queriesProtocol,
+			                                                              this.firstRempStatusTimeout,
+			                                                              this.nextRempStatusTimeout,
+			                                                              this.signatureId,
+			                                                              this.accessKey),
+			                                     new Client.CryptoConfig(this.mnemonicDictionary,
+			                                                             this.mnemonicWordCount,
+			                                                             this.hdkeyDerivationPath),
+			                                     new Client.AbiConfig(this.workchain,
+			                                                          this.messageExpirationTimeout,
+			                                                          this.messageExpirationTimeoutGrowFactor),
+			                                     new Client.BocConfig(this.cacheMaxSize),
+			                                     new Client.ProofsConfig(this.cacheInLocalStorage),
+			                                     this.localStoragePath);
 			var explorerConfig =
 					this.onchainConfig == null ? OnchainConfig.EMPTY(this.explorerConfigPath) : this.onchainConfig;
-			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(
-					this.environmentConfigPath,
-					this.solidityCompilerPath,
-					this.tvmlinkerPath,
-					this.stdLibPath,
-					this.soliditySourcesDefaultPath,
-					this.solidityArtifactsBuildPath) : this.localConfig;
-			return new Sdk(
-					EverSdkContext.builder()
-							.setConfigJson(this.mapper.writeValueAsString(config))
-							.setTimeout(this.timeout)
-							.setMapper(this.mapper)
-							.buildNew(loader),
-					this.debugTimeout, config, explorerConfig, envConfig
-			);
+			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(this.environmentConfigPath,
+			                                                             this.solidityCompilerPath,
+			                                                             this.tvmlinkerPath,
+			                                                             this.stdLibPath,
+			                                                             this.soliditySourcesDefaultPath,
+			                                                             this.solidityArtifactsBuildPath) : this.localConfig;
+			return new Sdk(EverSdkContext.builder()
+			                             .setConfigJson(this.mapper.writeValueAsString(config))
+			                             .setTimeout(this.timeout)
+			                             .setMapper(this.mapper)
+			                             .buildNew(loader), this.debugTimeout, config, explorerConfig, envConfig);
 		}
 
 		public Sdk load(int contextId, int contextRequestCount) throws EverSdkException, IOException {
 			var context = EverSdkContext.builder()
-					.setTimeout(this.timeout)
-					.setMapper(this.mapper)
-					.buildFromExisting(contextId, contextRequestCount);
+			                            .setTimeout(this.timeout)
+			                            .setMapper(this.mapper)
+			                            .buildFromExisting(contextId, contextRequestCount);
 			Client.ClientConfig config = null;
 			var explorerConfig =
 					this.onchainConfig == null ? OnchainConfig.EMPTY(this.explorerConfigPath) : this.onchainConfig;
-			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(
-					this.environmentConfigPath,
-					this.solidityCompilerPath,
-					this.tvmlinkerPath,
-					this.stdLibPath,
-					this.soliditySourcesDefaultPath,
-					this.solidityArtifactsBuildPath) : this.localConfig;
+			var envConfig = this.localConfig == null ? LocalConfig.EMPTY(this.environmentConfigPath,
+			                                                             this.solidityCompilerPath,
+			                                                             this.tvmlinkerPath,
+			                                                             this.stdLibPath,
+			                                                             this.soliditySourcesDefaultPath,
+			                                                             this.solidityArtifactsBuildPath) : this.localConfig;
 			config = Client.config(context);
 			return new Sdk(context, this.debugTimeout, config, explorerConfig, envConfig);
 		}
 
-		public Builder bocCacheMaxSize(Integer cacheMaxSize) {
+		public Builder bocCacheMaxSize(Long cacheMaxSize) {
 			this.cacheMaxSize = cacheMaxSize;
 			return this;
 		}

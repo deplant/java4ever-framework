@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.datatype.SolStruct;
@@ -24,7 +25,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	private final static System.Logger logger = System.getLogger(ContractAbi.class.getName());
 
 	public static ContractAbi ofString(String jsonString) throws JsonProcessingException {
-		return new ContractAbi(EverSdkContext.Builder.DEFAULT_MAPPER.readValue(jsonString, Abi.AbiContract.class));
+		return new ContractAbi(JsonContext.ABI_JSON_MAPPER().readValue(jsonString, Abi.AbiContract.class));
 	}
 
 	public static ContractAbi ofResource(String resourceName) throws JsonProcessingException {
@@ -36,11 +37,11 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public static ContractAbi ofJsonNode(JsonNode node) throws JsonProcessingException {
-		return ofString(EverSdkContext.Builder.DEFAULT_MAPPER.writeValueAsString(node));
+		return ofString(JsonContext.ABI_JSON_MAPPER().writeValueAsString(node));
 	}
 
 	public String json() throws JsonProcessingException {
-		return EverSdkContext.Builder.DEFAULT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		return JsonContext.ABI_JSON_MAPPER().setSerializationInclusion(JsonInclude.Include.NON_NULL)
 		                                            .writeValueAsString(abiContract());
 	}
 

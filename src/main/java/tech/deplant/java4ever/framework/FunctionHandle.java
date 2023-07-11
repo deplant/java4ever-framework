@@ -354,7 +354,7 @@ public record FunctionHandle<RETURN>(
 		                                              msgId,
 		                                              finalABIArray,
 		                                              contract().sdk().debugTreeTimeout(),
-		                                              0);
+		                                              0L);
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))

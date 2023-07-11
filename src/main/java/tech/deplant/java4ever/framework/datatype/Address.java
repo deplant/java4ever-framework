@@ -46,7 +46,7 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 
 	public static String ofFutureDeploy(Sdk sdk,
 	                                    Template template,
-	                                    int workchainId,
+	                                    long workchainId,
 	                                    Map<String, Object> initialData,
 	                                    Credentials credentials) throws EverSdkException {
 		return Abi.encodeMessage(

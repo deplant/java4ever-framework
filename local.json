@@ -1,13 +1,13 @@
 {
   "compiler" : {
-    "compiler_path" : "C:\\idea_git\\java4ever-framework"
+    "compilerPath" : "C:\\idea_git\\java4ever-framework"
   },
   "linker" : {
-    "linker_path" : "C:\\idea_git\\java4ever-framework",
-    "stdlib_sol_path" : "C:\\idea_git\\java4ever-framework"
+    "linkerPath" : "C:\\idea_git\\java4ever-framework",
+    "stdlibSolPath" : "C:\\idea_git\\java4ever-framework"
   },
-  "source_path" : "C:\\idea_git\\java4ever-framework",
-  "build_path" : "C:\\idea_git\\java4ever-framework",
+  "sourcePath" : "C:\\idea_git\\java4ever-framework",
+  "buildPath" : "C:\\idea_git\\java4ever-framework",
   "abis" : { },
   "tvcs" : { },
   "keys" : { }

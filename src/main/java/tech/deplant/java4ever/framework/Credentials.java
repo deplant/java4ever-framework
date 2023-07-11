@@ -2,10 +2,7 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.Crypto;
-import tech.deplant.java4ever.binding.EverSdkContext;
-import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.utils.Numbers;
@@ -38,8 +35,8 @@ public record Credentials(@JsonProperty("public") String publicKey, @JsonPropert
 
 	public static Credentials ofResource(String resourceName) {
 		try {
-			return EverSdkContext.Builder.DEFAULT_MAPPER.readValue(new JsonResource(resourceName).get(),
-			                                                       Credentials.class);
+			return JsonContext.ABI_JSON_MAPPER().readValue(new JsonResource(resourceName).get(),
+			                                               Credentials.class);
 		} catch (JsonProcessingException e) {
 			return NONE;
 		}
@@ -47,7 +44,7 @@ public record Credentials(@JsonProperty("public") String publicKey, @JsonPropert
 
 	public static Credentials ofFile(String filePath) {
 		try {
-			return EverSdkContext.Builder.DEFAULT_MAPPER.readValue(new JsonFile(filePath).get(), Credentials.class);
+			return JsonContext.ABI_JSON_MAPPER().readValue(new JsonFile(filePath).get(), Credentials.class);
 		} catch (JsonProcessingException e) {
 			return NONE;
 		}

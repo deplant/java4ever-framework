@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkContext;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
@@ -26,8 +27,8 @@ public class AbiTests {
 	public void deserialized_abi_equals_original_json() throws JsonProcessingException {
 		var jsonStr = new JsonResource("artifacts/tip31/TokenRoot.abi.json").get();
 		var cachedStr = TIP3TokenRootTemplate.DEFAULT_ABI().json();
-		assertEquals(EverSdkContext.Builder.DEFAULT_MAPPER.readTree(jsonStr),
-		             EverSdkContext.Builder.DEFAULT_MAPPER.readTree(cachedStr));
+		assertEquals(JsonContext.ABI_JSON_MAPPER().readTree(jsonStr),
+		             JsonContext.ABI_JSON_MAPPER().readTree(cachedStr));
 	}
 
 	@Test

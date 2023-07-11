@@ -119,7 +119,7 @@ public record Tvc(byte[] bytes) {
 		private String library;
 		private Boolean tick;
 		private Boolean tock;
-		private Integer splitDepth;
+		private Long splitDepth;
 		private String compilerVersion;
 
 		public Builder() {
@@ -130,7 +130,7 @@ public record Tvc(byte[] bytes) {
 		                String library,
 		                Boolean tick,
 		                Boolean tock,
-		                Integer splitDepth,
+		                Long splitDepth,
 		                String compilerVersion) {
 			this.code = code;
 			this.data = data;
@@ -166,7 +166,7 @@ public record Tvc(byte[] bytes) {
 			return this;
 		}
 
-		private Builder splitDepth(Integer splitDepth) {
+		private Builder splitDepth(Long splitDepth) {
 			this.splitDepth = splitDepth;
 			return this;
 		}

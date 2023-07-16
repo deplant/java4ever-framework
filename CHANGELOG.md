@@ -1,3 +1,7 @@
+### 2.2.0
+
+- Helpers for contract subscriptions
+
 ### 2.1.0
 
 - Updated EVER-SDK -> 1.43.3

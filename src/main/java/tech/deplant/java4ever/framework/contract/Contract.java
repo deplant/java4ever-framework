@@ -2,9 +2,11 @@ package tech.deplant.java4ever.framework.contract;
 
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.SubscribeEvent;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
+import tech.deplant.java4ever.framework.gql.SubscribeHandle;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +15,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface Contract {
@@ -95,6 +98,66 @@ public interface Contract {
 		                            functionName,
 		                            functionInputs,
 		                            functionHeader);
+	}
+
+	default SubscribeHandle subscribeOnTransactions(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+		final String queryText = """
+				subscription {
+							transactions(
+									filter: {
+										account_addr: { eq: "%s" }
+									}
+				                ) {
+								%s
+							}
+						}
+				""".formatted(address(),resultFields);
+		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
+	}
+
+	default SubscribeHandle subscribeOnIncomingMessages(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+		final String queryText = """
+				subscription {
+							messages(
+									filter: {
+										dst: { eq: "%s" }
+									}
+				                ) {
+								%s
+							}
+						}
+				""".formatted(address(),resultFields);
+		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
+	}
+
+	default SubscribeHandle subscribeOnOutgoingMessages(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+		final String queryText = """
+				subscription {
+							messages(
+									filter: {
+										src: { eq: "%s" }
+									}
+				                ) {
+								%s
+							}
+						}
+				""".formatted(address(),resultFields);
+		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
+	}
+
+	default SubscribeHandle subscribeOnAccount(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+		final String queryText = """
+				subscription {
+							accounts(
+									filter: {
+										id: { eq: "%s" }
+									}
+				                ) {
+								%s
+							}
+						}
+				""".formatted(address(),resultFields);
+		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {

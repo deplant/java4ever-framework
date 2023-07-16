@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
 public record FunctionHandle<RETURN>(

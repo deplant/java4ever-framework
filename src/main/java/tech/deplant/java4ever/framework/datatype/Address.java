@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.template.Template;
@@ -44,27 +46,35 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 		return (null == nullableObject) ? Address.ZERO : new Address(nullableObject.toString());
 	}
 
-	public static String ofFutureDeploy(Sdk sdk,
-	                                    Template template,
-	                                    long workchainId,
-	                                    Map<String, Object> initialData,
-	                                    Credentials credentials) throws EverSdkException {
-		return Abi.encodeMessage(
-				sdk.context(),
-				template.abi().ABI(),
-				null,
-				new Abi.DeploySet(template.tvc().base64String(),
-				                  null,
-				                  null,
-				                  workchainId,
-				                  initialData,
-				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
-				null,
-				requireNonNullElse(credentials, Credentials.NONE).signer(),
-				null,
-				null
-		).address();
-	}
+//	public static String ofFutureDeploy(Sdk sdk,
+//	                                    Template template,
+//	                                    long workchainId,
+//	                                    Map<String, Object> initialData,
+//	                                    Credentials credentials) throws EverSdkException {
+//		return ofFutureDeploy(sdk, template, workchainId, JsonContext.ABI_JSON_MAPPER().valueToTree(initialData), credentials);
+//	}
+//
+//	public static String ofFutureDeploy(Sdk sdk,
+//	                                    Template template,
+//	                                    long workchainId,
+//	                                    JsonNode initialData,
+//	                                    Credentials credentials) throws EverSdkException {
+//		return Abi.encodeMessage(
+//				sdk.context(),
+//				template.abi().ABI(),
+//				null,
+//				new Abi.DeploySet(template.tvc().base64String(),
+//				                  null,
+//				                  null,
+//				                  workchainId,
+//				                  initialData,
+//				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
+//				null,
+//				requireNonNullElse(credentials, Credentials.NONE).signer(),
+//				null,
+//				null
+//		).address();
+//	}
 
 	public boolean isNull() {
 		return this.value.equals(BigInteger.ZERO);

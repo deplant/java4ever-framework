@@ -1,8 +1,10 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.ByteFile;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
@@ -28,7 +30,7 @@ public record Tvc(byte[] bytes) {
 		return Base64.getEncoder().encodeToString(bytes());
 	}
 
-	public Map<String, Object> decodeInitialData(Sdk sdk, ContractAbi abi) throws EverSdkException {
+	public JsonNode decodeInitialData(Sdk sdk, ContractAbi abi) throws EverSdkException {
 		return Abi.decodeInitialData(sdk.context(), abi.ABI(), decode(sdk).data(), false).initialData();
 	}
 
@@ -36,7 +38,7 @@ public record Tvc(byte[] bytes) {
 	                                ContractAbi abi,
 	                                Map<String, Object> initData,
 	                                String pubkey) throws EverSdkException {
-		return Abi.encodeInitialData(sdk.context(), abi.ABI(), initData, pubkey, null).data();
+		return Abi.encodeInitialData(sdk.context(), abi.ABI(), JsonContext.ABI_JSON_MAPPER().valueToTree(initData), pubkey, null).data();
 	}
 
 	public String decodeInitialPubkey(Sdk sdk, ContractAbi abi) throws EverSdkException {
@@ -82,9 +84,9 @@ public record Tvc(byte[] bytes) {
 		String updatedDataString = Abi.updateInitialData(sdk.context(),
 		                                                 abi.ABI(),
 		                                                 data(sdk),
-		                                                 abi.convertInitDataInputs(initialData),
-		                                                 publicKey,
-		                                                 null).data();
+		                                                 JsonContext.ABI_JSON_MAPPER().valueToTree(abi.convertInitDataInputs(initialData)),
+		                                                                                           publicKey,
+		                                                                                           null).data();
 		var decoded = decode(sdk);
 		var newTvcString = Boc.encodeStateInit(sdk.context(),
 		                                 decoded.code(),

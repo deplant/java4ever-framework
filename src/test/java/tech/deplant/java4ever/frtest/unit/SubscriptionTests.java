@@ -18,6 +18,7 @@ import tech.deplant.java4ever.framework.datatype.Uint;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -41,25 +42,22 @@ public class SubscriptionTests {
 		String subscribedIdPre = LOCAL_MSIG_ROOT.address();
 		BigInteger subscribedBalancePre = LOCAL_MSIG_ROOT.accountBalance();
 		logger.log(System.Logger.Level.INFO, LOCAL_MSIG_ROOT.accountBalance());
-		LOCAL_MSIG_ROOT.subscribeOnTransactions("account_addr balance_delta", event -> {
-			try {
-				var node = JsonContext.ABI_JSON_MAPPER().readTree(event.result().get("result").toString());
-				String accountAddr = node.get("transactions").get("account_addr").asText();
-				String accountBalanceDelta = node.get("transactions").get("balance_delta").asText();
+		var handle = LOCAL_MSIG_ROOT.subscribeOnTransactions("account_addr balance_delta", event -> {
+				//String accountAddr = ((Map<String, Object>)((Map<String, Object>)event.result().get("result")).get("transactions")).get("account_addr").toString();
+				var transactions = event.result().get("result").get("transactions");
+				String accountAddr = transactions.get("account_addr").asText();
+				String accountBalanceDelta = transactions.get("balance_delta").asText();
 				assertEquals(subscribedIdPre, accountAddr);
 				logger.log(System.Logger.Level.INFO, accountBalanceDelta);
 				assertNotEquals(BigInteger.ZERO, Uint.fromJava(128, accountBalanceDelta).toJava());
-				assertNotEquals(subscribedBalancePre, LOCAL_MSIG_ROOT.accountBalance());
-			} catch (EverSdkException | JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
 		});
 		LOCAL_MSIG_ROOT.sendTransaction(new Address(LOCAL_MSIG_ROOT.address()),
 		                                CurrencyUnit.VALUE(CurrencyUnit.Ever.EVER, "2"),
 		                                false,
 		                                MessageFlag.EXACT_VALUE_GAS.flag(),
 		                                TvmCell.EMPTY()).call();
-		Thread.sleep(5000);
+		assertNotEquals(subscribedBalancePre, LOCAL_MSIG_ROOT.accountBalance());
+		handle.unsubscribe();
 	}
 
 }

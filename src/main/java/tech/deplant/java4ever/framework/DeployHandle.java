@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.Giver;
@@ -23,7 +24,7 @@ import static java.util.Objects.requireNonNullElse;
 /**
  * Representation of prepared deployment set. Usually this object is returned by template's prepareDeploy() method.
  *
- * @param clazz class of contract wrapper
+ * @param clazz             class of contract wrapper
  * @param sdk
  * @param template
  * @param workchainId
@@ -130,14 +131,18 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		                         null,
 		                         null,
 		                         workchainId(),
-		                         template().abi().convertInitDataInputs(initialDataFields()),
+		                         JsonContext.ABI_JSON_MAPPER()
+		                                    .valueToTree(template().abi().convertInitDataInputs(initialDataFields())),
 		                         requireNonNullElse(credentials(), Credentials.NONE).publicKey());
 	}
 
 	public Abi.CallSet toConstructorCallSet() throws EverSdkException {
 		return new Abi.CallSet("constructor",
 		                       constructorHeader(),
-		                       template().abi().convertFunctionInputs("constructor", constructorInputs()));
+		                       JsonContext.ABI_JSON_MAPPER()
+		                                  .valueToTree(template().abi()
+		                                                         .convertFunctionInputs("constructor",
+		                                                                                constructorInputs())));
 	}
 
 	public Abi.Signer toSigner() {
@@ -145,16 +150,14 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	public String toAddress() throws EverSdkException {
-		return Abi.encodeMessage(
-				sdk().context(),
-				template().abi().ABI(),
-				null,
-				toDeploySet(),
-				null,
-				toSigner(),
-				null,
-				null
-		).address();
+		return Abi.encodeMessage(sdk().context(),
+		                         template().abi().ABI(),
+		                         null,
+		                         toDeploySet(),
+		                         null,
+		                         toSigner(),
+		                         null,
+		                         null).address();
 	}
 
 	public RETURN deployWithGiver(Giver giver, BigInteger value) throws EverSdkException {
@@ -174,23 +177,23 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 			final Future<Abi.CallSet> callSetFuture = scope.fork(this::toConstructorCallSet);
 			//final Future<String> addressFuture = scope.fork(this::calculateAddress);
 			scope.join();
-			Processing.processMessage(
-					sdk().context(),
-					template().abi().ABI(),
-					address,
-					deploySetFuture.resultNow(),
-					callSetFuture.resultNow(),
-					toSigner(),
-					null,
-					null,
-					false
-			);
-			Map<String, Object> contractMap = Map.of(
-					"sdk", sdk(),
-					"address", address,
-					"abi", template().abi(),
-					"credentials", credentials()
-			);
+			Processing.processMessage(sdk().context(),
+			                          template().abi().ABI(),
+			                          address,
+			                          deploySetFuture.resultNow(),
+			                          callSetFuture.resultNow(),
+			                          toSigner(),
+			                          null,
+			                          null,
+			                          false);
+			Map<String, Object> contractMap = Map.of("sdk",
+			                                         sdk(),
+			                                         "address",
+			                                         address,
+			                                         "abi",
+			                                         template().abi(),
+			                                         "credentials",
+			                                         credentials());
 			//return MAPPER.convertValue(contractMap, clazz());
 			return Contract.instantiate(clazz(), sdk(), address, template().abi(), credentials());
 		} catch (InterruptedException e) {

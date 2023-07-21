@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.utils.Numbers;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -16,10 +17,12 @@ public record Uint(int size, BigInteger bigInteger) implements AbiType<BigIntege
 			case BigInteger bi -> new Uint(size, bi.abs());
 			case BigDecimal bd -> new Uint(size, bd.toBigInteger().abs());
 			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()).abs());
-			case String str
-					when str.length() >= 2 && "0x".equals(str.substring(0, 2)) ->
-					new Uint(size, new BigInteger(str.substring(2), 16).abs()); // hex value
-			case String str -> new Uint(size, new BigInteger(str).abs()); // not hex value
+			case String str -> new Uint(size, Numbers.hexStringToBigInt(str));
+//			case String str when str.length() >= 3 && "-0x".equals(str.substring(0, 3)) ->
+//					new Uint(size, new BigInteger(str.substring(3), 16).abs().negate());
+//			case String str when str.length() >= 2 && "0x".equals(str.substring(0, 2)) ->
+//					new Uint(size, new BigInteger(str.substring(2), 16).abs()); // hex value
+//			case String str -> new Uint(size, new BigInteger(str).abs()); // not hex value
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + input + " class: " + input.getClass().getName());
 		};

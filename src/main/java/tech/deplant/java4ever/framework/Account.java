@@ -1,10 +1,8 @@
 package tech.deplant.java4ever.framework;
 
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.Net;
-import tech.deplant.java4ever.binding.Tvm;
+import tech.deplant.java4ever.binding.*;
 
+import java.io.IOException;
 import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
@@ -38,12 +36,17 @@ public record Account(String id,
 		filter.put("id", new GraphQLFilter.In(new String[]{address}));
 		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
 		                                                         "accounts",
-		                                                         filter,
+		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
 		                                                         null,
 		                                                         null);
 		if (result.result().length > 0) {
-			return sdk.convertMap(result.result()[0], Account.class);
+			try {
+				return JsonContext.SDK_JSON_MAPPER().readValue(result.result()[0].traverse(),Account.class);
+			} catch (IOException e) {
+				logger.log(System.Logger.Level.ERROR, e);
+				return new Account(address, 0, "0x00", null, null, null, null, null, null, 0);
+			}
 		} else {
 			return new Account(address, 0, "0x00", null, null, null, null, null, null, 0);
 		}
@@ -65,11 +68,11 @@ public record Account(String id,
 		return Arrays
 				.stream(Net.queryCollection(sdk.context(),
 				                            "accounts",
-				                            filter,
+				                            JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
 				                            null,
 				                            null).result())
-				.map(obj -> sdk.convertMap(obj, Account.class))
+				.map(obj -> JsonContext.SDK_JSON_MAPPER().convertValue(obj, Account.class))
 				.toList();
 	}
 

@@ -1,6 +1,7 @@
 ### 2.2.0
 
-- Helpers for contract subscriptions
+- Added contract methods for subscriptions
+- Removed Account methods
 
 ### 2.1.0
 

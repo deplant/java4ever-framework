@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework.datatype;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.Boc;
@@ -35,11 +36,11 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 		};
 	}
 
-	public Map<String, Object> decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
+	public JsonNode decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
 		return Abi.decodeBoc(sdk.context(), types, cellBoc(), true).data();
 	}
 
-	public Map<String, Object> decode(Sdk sdk, String[] types) throws EverSdkException {
+	public JsonNode decode(Sdk sdk, String[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
 			String type = types[i];
@@ -49,7 +50,7 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 		return decode(sdk, params);
 	}
 
-	public Object decodeAndGet(Sdk sdk, String[] types, int index) throws EverSdkException {
+	public JsonNode decodeAndGet(Sdk sdk, String[] types, int index) throws EverSdkException {
 		var result = decode(sdk, types);
 		return result.get(String.valueOf(index));
 	}

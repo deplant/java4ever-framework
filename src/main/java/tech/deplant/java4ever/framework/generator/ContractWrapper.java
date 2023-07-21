@@ -51,7 +51,7 @@ public class ContractWrapper {
 			case BOOL -> ClassName.get(Boolean.class);
 			case CELL -> ClassName.get(TvmCell.class);
 			case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
-			case BUILDER -> ClassName.get(TvmBuilder.class);
+			case BUILDER -> ClassName.get(TvmBuilder.class); //TODO Check this too
 			case TUPLE -> ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
 			case OPTIONAL -> ParameterizedTypeName.get(ClassName.get(Optional.class), typeSwitch(abiTypeString));
 		};

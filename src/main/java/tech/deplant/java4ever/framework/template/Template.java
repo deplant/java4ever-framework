@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.template;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.*;
@@ -15,16 +16,16 @@ public interface Template {
 
 	Tvc tvc();
 
-	default String calculateAddress(Sdk sdk,
-	                                Map<String, Object> initialData,
-	                                Credentials credentials) throws EverSdkException {
-		String address = Address.ofFutureDeploy(sdk, new AbstractTemplate(abi(), tvc()), 0, initialData, credentials);
-		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
-		return address;
-	}
+//	default String calculateAddress(Sdk sdk,
+//	                                Map<String, Object> initialData,
+//	                                Credentials credentials) throws EverSdkException {
+//		String address = Address.ofFutureDeploy(sdk, new AbstractTemplate(abi(), tvc()), 0, initialData, credentials);
+//		logger.log(System.Logger.Level.INFO, () -> "Future address: " + address);
+//		return address;
+//	}
 
 
-	default Map<String, Object> decodeInitialData(Sdk sdk) throws EverSdkException {
+	default JsonNode decodeInitialData(Sdk sdk) throws EverSdkException {
 		return tvc().decodeInitialData(sdk, abi());
 	}
 

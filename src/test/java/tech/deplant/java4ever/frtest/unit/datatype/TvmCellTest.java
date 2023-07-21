@@ -46,7 +46,7 @@ class TvmCellTest {
 
 		var result = builder.toCell(SDK_EMPTY).decodeAndGet(SDK_EMPTY, outTypeNames, 2);
 
-		assertEquals(source,result.toString());
+		assertEquals(source,result.asText());
 	}
 
 	@Test

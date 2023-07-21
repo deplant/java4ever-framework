@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.gql;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.Net;
@@ -17,13 +18,13 @@ public record SubscribeHandle(Sdk sdk, long handle) {
 	public static SubscribeHandle subscribe(Sdk sdk, String queryText, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
 		var result = Net.subscribe(sdk.context(),
 		              queryText,
-		              Map.of(),
+		              JsonContext.EMPTY_NODE(),
 		              handler -> {
 			              try {
-				              subscribeEventConsumer.accept(new SubscribeEvent(JsonContext.readAsMap(JsonContext.ABI_JSON_MAPPER(),handler.params())));
+				              subscribeEventConsumer.accept(new SubscribeEvent(JsonContext.ABI_JSON_MAPPER().readTree(handler.params())));
 			              } catch (JsonProcessingException e) {
 				              logger.log(System.Logger.Level.WARNING, e::getMessage);
-				              subscribeEventConsumer.accept(new SubscribeEvent(Map.of()));
+				              subscribeEventConsumer.accept(new SubscribeEvent(null));
 			              }
 		              });
 		return new SubscribeHandle(sdk, result.handle());

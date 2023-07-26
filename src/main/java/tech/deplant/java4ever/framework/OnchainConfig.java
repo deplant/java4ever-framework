@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.JsonContext;
@@ -115,6 +116,6 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 	public record OnchainInfo(Map<String, SavedContract> contracts, Map<String, Credentials> credentials) {
 	}
 
-	public record SavedContract(String abiJson, String address) {
+	public record SavedContract(@JsonProperty("abi_json") String abiJson, String address) {
 	}
 }

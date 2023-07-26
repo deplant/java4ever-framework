@@ -312,7 +312,7 @@ public record Sdk(EverSdkContext context,
 		}
 
 		public Sdk build(LibraryLoader loader) throws IOException {
-			var config = new Client.ClientConfig(new Client.BindingConfig("java4ever", "2.1.1"),
+			var config = new Client.ClientConfig(new Client.BindingConfig("java4ever", "2.2.0"),
 			                                     new Client.NetworkConfig(this.serverAddress,
 			                                                              this.endpoints,
 			                                                              this.networkRetriesCount,

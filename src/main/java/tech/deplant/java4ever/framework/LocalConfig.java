@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -129,8 +130,8 @@ public record LocalConfig(Artifact<String, String> artifact,
 
 	public record LocalInfo(Solc compiler,
 	                        TvmLinker linker,
-	                        String sourcePath,
-	                        String buildPath,
+	                        @JsonProperty("source_path") String sourcePath,
+	                        @JsonProperty("build_path") String buildPath,
 	                        Map<String, String> abis,
 	                        Map<String, String> tvcs,
 	                        Map<String, String> keys) {

@@ -2,6 +2,7 @@ package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
+import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
@@ -52,17 +53,22 @@ public class Env {
 	static TIP3TokenRoot LOCAL_TIP3_ROOT;
 	static TIP3TokenWallet LOCAL_TIP3_WALLET1;
 	static TIP3TokenWallet LOCAL_TIP3_WALLET2;
-	static LibraryLoader LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
+	//static LibraryLoader LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
+
+	static LibraryLoader DEFAULT_LOADER = new DefaultLoader(Env.class.getClassLoader());
+
 	private static boolean isInitialized = false;
 
 	public static void INIT() throws IOException, EverSdkException {
 		if (!isInitialized) {
 
+
+
 			// should be first
-			SDK_EMPTY = Sdk.DEFAULT();
-			SDK_LOCAL = Sdk.DEFAULT(LOCAL_ENDPOINT);
-			SDK_DEV = Sdk.DEFAULT(DEV_ENDPOINT);
-			SDK_MAIN = Sdk.DEFAULT(MAIN_ENDPOINT);
+			SDK_EMPTY = Sdk.builder().build(DEFAULT_LOADER);
+			SDK_LOCAL = Sdk.builder().networkEndpoints(LOCAL_ENDPOINT).build(DEFAULT_LOADER);
+			SDK_DEV = Sdk.builder().networkEndpoints(DEV_ENDPOINT).build(DEFAULT_LOADER);
+			SDK_MAIN = Sdk.builder().networkEndpoints(MAIN_ENDPOINT).build(DEFAULT_LOADER);
 
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
 
@@ -109,14 +115,14 @@ public class Env {
 		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
 		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
-		                                                                  CurrencyUnit.VALUE(EVER, "0.5"))
+		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()
 		                                                        .makeAddrStd());
 		LOCAL_TIP3_WALLET2 = new TIP3TokenWallet(SDK_LOCAL,
 		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
 		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
-		                                                                  CurrencyUnit.VALUE(EVER, "0.5"))
+		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()
 		                                                        .makeAddrStd());
 	}

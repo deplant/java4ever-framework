@@ -1,3 +1,9 @@
+### 2.3.0
+
+- Updated EVER-SDK -> 1.44.1
+- Fixes for config serialization
+- Fixes for sendFrom() methods
+
 ### 2.2.0
 
 - Added contract methods for subscriptions

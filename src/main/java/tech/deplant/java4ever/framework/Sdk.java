@@ -12,6 +12,20 @@ import tech.deplant.java4ever.framework.contract.AbstractContract;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Class that holds a configured EVER-SDK session/context.
+ *
+ * {@snippet :
+	Sdk sdk = Sdk.builder().networkEndpoints("https://localhost:8080/graphql").build();
+ * }
+ *
+ *
+ * @param context
+ * @param debugTreeTimeout
+ * @param clientConfig
+ * @param onchainConfig
+ * @param localConfig
+ */
 public record Sdk(EverSdkContext context,
                   long debugTreeTimeout,
                   Client.ClientConfig clientConfig,

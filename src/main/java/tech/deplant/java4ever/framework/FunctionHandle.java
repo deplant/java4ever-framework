@@ -303,7 +303,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                .map(ContractAbi::ABI)
 		                                .toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall();
-		var msgId = resultOfProcess.transaction().get("in_msg").toString();
+		var msgId = resultOfProcess.transaction().get("in_msg").asText();
 		var debugOutResult = Net.queryTransactionTree(contract().sdk().context(),
 		                                              msgId,
 		                                              finalABIArray,

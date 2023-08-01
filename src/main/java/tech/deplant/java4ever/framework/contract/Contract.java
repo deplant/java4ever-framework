@@ -1,12 +1,15 @@
 package tech.deplant.java4ever.framework.contract;
 
+import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.SubscribeEvent;
 import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 import tech.deplant.java4ever.framework.gql.SubscribeHandle;
+import tech.deplant.java4ever.framework.gql.TransactionStatus;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,17 +18,21 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface Contract {
 
-	static <IMPL> IMPL instantiate(Class<IMPL> clazz, Sdk sdk, String address, ContractAbi abi,
+	static System.Logger logger = System.getLogger(Contract.class.getName());
+
+	static <IMPL> IMPL instantiate(Class<IMPL> clazz,
+	                               Sdk sdk,
+	                               String address,
+	                               ContractAbi abi,
 	                               Credentials credentials) {
-		List<?> componentTypes = Stream
-				.of(clazz.getRecordComponents())
-				.map(RecordComponent::getType)
-				.toList();
+		List<?> componentTypes = Stream.of(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
 		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
 			if (Arrays.asList(c.getParameterTypes()).equals(componentTypes)) {
 				try {
@@ -100,7 +107,47 @@ public interface Contract {
 		                            functionHeader);
 	}
 
-	default SubscribeHandle subscribeOnTransactions(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+	default void waitForTransaction(Address from,
+	                                boolean onlySuccessful, Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
+		final AtomicBoolean awaitDone = new AtomicBoolean(false);
+		final Consumer<SubscribeEvent> subscribeEventConsumer = subscribeEvent -> {
+			var transaction = subscribeEvent.result().get("result").get("transactions");
+			if (Objs.isNotNull(transaction.get("in_message")) &&
+			    Objs.isNotNull(transaction.get("in_message").get("src")) &&
+			    transaction.get("in_message").get("src").asText().equals(from.makeAddrStd())) {
+				if (!onlySuccessful ||
+				    (Objs.isNotNull(transaction.get("aborted")) &&
+				     Objs.isNotNull(transaction.get("status")) &&
+				     !transaction.get("aborted").asBoolean() &&
+				     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
+					logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
+					awaitDone.set(true);
+					logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
+				}
+			}
+		};
+		SubscribeHandle handle = subscribeOnTransactions("account_addr balance_delta in_message { src } aborted status",
+		                                                 subscribeEventConsumer);
+		long waitCounter = 0L;
+		if (Objs.isNotNull(startEvent)) {
+			startEvent.run();
+			logger.log(System.Logger.Level.TRACE, () -> "Event Done!!!");
+		}
+		while (true) {
+			if (awaitDone.get()) {
+				logger.log(System.Logger.Level.TRACE, () -> "Unsubscribe!!!");
+				handle.unsubscribe();
+				break;
+			} else if (waitCounter >= sdk().context().timeout()) {
+				throw new TimeoutException();
+			}
+			Thread.sleep(2000L);
+			waitCounter += 2000L;
+		}
+	}
+
+	default SubscribeHandle subscribeOnTransactions(String resultFields,
+	                                                Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
 				subscription {
 							transactions(
@@ -111,11 +158,12 @@ public interface Contract {
 								%s
 							}
 						}
-				""".formatted(address(),resultFields);
+				""".formatted(address(), resultFields);
 		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
-	default SubscribeHandle subscribeOnIncomingMessages(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+	default SubscribeHandle subscribeOnIncomingMessages(String resultFields,
+	                                                    Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
 				subscription {
 							messages(
@@ -126,11 +174,12 @@ public interface Contract {
 								%s
 							}
 						}
-				""".formatted(address(),resultFields);
+				""".formatted(address(), resultFields);
 		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
-	default SubscribeHandle subscribeOnOutgoingMessages(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+	default SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
+	                                                    Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
 				subscription {
 							messages(
@@ -141,11 +190,12 @@ public interface Contract {
 								%s
 							}
 						}
-				""".formatted(address(),resultFields);
+				""".formatted(address(), resultFields);
 		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
-	default SubscribeHandle subscribeOnAccount(String resultFields, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
+	default SubscribeHandle subscribeOnAccount(String resultFields,
+	                                           Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
 				subscription {
 							accounts(
@@ -156,17 +206,12 @@ public interface Contract {
 								%s
 							}
 						}
-				""".formatted(address(),resultFields);
+				""".formatted(address(), resultFields);
 		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {
-		return Abi.decodeMessage(sdk().context(),
-		                         abi().ABI(),
-		                         messageBoc.cellBoc(),
-		                         false,
-		                         null,
-		                         null);
+		return Abi.decodeMessage(sdk().context(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
 	}
 
 }

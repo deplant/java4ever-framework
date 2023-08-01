@@ -1,6 +1,6 @@
 package tech.deplant.java4ever.framework.artifact;
 
-import tech.deplant.java4ever.utils.Fls;
+import tech.deplant.commons.Fls;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

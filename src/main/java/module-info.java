@@ -1,7 +1,8 @@
 module java4ever.framework {
 	requires jdk.incubator.concurrent;
 	requires transitive java4ever.binding;
-	requires transitive java4ever.utils;
+	requires transitive deplant.commons;
+	requires transitive deplant.javapoet;
 	requires java.compiler;
 	requires com.fasterxml.jackson.datatype.jdk8;
 	requires com.fasterxml.jackson.module.paramnames;

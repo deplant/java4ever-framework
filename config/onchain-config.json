@@ -7,8 +7,8 @@
   },
   "credentials" : {
     "test_keys" : {
-      "public" : "6f2959af6de870db1340048b8df43750b7ef2be8a90a904ecf77d757142a2f42",
-      "secret" : "0b8c3637fa19f5f4e3c1fc5d9d1de99bdbe5621468901f3ead21a7ae10000a61"
+      "public" : "32a00be96eac7dcf83214e9c56b09f70b9330bc86ec015a26bb44305d962365e",
+      "secret" : "fc0ff9ab0c1e292345fb604014fe90ecf86ad03fe1d92bdcca6cb8e623a55c1e"
     }
   }
 }

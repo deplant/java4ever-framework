@@ -4,20 +4,21 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import jdk.incubator.concurrent.StructuredTaskScope;
+import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
 import tech.deplant.java4ever.framework.template.Template;
-import tech.deplant.java4ever.utils.Objs;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -34,14 +35,14 @@ import static java.util.Objects.requireNonNullElse;
  * @param constructorHeader
  * @param <RETURN>
  */
-public record DeployHandle<RETURN>(Class<RETURN> clazz,
-                                   Sdk sdk,
-                                   Template template,
-                                   long workchainId,
-                                   Credentials credentials,
-                                   Map<String, Object> initialDataFields,
-                                   Map<String, Object> constructorInputs,
-                                   Abi.FunctionHeader constructorHeader) {
+public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
+                                                    Sdk sdk,
+                                                    Template template,
+                                                    long workchainId,
+                                                    Credentials credentials,
+                                                    Map<String, Object> initialDataFields,
+                                                    Map<String, Object> constructorInputs,
+                                                    Abi.FunctionHeader constructorHeader) {
 
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
@@ -71,7 +72,7 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 		     constructorHeader);
 	}
 
-	public <T> DeployHandle<T> withReturnClass(Class<T> returnClass) {
+	public <T extends Contract> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,
 		                          sdk(),
 		                          template(),
@@ -162,8 +163,32 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 
 	public RETURN deployWithGiver(Giver giver, BigInteger value) throws EverSdkException {
 		var address = toAddress();
-		giver.give(address, value).call();
-		return deploy(address);
+		try {
+			new AbstractContract(sdk(), address, template().abi()).waitForTransaction(new Address(giver.address()),
+			                                                                          false,
+			                                                                          () -> {
+				                                                                          try {
+					                                                                          giver.give(address, value)
+					                                                                                     .callTree(false);
+				                                                                          } catch (EverSdkException e) {
+					                                                                          logger.log(System.Logger.Level.ERROR, () -> "Error! Message: " + e.getMessage());
+					                                                                          throw new RuntimeException(
+							                                                                          e);
+				                                                                          }
+			                                                                          });
+			return deploy(address);
+		} catch (InterruptedException e) {
+			logger.log(System.Logger.Level.ERROR, () -> "Wait for giver funds interrupted! Message: " + e.getMessage());
+			throw new EverSdkException(new EverSdkException.ErrorResult(-400, "EVER-SDK call interrupted!"), e);
+		} catch (TimeoutException e) {
+			logger.log(System.Logger.Level.ERROR,
+			           () -> "Wait for giver funds timeout! Timeout: " + sdk().context().timeout() + " Message: " +
+			                 e.getMessage());
+			throw new EverSdkException(new EverSdkException.ErrorResult(-402,
+			                                                            "EVER-SDK Execution expired on Timeout! Current timeout: " +
+			                                                            sdk().context().timeout()), e);
+		}
+
 	}
 
 	public RETURN deploy() throws EverSdkException {
@@ -172,33 +197,24 @@ public record DeployHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	private RETURN deploy(String address) throws EverSdkException {
-		try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-			final Future<Abi.DeploySet> deploySetFuture = scope.fork(this::toDeploySet);
-			final Future<Abi.CallSet> callSetFuture = scope.fork(this::toConstructorCallSet);
-			//final Future<String> addressFuture = scope.fork(this::calculateAddress);
-			scope.join();
-			Processing.processMessage(sdk().context(),
-			                          template().abi().ABI(),
-			                          address,
-			                          deploySetFuture.resultNow(),
-			                          callSetFuture.resultNow(),
-			                          toSigner(),
-			                          null,
-			                          null,
-			                          false);
-			Map<String, Object> contractMap = Map.of("sdk",
-			                                         sdk(),
-			                                         "address",
-			                                         address,
-			                                         "abi",
-			                                         template().abi(),
-			                                         "credentials",
-			                                         credentials());
-			//return MAPPER.convertValue(contractMap, clazz());
-			return Contract.instantiate(clazz(), sdk(), address, template().abi(), credentials());
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		Processing.processMessage(sdk().context(),
+		                          template().abi().ABI(),
+		                          address,
+		                          toDeploySet(),
+		                          toConstructorCallSet(),
+		                          toSigner(),
+		                          null,
+		                          null,
+		                          false);
+		Map<String, Object> contractMap = Map.of("sdk",
+		                                         sdk(),
+		                                         "address",
+		                                         address,
+		                                         "abi",
+		                                         template().abi(),
+		                                         "credentials",
+		                                         credentials());
+		return Contract.instantiate(clazz(), sdk(), address, template().abi(), credentials());
 	}
 
 

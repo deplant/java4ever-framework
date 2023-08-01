@@ -3,7 +3,7 @@ package tech.deplant.java4ever.frtest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.frtest.unit.AbiTests;
-import tech.deplant.java4ever.utils.Objs;
+import tech.deplant.commons.Objs;
 
 import java.io.IOException;
 import java.net.URI;

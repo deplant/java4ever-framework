@@ -8,7 +8,7 @@ import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.template.Template;
-import tech.deplant.java4ever.utils.Strings;
+import tech.deplant.commons.Strings;
 
 import java.math.BigInteger;
 import java.util.Map;

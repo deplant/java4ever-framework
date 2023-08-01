@@ -2,10 +2,10 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import tech.deplant.commons.Numbers;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.utils.Numbers;
 
 import java.math.BigInteger;
 

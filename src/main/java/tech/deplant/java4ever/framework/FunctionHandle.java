@@ -10,8 +10,8 @@ import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
-import tech.deplant.java4ever.utils.Numbers;
-import tech.deplant.java4ever.utils.Objs;
+import tech.deplant.commons.Numbers;
+import tech.deplant.commons.Objs;
 
 import java.io.IOException;
 import java.math.BigDecimal;

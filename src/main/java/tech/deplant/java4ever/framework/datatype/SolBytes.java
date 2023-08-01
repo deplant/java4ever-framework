@@ -1,7 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.utils.Strings;
+import tech.deplant.commons.Strings;
 
 public record SolBytes(String text) implements AbiType<String, String> {
 

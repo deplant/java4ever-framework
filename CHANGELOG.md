@@ -1,3 +1,9 @@
+### 2.4.0
+
+- Support of separate Javapoet & Commons
+- Fix for Uint conversions
+- Better work with givers, uses subscription internally to know when send deploy
+
 ### 2.3.0
 
 - Updated EVER-SDK -> 1.44.1

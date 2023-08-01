@@ -1,7 +1,7 @@
 package tech.deplant.java4ever.framework;
 
 import tech.deplant.java4ever.binding.Net;
-import tech.deplant.java4ever.utils.Objs;
+import tech.deplant.commons.Objs;
 
 import java.util.Arrays;
 

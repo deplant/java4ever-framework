@@ -22,6 +22,7 @@ public record SubscribeHandle(Sdk sdk, long handle) {
 		              handler -> {
 			              try {
 				              subscribeEventConsumer.accept(new SubscribeEvent(JsonContext.ABI_JSON_MAPPER().readTree(handler.params())));
+				              logger.log(System.Logger.Level.TRACE, "Callback response type: " + handler.responseType());
 			              } catch (JsonProcessingException e) {
 				              logger.log(System.Logger.Level.WARNING, e::getMessage);
 				              subscribeEventConsumer.accept(new SubscribeEvent(null));

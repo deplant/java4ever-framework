@@ -1,35 +1,43 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.commons.Strings;
 
-public record SolBytes(String text) implements AbiType<String, String> {
+import java.nio.charset.StandardCharsets;
 
-	public static SolBytes fromJava(Object input) {
-		return new SolBytes(input.toString());
+public record SolBytes(int size, byte[] value) implements AbiValue {
+
+	public SolBytes(byte[] value) {
+		this(0,value);
 	}
 
-	public static SolBytes fromABI(String hexString) {
-		return new SolBytes(Strings.fromHexString(hexString.toUpperCase()));
+	@JsonCreator
+	public SolBytes(String hexValue) {
+		this(0,Strings.hexStringToBytes(hexValue.toUpperCase()));
 	}
 
-	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, abiTypeName(), null);
+	public byte[] toBytes() {
+		return value();
 	}
 
-	@Override
-	public String abiTypeName() {
-		return "bytes";
-	}
-
-	@Override
-	public String toJava() {
-		return text();
+	public String toHexString() {
+		return Strings.toHexString(value());
 	}
 
 	@Override
-	public String toABI() {
-		return Strings.toHexString(text());
+	public String toString() {
+		return new String(value(), StandardCharsets.UTF_8);
+	}
+
+	@JsonValue
+	public String jsonValue() {
+		return Strings.toHexString(value());
+	}
+
+	@Override
+	public AbiType type() {
+		return new AbiType(AbiTypePrefix.BYTES,size(),false);
 	}
 }

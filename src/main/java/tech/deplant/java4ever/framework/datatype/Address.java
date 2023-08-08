@@ -1,21 +1,12 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.JsonNode;
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.JsonContext;
-import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.template.Template;
+import com.fasterxml.jackson.annotation.JsonValue;
 import tech.deplant.commons.Strings;
 
 import java.math.BigInteger;
-import java.util.Map;
 
-import static java.util.Objects.requireNonNullElse;
-
-public record Address(int wid, BigInteger value) implements AbiType<String, String> {
+public record Address(int wid, BigInteger value) implements AbiValue {
 
 	public static final Address ZERO = new Address(0, BigInteger.ZERO);
 
@@ -46,74 +37,29 @@ public record Address(int wid, BigInteger value) implements AbiType<String, Stri
 		return (null == nullableObject) ? Address.ZERO : new Address(nullableObject.toString());
 	}
 
-//	public static String ofFutureDeploy(Sdk sdk,
-//	                                    Template template,
-//	                                    long workchainId,
-//	                                    Map<String, Object> initialData,
-//	                                    Credentials credentials) throws EverSdkException {
-//		return ofFutureDeploy(sdk, template, workchainId, JsonContext.ABI_JSON_MAPPER().valueToTree(initialData), credentials);
-//	}
-//
-//	public static String ofFutureDeploy(Sdk sdk,
-//	                                    Template template,
-//	                                    long workchainId,
-//	                                    JsonNode initialData,
-//	                                    Credentials credentials) throws EverSdkException {
-//		return Abi.encodeMessage(
-//				sdk.context(),
-//				template.abi().ABI(),
-//				null,
-//				new Abi.DeploySet(template.tvc().base64String(),
-//				                  null,
-//				                  null,
-//				                  workchainId,
-//				                  initialData,
-//				                  requireNonNullElse(credentials, Credentials.NONE).publicKey()),
-//				null,
-//				requireNonNullElse(credentials, Credentials.NONE).signer(),
-//				null,
-//				null
-//		).address();
-//	}
-
-	public boolean isNull() {
+	public boolean isZeroAddress() {
 		return this.value.equals(BigInteger.ZERO);
 	}
 
-	//TODO Add definition of different address types
-
-	/**
-	 * @return Returns type of the address:
-	 * 0 - addr_none 1 - addr_extern 2 - addr_std
-	 */
-	public int getType() {
-		return 0;
+	public String makeAddrStd() {
+		return toString();
 	}
 
-	public String makeAddrStd() {
+	@Override
+	public String toString() {
 		return
 				wid() +
 				":" +
 				Strings.padLeftZeros(value().toString(16), 64);
 	}
 
-	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, abiTypeName(), null);
+	@JsonValue
+	public String jsonValue() {
+		return toString();
 	}
 
 	@Override
-	public String abiTypeName() {
-		return "address";
-	}
-
-	@Override
-	public String toJava() {
-		return makeAddrStd();
-	}
-
-	@Override
-	public String toABI() {
-		return makeAddrStd();
+	public AbiType type() {
+		return new AbiType(AbiTypePrefix.ADDRESS,0,false);
 	}
 }

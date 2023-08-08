@@ -1,36 +1,25 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import tech.deplant.java4ever.binding.Abi;
 
-public record Bool(Boolean value) implements AbiType<Boolean, Boolean> {
+public record Bool(Boolean value) implements AbiValue {
 
-	public static Bool fromJava(Object input) {
-		return switch (input) {
-			case Bool u -> u;
-			case String s -> new Bool(Boolean.valueOf(s));
-			case Boolean b -> new Bool(b);
-			default -> throw new IllegalStateException(
-					"Unexpected value: " + input + " class: " + input.getClass().getName());
-		};
+	public Bool(String stringValue) {
+		this(Boolean.valueOf(stringValue);
 	}
 
-	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, abiTypeName(), null);
+	public boolean toBoolean() {
+		return value();
 	}
 
-	@Override
-	public String abiTypeName() {
-		return "bool";
-	}
-
-	@Override
-	public Boolean toJava() {
+	@JsonValue
+	public Boolean jsonValue() {
 		return value();
 	}
 
 	@Override
-	public Boolean toABI() {
-		return value();
+	public AbiType type() {
+		return new AbiType(AbiTypePrefix.BOOL,0,false);
 	}
 }

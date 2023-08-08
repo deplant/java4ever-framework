@@ -114,7 +114,7 @@ public interface Contract {
 			var transaction = subscribeEvent.result().get("result").get("transactions");
 			if (Objs.isNotNull(transaction.get("in_message")) &&
 			    Objs.isNotNull(transaction.get("in_message").get("src")) &&
-			    transaction.get("in_message").get("src").asText().equals(from.makeAddrStd())) {
+			    transaction.get("in_message").get("src").asText().equals(from.toString())) {
 				if (!onlySuccessful ||
 				    (Objs.isNotNull(transaction.get("aborted")) &&
 				     Objs.isNotNull(transaction.get("status")) &&

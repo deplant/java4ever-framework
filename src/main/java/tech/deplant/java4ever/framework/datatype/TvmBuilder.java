@@ -4,7 +4,6 @@ import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,18 +16,18 @@ public class TvmBuilder {
 		return this.operations.toArray(Boc.BuilderOp[]::new);
 	}
 
-	public void store(AbiType... types) throws EverSdkException {
+	public void store(AbiValue... types) throws EverSdkException {
 		for (var type : types) {
 			this.operations.add(switch (type) {
-				case Uint intVal -> new Boc.BuilderOp.Integer((long) intVal.size(), intVal.toABI());
-				case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
+				case Uint intVal -> new Boc.BuilderOp.Integer((long) intVal.size(), intVal.jsonValue());
+				case Address addr -> new Boc.BuilderOp.Address(addr.jsonValue());
 				case SolString str -> {
 					incrementRefCounter();
-					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.toABI())});
+					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.jsonValue())});
 				}
 				case SolBytes byt -> {
 					incrementRefCounter();
-					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(byt.toABI())});
+					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(byt.jsonValue())});
 				}
 				case TvmBuilder builder -> {
 					incrementRefCounter();
@@ -49,8 +48,8 @@ public class TvmBuilder {
 		}
 	}
 
-	public TvmBuilder store(TypePrefix prefix, int size, Object inputValue) throws EverSdkException {
-		store(AbiType.of(prefix, size, inputValue));
+	public TvmBuilder store(AbiType type, Object inputValue) throws EverSdkException {
+		store(AbiValue.of(type, inputValue));
 		return this;
 	}
 

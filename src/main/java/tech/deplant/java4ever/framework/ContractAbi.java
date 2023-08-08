@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.datatype.SolStruct;
-import tech.deplant.java4ever.framework.datatype.TypePrefix;
 import tech.deplant.java4ever.framework.datatype.Uint;
 
 import java.util.Arrays;
@@ -46,7 +44,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public String functionId(Sdk sdk, String name) throws EverSdkException {
-		return Uint.fromJava(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).toABI();
+		return Uint.fromJava(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).jsonValue();
 	}
 
 	public boolean hasHeader(String name) {
@@ -191,9 +189,6 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 		                           .map(data -> new Abi.AbiParam(data.name(), data.type(), data.components()))
 		                           .toArray(Abi.AbiParam[]::new);
 		return SolStruct.fromJava(initDataParams, initDataInputs).values();
-	}
-
-	public record AbiTypeDetails(TypePrefix type, int size, boolean isArray) {
 	}
 
 }

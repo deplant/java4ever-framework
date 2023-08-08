@@ -9,5 +9,6 @@ module test {
 	exports tech.deplant.java4ever.frtest.unit;
 	exports tech.deplant.java4ever.frtest.codegen;
 	exports tech.deplant.java4ever.frtest;
+	exports tech.deplant.java4ever.frtest.unit.datatype;
 
 }

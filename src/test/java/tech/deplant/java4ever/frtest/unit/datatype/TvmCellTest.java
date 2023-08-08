@@ -35,12 +35,12 @@ class TvmCellTest {
 
 		String source = "I want to be equal!!!";
 
-		List<AbiType> types = List.of(Uint.fromJava(32, "200"),
-		                              Uint.fromJava(64, "300"),
-		                              SolBytes.fromJava(source));
+		List<AbiValue> types = List.of(Uint.fromJava(32, "200"),
+		                               Uint.fromJava(64, "300"),
+		                               SolBytes.fromJava(source));
 
 		var builder = new TvmBuilder();
-		builder.store(types.toArray(AbiType[]::new));
+		builder.store(types.toArray(AbiValue[]::new));
 
 		String[] outTypeNames = new String[]{"uint32","uint64","string"};
 

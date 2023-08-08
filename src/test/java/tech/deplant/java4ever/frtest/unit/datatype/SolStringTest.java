@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.datatype.SolBytes;
 import tech.deplant.java4ever.framework.datatype.SolString;
 import tech.deplant.java4ever.frtest.unit.Env;
 
@@ -31,7 +30,7 @@ public class SolStringTest {
 
 	@Test
 	public void string_to_abi_string_equals() {
-		assertEquals("hello!", SolString.fromJava("hello!").toABI());
+		assertEquals("hello!", SolString.fromJava("hello!").jsonValue());
 	}
 
 }

@@ -2,7 +2,6 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.JsonFile;

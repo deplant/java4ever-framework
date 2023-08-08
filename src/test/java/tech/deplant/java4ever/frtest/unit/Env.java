@@ -1,7 +1,6 @@
 package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.Credentials;
@@ -117,14 +116,14 @@ public class Env {
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
 		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()
-		                                                        .makeAddrStd());
+		                                                        .toString());
 		LOCAL_TIP3_WALLET2 = new TIP3TokenWallet(SDK_LOCAL,
 		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
 		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
 		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()
-		                                                        .makeAddrStd());
+		                                                        .toString());
 	}
 
 	public static Credentials RNG_KEYS() throws EverSdkException {

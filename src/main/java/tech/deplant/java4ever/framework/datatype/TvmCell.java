@@ -1,23 +1,13 @@
 package tech.deplant.java4ever.framework.datatype;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.Tvm;
 import tech.deplant.java4ever.framework.Sdk;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.util.Map;
 
-
-public record TvmCell(String cellBoc) implements AbiType<String, String> {
+public record TvmCell(String cellBoc) implements AbiValue {
 
 	public static TvmCell EMPTY() {
 		return TvmCell.fromJava("te6ccgEBAQEAAgAAAA==");
@@ -26,14 +16,6 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 	public static TvmBuilder builder() {
 		return new TvmBuilder();
 	}
-
-	public static TvmCell fromJava(Object input) {
-		return switch (input) {
-			case TvmCell cell -> cell;
-			case String s -> new TvmCell(s);
-			default -> throw new IllegalStateException(
-					"Unexpected value: " + input + " class: " + input.getClass().getName());
-		};
 	}
 
 	public JsonNode decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
@@ -43,9 +25,15 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 	public JsonNode decode(Sdk sdk, String[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
-			String type = types[i];
-			String name = String.valueOf(i);
-			params[i] = new Abi.AbiParam(name, type, null);
+			params[i] = new Abi.AbiParam(String.valueOf(i), types[i], null);
+		}
+		return decode(sdk, params);
+	}
+
+	public JsonNode decode(Sdk sdk, AbiType[] types) throws EverSdkException {
+		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
+		for (int i = 0; i < types.length; i++) {
+			params[i] = new Abi.AbiParam(String.valueOf(i), types[i].abiName(), null);
 		}
 		return decode(sdk, params);
 	}
@@ -56,23 +44,18 @@ public record TvmCell(String cellBoc) implements AbiType<String, String> {
 	}
 
 	@Override
-	public Abi.AbiParam toAbiParam(String name) {
-		return new Abi.AbiParam(name, abiTypeName(), null);
+	public String toString() {
+		return cellBoc();
 	}
 
-	@Override
-	public String abiTypeName() {
-		return "cell";
-	}
-
-	@Override
-	public String toJava() {
+	@JsonValue
+	public String jsonValue() {
 		return cellBoc();
 	}
 
 	@Override
-	public String toABI() {
-		return cellBoc();
+	public AbiType type() {
+		return new AbiType(AbiTypePrefix.STRING,0,false);
 	}
 
 }

@@ -1,4 +1,4 @@
-package tech.deplant.java4ever.frtest.unit;
+package tech.deplant.java4ever.frtest.unit.datatype;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.template.*;
+import tech.deplant.java4ever.frtest.unit.AbiTests;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

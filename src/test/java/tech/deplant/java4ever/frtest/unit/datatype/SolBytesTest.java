@@ -30,7 +30,7 @@ public class SolBytesTest {
 
 	@Test
 	public void string_to_bytes_equals() {
-		assertEquals("68656C6C6F21", SolBytes.fromJava("hello!").toABI());
+		assertEquals("68656C6C6F21", SolBytes.fromJava("hello!").jsonValue());
 	}
 
 }

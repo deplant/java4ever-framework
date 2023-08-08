@@ -11,10 +11,7 @@ import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.datatype.Address;
-import tech.deplant.java4ever.framework.datatype.SolStruct;
-import tech.deplant.java4ever.framework.datatype.TvmBuilder;
-import tech.deplant.java4ever.framework.datatype.TvmCell;
+import tech.deplant.java4ever.framework.datatype.*;
 import tech.deplant.java4ever.framework.template.Template;
 import tech.deplant.javapoet.*;
 
@@ -34,20 +31,13 @@ public class ContractWrapper {
 	private static System.Logger logger = System.getLogger(ContractWrapper.class.getName());
 
 	private static TypeName typeSwitch(String abiTypeString) throws EverSdkException {
-		var details = SolStruct.typeParser(abiTypeString);
-		TypeName resultTypeName = switch (details.type()) {
-			case INT, UINT -> {
-				if (details.size() <= 32) {
-					yield ClassName.get(Integer.class);
-				} else if (details.size() <= 64) {
-					yield ClassName.get(Long.class);
-				} else {
-					yield ClassName.get(BigInteger.class);
-				}
-			}
-			case STRING, BYTE, BYTES -> TypeName.STRING;
+		var details = AbiType.of(abiTypeString);
+		TypeName resultTypeName = switch (details.prefix()) {
+			case INT, UINT -> ClassName.get(Uint.class);
+			case STRING -> ClassName.get(SolString.class);
+			case BYTE, BYTES -> ClassName.get(SolBytes.class);
 			case ADDRESS -> ClassName.get(Address.class);
-			case BOOL -> ClassName.get(Boolean.class);
+			case BOOL -> ClassName.get(Bool.class);
 			case CELL -> ClassName.get(TvmCell.class);
 			case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
 			case BUILDER -> ClassName.get(TvmBuilder.class); //TODO Check this too

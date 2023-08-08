@@ -13,9 +13,13 @@ public record SolBytes(int size, byte[] value) implements AbiValue {
 		this(0,value);
 	}
 
+	public SolBytes(int size, String hexValue) {
+		this(size,Strings.hexStringToBytes(hexValue.toUpperCase()));
+	}
+
 	@JsonCreator
 	public SolBytes(String hexValue) {
-		this(0,Strings.hexStringToBytes(hexValue.toUpperCase()));
+		this(0,hexValue);
 	}
 
 	public byte[] toBytes() {

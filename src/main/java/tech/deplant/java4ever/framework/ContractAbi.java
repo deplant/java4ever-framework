@@ -40,7 +40,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 
 	public String json() throws JsonProcessingException {
 		return JsonContext.ABI_JSON_MAPPER().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-		                                            .writeValueAsString(abiContract());
+		                  .writeValueAsString(abiContract());
 	}
 
 	public String functionId(Sdk sdk, String name) throws EverSdkException {
@@ -73,12 +73,12 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 				                                                                                 output.name())));
 	}
 
-	private Abi.AbiFunction findFunction(Abi.AbiFunction[] functionArr, String name) {
-		return Arrays.stream(functionArr).filter(function -> name.equals(function.name())).findAny().orElseThrow();
+	private Abi.AbiFunction findFunction(String name) {
+		return Arrays.stream(functions()).filter(function -> name.equals(function.name())).findAny().orElseThrow();
 	}
 
-	private Abi.AbiEvent findEvent(Abi.AbiEvent[] functionArr, String name) {
-		return Arrays.stream(functionArr).filter(event -> name.equals(event.name())).findAny().orElseThrow();
+	private Abi.AbiEvent findEvent(String name) {
+		return Arrays.stream(events()).filter(event -> name.equals(event.name())).findAny().orElseThrow();
 	}
 
 	private Abi.AbiParam findParam(Abi.AbiParam[] paramArr, String name) {
@@ -86,7 +86,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public Abi.AbiParam functionInputType(String functionName, String inputName) {
-		return findParam(findFunction(functions(), functionName).inputs(), inputName);
+		return findParam(findFunction(functionName).inputs(), inputName);
 	}
 
 	public Abi.AbiParam initDataType(String initDataName) {
@@ -95,11 +95,11 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public Abi.AbiParam functionOutputType(String functionName, String outputName) {
-		return findParam(findFunction(functions(), functionName).outputs(), outputName);
+		return findParam(findFunction(functionName).outputs(), outputName);
 	}
 
 	public Abi.AbiParam eventInputType(String functionName, String inputName) {
-		return findParam(findEvent(events(), functionName).inputs(), inputName);
+		return findParam(findEvent(functionName).inputs(), inputName);
 	}
 
 	public Abi.AbiData[] data() {
@@ -120,6 +120,17 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 
 	public Abi.ABI ABI() {
 		return new Abi.ABI.Contract(abiContract());
+	}
+
+	public Abi.ABI functionCallABI(String functionName) {
+		return new Abi.ABI.Contract(new Abi.AbiContract(abiContract().abiVersionMajor(),
+		                                                abiContract().abiVersion(),
+		                                                abiContract().version(),
+		                                                abiContract().header(),
+		                                                new Abi.AbiFunction[]{findFunction(functionName)},
+		                                                new Abi.AbiEvent[]{},
+		                                                new Abi.AbiData[]{},
+		                                                new Abi.AbiParam[]{}));
 	}
 
 

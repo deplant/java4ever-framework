@@ -2,16 +2,15 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import tech.deplant.commons.Numbers;
+import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
-import tech.deplant.java4ever.framework.datatype.Uint;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
-import tech.deplant.commons.Numbers;
-import tech.deplant.commons.Objs;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,9 +24,18 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
                                      Contract contract,
                                      String functionName,
                                      Map<String, Object> functionInputs,
-                                     Abi.FunctionHeader functionHeader) {
+                                     Abi.FunctionHeader functionHeader,
+                                     DebugOptions debugOptions) {
 
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
+
+	public FunctionHandle(Class<RETURN> clazz,
+	                      Contract contract,
+	                      String functionName,
+	                      Map<String, Object> functionInputs,
+	                      Abi.FunctionHeader functionHeader) {
+		this(clazz, contract, functionName, functionInputs, functionHeader, new DebugOptions(false, 60000L, false));
+	}
 
 	public FunctionHandle(Class<RETURN> clazz,
 	                      Sdk sdk,
@@ -52,6 +60,27 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		     functionName,
 		     functionInputs,
 		     functionHeader);
+	}
+
+	public FunctionHandle<RETURN> withDebugTree(boolean enabled,
+	                                            long timeout,
+	                                            boolean throwErrors,
+	                                            ContractAbi... treeAbis) {
+		return new FunctionHandle<>(clazz(),
+		                            contract(),
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader(),
+		                            new DebugOptions(enabled, timeout, throwErrors, treeAbis));
+	}
+
+	public FunctionHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
+		return new FunctionHandle<>(clazz(),
+		                            contract(),
+		                            functionName(),
+		                            functionInputs(),
+		                            functionHeader(),
+		                            debugOptions);
 	}
 
 	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
@@ -111,14 +140,14 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * @throws EverSdkException
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return TvmCell.fromJava(Abi.encodeMessageBody(contract().sdk().context(),
-		                                              contract().abi().ABI(),
-		                                              toCallSet(),
-		                                              true,
-		                                              toSigner(),
-		                                              null,
-		                                              contract().address(),
-		                                              null).body());
+		return new TvmCell(Abi.encodeMessageBody(contract().sdk().context(),
+		                                         contract().abi().functionCallABI(functionName()),
+		                                         toCallSet(),
+		                                         true,
+		                                         toSigner(),
+		                                         null,
+		                                         contract().address(),
+		                                         null).body());
 	}
 
 	public Abi.Signer toSigner() {
@@ -258,19 +287,17 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                                           .get("in_msg")
 		                                                                           .asText(),
 		                                                            "ext",
-		                                                            new BigDecimal(Uint.fromJava(128,
-		                                                                                         resultOfProcess.fees()
-		                                                                                                        .totalFwdFees())
-		                                                                               .toJava(), 9).toPlainString(),
+		                                                            new BigDecimal(resultOfProcess.fees()
+		                                                                                          .totalFwdFees(),
+		                                                                           9).toPlainString(),
 		                                                            resultOfProcess.transaction()
 		                                                                           .get("account_addr")
 		                                                                           .asText(),
 		                                                            0,
 		                                                            this.functionName,
-		                                                            new BigDecimal(Uint.fromJava(128,
-		                                                                                         resultOfProcess.fees()
-		                                                                                                        .totalAccountFees())
-		                                                                               .toJava(), 9).toPlainString(),
+		                                                            new BigDecimal(resultOfProcess.fees()
+		                                                                                          .totalAccountFees(),
+		                                                                           9).toPlainString(),
 		                                                            "");
 		info(logger, lazyFormatLogMessage);
 		return Optional.ofNullable(resultOfProcess.decoded().output()).orElse(JsonContext.EMPTY_NODE());

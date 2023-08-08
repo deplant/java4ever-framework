@@ -42,7 +42,8 @@ public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
                                                     Credentials credentials,
                                                     Map<String, Object> initialDataFields,
                                                     Map<String, Object> constructorInputs,
-                                                    Abi.FunctionHeader constructorHeader) {
+                                                    Abi.FunctionHeader constructorHeader,
+                                                    DebugOptions debugOptions) {
 
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
@@ -70,6 +71,49 @@ public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
 		     initialDataFields,
 		     constructorInputs,
 		     constructorHeader);
+	}
+
+	public DeployHandle(Class<RETURN> clazz,
+	                    Sdk sdk,
+	                    Template template,
+	                    long workchainId,
+	                    Credentials credentials,
+	                    Map<String, Object> initialDataFields,
+	                    Map<String, Object> constructorInputs,
+	                    Abi.FunctionHeader constructorHeader) {
+		this(clazz,
+		     sdk,
+		     template,
+		     workchainId,
+		     credentials,
+		     initialDataFields,
+		     constructorInputs,
+		     constructorHeader,
+		     new DebugOptions(false, 60000L, false));
+	}
+
+	public DeployHandle<RETURN> withDebugTree(boolean enabled, long timeout, boolean throwErrors, ContractAbi... treeAbis) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          template(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields(),
+		                          constructorInputs(),
+		                          constructorHeader(),
+		                          new DebugOptions(enabled, timeout, throwErrors, treeAbis));
+	}
+
+	public DeployHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
+		return new DeployHandle<>(clazz(),
+		                          sdk(),
+		                          template(),
+		                          workchainId(),
+		                          credentials(),
+		                          initialDataFields(),
+		                          constructorInputs(),
+		                          constructorHeader(),
+		                          debugOptions);
 	}
 
 	public <T extends Contract> DeployHandle<T> withReturnClass(Class<T> returnClass) {

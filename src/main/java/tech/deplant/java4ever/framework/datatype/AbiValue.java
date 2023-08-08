@@ -2,7 +2,7 @@ package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.java4ever.binding.EverSdkException;
 
-public sealed interface AbiValue permits Address, Bool, SolBytes, SolString, SolStruct, TvmCell, Uint {
+public sealed interface AbiValue permits Address, Bool, SolArray, SolBytes, SolString, SolStruct, TvmBuilder, TvmCell, Uint {
 
 	static AbiValue of(AbiType type, Object value) throws EverSdkException {
 		return switch (type.prefix()) {
@@ -43,7 +43,5 @@ public sealed interface AbiValue permits Address, Bool, SolBytes, SolString, Sol
 	Object jsonValue();
 
 	AbiType type();
-
-
 
 }

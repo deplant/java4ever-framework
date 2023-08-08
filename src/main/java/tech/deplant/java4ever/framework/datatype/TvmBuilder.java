@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TvmBuilder {
-	private final AtomicInteger refCounter = new AtomicInteger(0);
-	private final List<Boc.BuilderOp> operations = new ArrayList<>();
+public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operations) implements AbiValue {
+
+	public TvmBuilder() {
+		this(new AtomicInteger(0), new ArrayList<>());
+	}
 
 	public Boc.BuilderOp[] builders() {
 		return this.operations.toArray(Boc.BuilderOp[]::new);
@@ -55,5 +57,15 @@ public class TvmBuilder {
 
 	public TvmCell toCell(Sdk sdk) throws EverSdkException {
 		return new TvmCell(Boc.encodeBoc(sdk.context(), builders(), null).boc());
+	}
+
+	@Override
+	public Object jsonValue() {
+		return this;
+	}
+
+	@Override
+	public AbiType type() {
+		return new AbiType(AbiTypePrefix.BUILDER,0,false);
 	}
 }

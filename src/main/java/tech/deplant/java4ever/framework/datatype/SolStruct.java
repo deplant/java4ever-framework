@@ -192,7 +192,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			Map<Object, Object> outputMap = (Map<Object, Object>) outputValue;
 			Map<Object, Object> convertedMap = new HashMap<>();
 			for (var entry : outputMap.entrySet()) {
-				convertedMap.put(AbiValue.ofABI(keyDetails, entry.getKey()).toJava(),
+				convertedMap.put(AbiValue.ofABI(keyDetails, entry.getKey()),
 				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
 				                                                      valueTypeString,
 				                                                      param.components()), entry.getValue()));
@@ -217,10 +217,10 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (outputValue) {
-					case String s -> new Object[]{AbiValue.ofABI(rootDetails, s).toJava()};
+					case String s -> new Object[]{AbiValue.ofABI(rootDetails, s)};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiValue.ofABI(rootDetails, element).toJava();
+							return AbiValue.ofABI(rootDetails, element);
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -228,18 +228,18 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					}).toArray();
 					case List list -> list.stream().map(element -> {
 						try {
-							return AbiValue.ofABI(rootDetails, element).toJava();
+							return AbiValue.ofABI(rootDetails, element);
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
 						}
 					}).toArray();
 					default ->
-							new Object[]{AbiValue.ofABI(rootDetails, outputValue).toJava()};
+							new Object[]{AbiValue.ofABI(rootDetails, outputValue)};
 				};
 			} else {
 				// all others
-				return AbiValue.ofABI(rootDetails, outputValue).toJava();
+				return AbiValue.ofABI(rootDetails, outputValue);
 			}
 		}
 	}

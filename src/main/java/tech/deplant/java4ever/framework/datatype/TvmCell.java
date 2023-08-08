@@ -9,13 +9,10 @@ import tech.deplant.java4ever.framework.Sdk;
 
 public record TvmCell(String cellBoc) implements AbiValue {
 
-	public static TvmCell EMPTY() {
-		return TvmCell.fromJava("te6ccgEBAQEAAgAAAA==");
-	}
+	public static final TvmCell EMPTY = new TvmCell("te6ccgEBAQEAAgAAAA==");
 
 	public static TvmBuilder builder() {
 		return new TvmBuilder();
-	}
 	}
 
 	public JsonNode decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {

@@ -1,9 +1,9 @@
 ### 2.4.0
 
-- Added support for separate Javapoet & Commons libs
 - Fixed Uint conversions
-- Improved work with givers, uses subscription internally to know when send deploy
+- Improved DeployHandle::deployWithGiver, uses subscription internally to know when to send deploy
 - Improved ABI type system
+- Added support for separate Javapoet & Commons libs
 - Lesser message size for function calls (now we send only ABI of needed function + version/header info, not full ABI)
 - Improved transaction tree debug
 

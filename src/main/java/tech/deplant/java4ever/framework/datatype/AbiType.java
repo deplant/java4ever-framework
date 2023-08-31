@@ -11,6 +11,14 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 
 	private final static System.Logger logger = System.getLogger(AbiType.class.getName());
 
+	public AbiType(AbiTypePrefix prefix, int size) {
+		this(prefix, size, false);
+	}
+
+	public AbiType(AbiTypePrefix prefix) {
+		this(prefix, 0, false);
+	}
+
 	public static AbiType of(String typeString) throws EverSdkException {
 		if (typeString.contains("optional")) {
 			return new AbiType(AbiTypePrefix.OPTIONAL, 0, false);

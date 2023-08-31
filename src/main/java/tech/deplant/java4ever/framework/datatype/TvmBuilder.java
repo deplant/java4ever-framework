@@ -19,7 +19,7 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 		return this.operations.toArray(Boc.BuilderOp[]::new);
 	}
 
-	public void store(AbiValue... types) throws EverSdkException {
+	public TvmBuilder store(AbiValue... types) throws EverSdkException {
 		for (var type : types) {
 			this.operations.add(switch (type) {
 				case Uint intVal -> new Boc.BuilderOp.Integer((long) intVal.size(), intVal.toABI());
@@ -41,6 +41,7 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 				                                      new Exception());
 			});
 		}
+		return this;
 	}
 
 	private void incrementRefCounter() throws EverSdkException {
@@ -52,8 +53,7 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 	}
 
 	public TvmBuilder store(AbiType type, Object inputValue) throws EverSdkException {
-		store(AbiValue.of(type, inputValue));
-		return this;
+		return store(AbiValue.of(type, inputValue));
 	}
 
 	public TvmCell toCell(Sdk sdk) throws EverSdkException {

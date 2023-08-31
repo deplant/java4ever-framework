@@ -52,7 +52,7 @@ public class Tip3Tests {
 		GIVER_LOCAL.give(LOCAL_TIP3_ROOT.address(), EVER_TEN);
 		GIVER_LOCAL.give(LOCAL_MSIG_ROOT.address(), EVER_TEN);
 		LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ONE, receiverAddress, false,
-		                     TvmCell.EMPTY())
+		                     TvmCell.EMPTY)
 		               .sendFromTree(LOCAL_MSIG_ROOT,
 		                             CurrencyUnit.VALUE(EVER, "0.3"),
 		                             true,

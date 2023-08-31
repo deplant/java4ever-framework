@@ -7,7 +7,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
 
 
-public record TvmCell(String cellBoc) implements AbiValue {
+public record TvmCell(String cellBoc) implements AbiValue<String> {
 
 	public static final TvmCell EMPTY = new TvmCell("te6ccgEBAQEAAgAAAA==");
 
@@ -45,8 +45,13 @@ public record TvmCell(String cellBoc) implements AbiValue {
 		return cellBoc();
 	}
 
+	@Override
+	public String toJava() {
+		return toString();
+	}
+
 	@JsonValue
-	public String jsonValue() {
+	public String toABI() {
 		return cellBoc();
 	}
 

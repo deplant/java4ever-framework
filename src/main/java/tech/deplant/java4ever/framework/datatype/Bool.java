@@ -2,18 +2,23 @@ package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public record Bool(Boolean value) implements AbiValue {
+public record Bool(Boolean value) implements AbiValue<Boolean> {
 
 	public Bool(String stringValue) {
-		this(Boolean.valueOf(stringValue);
+		this(Boolean.valueOf(stringValue));
 	}
 
 	public boolean toBoolean() {
 		return value();
 	}
 
+	@Override
+	public Boolean toJava() {
+		return toBoolean();
+	}
+
 	@JsonValue
-	public Boolean jsonValue() {
+	public Boolean toABI() {
 		return value();
 	}
 

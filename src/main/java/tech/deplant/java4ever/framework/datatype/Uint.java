@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.commons.Numbers;
 
@@ -8,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 
-public record Uint(int size, BigInteger value) implements AbiValue {
+public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 
 	@JsonCreator
 	public Uint(Object value) {
@@ -55,7 +56,12 @@ public record Uint(int size, BigInteger value) implements AbiValue {
 	}
 
 	@Override
-	public String jsonValue() {
+	public BigInteger toJava() {
+		return toBigInteger();
+	}
+
+	@JsonValue
+	public String toABI() {
 		return toString();
 	}
 

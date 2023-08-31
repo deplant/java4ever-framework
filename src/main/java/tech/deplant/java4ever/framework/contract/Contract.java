@@ -55,7 +55,7 @@ public interface Contract {
 	 * @throws EverSdkException
 	 */
 	default BigInteger accountBalance() throws EverSdkException {
-		return Uint.fromJava(128, account().balance()).toJava();
+		return Uint.of(128, account().balance()).toJava();
 	}
 
 	/**

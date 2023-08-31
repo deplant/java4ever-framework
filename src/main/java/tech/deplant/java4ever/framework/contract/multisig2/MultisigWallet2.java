@@ -15,7 +15,7 @@ public interface MultisigWallet2 extends Giver {
 	@Override
 	default FunctionHandle<Void> give(String to, BigInteger value) {
 		return sendTransaction(new Address(to), value, false,
-		                       1, TvmCell.EMPTY());
+		                       1, TvmCell.EMPTY);
 	}
 
 	public FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce,

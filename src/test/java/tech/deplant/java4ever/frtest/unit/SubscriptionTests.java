@@ -49,13 +49,13 @@ public class SubscriptionTests {
 				String accountBalanceDelta = transactions.get("balance_delta").asText();
 				assertEquals(subscribedIdPre, accountAddr);
 				logger.log(System.Logger.Level.INFO, accountBalanceDelta);
-				assertNotEquals(BigInteger.ZERO, Uint.fromJava(128, accountBalanceDelta).toJava());
+				assertNotEquals(BigInteger.ZERO, Uint.of(128, accountBalanceDelta).toBigInteger());
 		});
 		LOCAL_MSIG_ROOT.sendTransaction(new Address(LOCAL_MSIG_ROOT.address()),
 		                                CurrencyUnit.VALUE(CurrencyUnit.Ever.EVER, "2"),
 		                                false,
 		                                MessageFlag.EXACT_VALUE_GAS.flag(),
-		                                TvmCell.EMPTY()).call();
+		                                TvmCell.EMPTY).call();
 		assertNotEquals(subscribedBalancePre, LOCAL_MSIG_ROOT.accountBalance());
 		handle.unsubscribe();
 	}

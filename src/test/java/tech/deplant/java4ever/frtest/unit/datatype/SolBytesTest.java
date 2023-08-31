@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import tech.deplant.commons.Strings;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.datatype.SolBytes;
 import tech.deplant.java4ever.frtest.unit.Env;
@@ -25,12 +26,12 @@ public class SolBytesTest {
 
 	@Test
 	public void bytes_to_string_equals() {
-		assertEquals("hello!", SolBytes.fromABI("68656C6C6F21").toJava());
+		assertEquals("hello!", new SolBytes("68656C6C6F21").toString());
 	}
 
 	@Test
 	public void string_to_bytes_equals() {
-		assertEquals("68656C6C6F21", SolBytes.fromJava("hello!").jsonValue());
+		assertEquals("68656C6C6F21", new SolBytes(Strings.toHexString("hello!")).toHexString());
 	}
 
 }

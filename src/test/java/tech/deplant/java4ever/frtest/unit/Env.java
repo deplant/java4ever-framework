@@ -112,14 +112,14 @@ public class Env {
 
 		LOCAL_TIP3_WALLET1 = new TIP3TokenWallet(SDK_LOCAL,
 		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
-		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
+		                                                                      CurrencyUnit.VALUE(EVER, "0.5"))
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
 		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()
 		                                                        .toString());
 		LOCAL_TIP3_WALLET2 = new TIP3TokenWallet(SDK_LOCAL,
 		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
-		                                                                      CurrencyUnit.VALUE(EVER, "0.3"))
+		                                                                      CurrencyUnit.VALUE(EVER, "0.5"))
 		                                                        .sendFrom(LOCAL_MSIG_ROOT,
 		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
 		                                                        .tokenWallet()

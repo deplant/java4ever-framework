@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.datatype;
 
+import tech.deplant.commons.Strings;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Sdk;
@@ -21,15 +22,15 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 	public void store(AbiValue... types) throws EverSdkException {
 		for (var type : types) {
 			this.operations.add(switch (type) {
-				case Uint intVal -> new Boc.BuilderOp.Integer((long) intVal.size(), intVal.jsonValue());
-				case Address addr -> new Boc.BuilderOp.Address(addr.jsonValue());
+				case Uint intVal -> new Boc.BuilderOp.Integer((long) intVal.size(), intVal.toABI());
+				case Address addr -> new Boc.BuilderOp.Address(addr.toABI());
 				case SolString str -> {
 					incrementRefCounter();
-					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(str.jsonValue())});
+					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(Strings.toHexString(str.toABI()))});
 				}
 				case SolBytes byt -> {
 					incrementRefCounter();
-					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(byt.jsonValue())});
+					yield new Boc.BuilderOp.Cell(new Boc.BuilderOp[]{new Boc.BuilderOp.BitString(byt.toABI())});
 				}
 				case TvmBuilder builder -> {
 					incrementRefCounter();
@@ -60,7 +61,12 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 	}
 
 	@Override
-	public Object jsonValue() {
+	public Object toJava() {
+		return this;
+	}
+
+	@Override
+	public Object toABI() {
 		return this;
 	}
 

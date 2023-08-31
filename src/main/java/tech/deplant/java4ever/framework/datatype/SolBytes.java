@@ -35,8 +35,13 @@ public record SolBytes(int size, byte[] value) implements AbiValue {
 		return new String(value(), StandardCharsets.UTF_8);
 	}
 
+	@Override
+	public Object toJava() {
+		return toBytes();
+	}
+
 	@JsonValue
-	public String jsonValue() {
+	public String toABI() {
 		return Strings.toHexString(value());
 	}
 

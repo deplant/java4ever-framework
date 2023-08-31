@@ -6,7 +6,7 @@ import tech.deplant.commons.Strings;
 
 import java.math.BigInteger;
 
-public record Address(int wid, BigInteger value) implements AbiValue {
+public record Address(int wid, BigInteger value) implements AbiValue<String> {
 
 	public static final Address ZERO = new Address(0, BigInteger.ZERO);
 
@@ -53,8 +53,13 @@ public record Address(int wid, BigInteger value) implements AbiValue {
 				Strings.padLeftZeros(value().toString(16), 64);
 	}
 
+	@Override
+	public String toJava() {
+		return toString();
+	}
+
 	@JsonValue
-	public String jsonValue() {
+	public String toABI() {
 		return toString();
 	}
 

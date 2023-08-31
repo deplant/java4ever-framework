@@ -59,7 +59,7 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 					yield false;
 				}
 			}
-			case default -> false;
+			default -> false;
 		};
 	}
 

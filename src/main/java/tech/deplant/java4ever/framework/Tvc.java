@@ -50,7 +50,7 @@ public record Tvc(byte[] bytes) {
 	}
 
 	public TvmCell codeCell(Sdk sdk) throws EverSdkException {
-		return TvmCell.fromJava(decode(sdk).code());
+		return new TvmCell(decode(sdk).code());
 	}
 
 	public Boc.ResultOfDecodeStateInit decode(Sdk sdk) throws EverSdkException {

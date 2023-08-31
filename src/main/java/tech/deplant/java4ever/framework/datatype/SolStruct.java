@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public record SolStruct(Abi.AbiParam[] abiParams,
-                        Map<String, Object> values) implements AbiValue<Map<String, Object>, Map<String, Object>> {
+                        Map<String, Object> values) implements AbiValue<Map<String, Object>> {
 
 	private final static System.Logger logger = System.getLogger(SolStruct.class.getName());
 
@@ -112,7 +112,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			Map<Object, Object> inputMap = (Map<Object, Object>) inputValue;
 			Map<Object, Object> convertedMap = new HashMap<>();
 			for (var entry : inputMap.entrySet()) {
-				convertedMap.put(AbiValue.of(keyDetails, entry.getKey()).jsonValue(),
+				convertedMap.put(AbiValue.of(keyDetails, entry.getKey()).toABI(),
 				                 serializeInputTree(new Abi.AbiParam(valueTypeString,
 				                                                     valueTypeString,
 				                                                     param.components()), entry.getValue()));
@@ -137,10 +137,10 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (inputValue) {
-					case String s -> new Object[]{AbiValue.of(rootDetails, s).jsonValue()};
+					case String s -> new Object[]{AbiValue.of(rootDetails, s).toABI()};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiValue.of(rootDetails, element).jsonValue();
+							return AbiValue.of(rootDetails, element).toABI();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -148,17 +148,17 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					}).toArray();
 					case List list -> list.stream().map(element -> {
 						try {
-							return AbiValue.of(rootDetails, element).jsonValue();
+							return AbiValue.of(rootDetails, element).toABI();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
 						}
 					}).toArray();
-					default -> new Object[]{AbiValue.of(rootDetails, inputValue).jsonValue()};
+					default -> new Object[]{AbiValue.of(rootDetails, inputValue).toABI()};
 				};
 			} else {
 				// all others
-				return AbiValue.of(rootDetails, inputValue).jsonValue();
+				return AbiValue.of(rootDetails, inputValue).toABI();
 			}
 		}
 	}
@@ -192,7 +192,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 			Map<Object, Object> outputMap = (Map<Object, Object>) outputValue;
 			Map<Object, Object> convertedMap = new HashMap<>();
 			for (var entry : outputMap.entrySet()) {
-				convertedMap.put(AbiValue.ofABI(keyDetails, entry.getKey()),
+				convertedMap.put(AbiValue.of(keyDetails, entry.getKey()).toJava(),
 				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
 				                                                      valueTypeString,
 				                                                      param.components()), entry.getValue()));
@@ -217,10 +217,10 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 				// arrays
 			} else if (rootDetails.isArray()) {
 				return switch (outputValue) {
-					case String s -> new Object[]{AbiValue.ofABI(rootDetails, s)};
+					case String s -> new Object[]{AbiValue.of(rootDetails, s)};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiValue.ofABI(rootDetails, element);
+							return AbiValue.of(rootDetails, element).toJava();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -228,18 +228,18 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					}).toArray();
 					case List list -> list.stream().map(element -> {
 						try {
-							return AbiValue.ofABI(rootDetails, element);
+							return AbiValue.of(rootDetails, element).toJava();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
 						}
 					}).toArray();
 					default ->
-							new Object[]{AbiValue.ofABI(rootDetails, outputValue)};
+							new Object[]{AbiValue.of(rootDetails, outputValue).toJava()};
 				};
 			} else {
 				// all others
-				return AbiValue.ofABI(rootDetails, outputValue);
+				return AbiValue.of(rootDetails, outputValue).toJava();
 			}
 		}
 	}
@@ -250,7 +250,12 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 	}
 
 	@Override
-	public Map<String, Object> jsonValue() {
+	public Map<String, Object> toABI() {
 		return values();
+	}
+
+	@Override
+	public AbiType type() {
+		return null;
 	}
 }

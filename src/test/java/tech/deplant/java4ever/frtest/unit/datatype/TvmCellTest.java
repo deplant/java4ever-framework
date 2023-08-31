@@ -27,7 +27,7 @@ class TvmCellTest {
 
 	@Test
 	public void empty_cell_equals_empty_builder() throws EverSdkException {
-		assertEquals(TvmCell.EMPTY(),TvmCell.builder().toCell(SDK_EMPTY));
+		assertEquals(TvmCell.EMPTY,TvmCell.builder().toCell(SDK_EMPTY));
 	}
 
 	@Test
@@ -35,9 +35,9 @@ class TvmCellTest {
 
 		String source = "I want to be equal!!!";
 
-		List<AbiValue> types = List.of(Uint.fromJava(32, "200"),
-		                               Uint.fromJava(64, "300"),
-		                               SolBytes.fromJava(source));
+		List<AbiValue> types = List.of(Uint.of(32, "200"),
+		                               Uint.of(64, "300"),
+		                               new SolString(source));
 
 		var builder = new TvmBuilder();
 		builder.store(types.toArray(AbiValue[]::new));

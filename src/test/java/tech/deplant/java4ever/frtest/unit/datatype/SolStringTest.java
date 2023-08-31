@@ -25,12 +25,12 @@ public class SolStringTest {
 
 	@Test
 	public void abi_string_to_string_equals() {
-		assertEquals("hello!", SolString.fromABI("hello!").toJava());
+		assertEquals("hello!", new SolString("hello!").toString());
 	}
 
 	@Test
 	public void string_to_abi_string_equals() {
-		assertEquals("hello!", SolString.fromJava("hello!").jsonValue());
+		assertEquals("hello!", new SolString("hello!").toString());
 	}
 
 }

@@ -2,12 +2,19 @@ package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.Arrays;
+
 public record SolArray(AbiValue[] values) implements AbiValue {
+
+	@Override
+	public Object toJava() {
+		return Arrays.stream(values()).map(AbiValue::toJava).toArray();
+	}
 
 	@JsonValue
 	@Override
-	public Object jsonValue() {
-		return values();
+	public Object toABI() {
+		return Arrays.stream(values()).map(AbiValue::toABI).toArray();
 	}
 
 	@Override

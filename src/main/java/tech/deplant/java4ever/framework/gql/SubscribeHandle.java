@@ -16,7 +16,7 @@ public record SubscribeHandle(Sdk sdk, long handle) {
 	private static System.Logger logger = System.getLogger(SubscribeHandle.class.getName());
 
 	public static SubscribeHandle subscribe(Sdk sdk, String queryText, Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
-		var result = Net.subscribe(sdk.context(),
+		var handle = Net.subscribe(sdk.context(),
 		              queryText,
 		              JsonContext.EMPTY_NODE(),
 		              handler -> {
@@ -27,8 +27,8 @@ public record SubscribeHandle(Sdk sdk, long handle) {
 				              logger.log(System.Logger.Level.WARNING, e::getMessage);
 				              subscribeEventConsumer.accept(new SubscribeEvent(null));
 			              }
-		              });
-		return new SubscribeHandle(sdk, result.handle());
+		              }).handle();
+		return new SubscribeHandle(sdk, handle);
 	}
 
 	public void unsubscribe() throws EverSdkException {

@@ -5,15 +5,20 @@ import tech.deplant.java4ever.binding.Abi;
 
 import java.nio.charset.StandardCharsets;
 
-public record SolString(String value) implements AbiValue {
+public record SolString(String value) implements AbiValue<String> {
 
 	@Override
 	public String toString() {
 		return value();
 	}
 
+	@Override
+	public String toJava() {
+		return toString();
+	}
+
 	@JsonValue
-	public String jsonValue() {
+	public String toABI() {
 		return value();
 	}
 

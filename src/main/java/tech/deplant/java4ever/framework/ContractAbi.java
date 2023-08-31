@@ -44,7 +44,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	}
 
 	public String functionId(Sdk sdk, String name) throws EverSdkException {
-		return Uint.of(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).jsonValue();
+		return Uint.of(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).toABI();
 	}
 
 	public boolean hasHeader(String name) {

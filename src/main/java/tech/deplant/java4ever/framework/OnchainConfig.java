@@ -11,6 +11,7 @@ import tech.deplant.java4ever.framework.contract.Contract;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static tech.deplant.java4ever.framework.LogUtils.warn;
@@ -58,25 +59,28 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return info().credentials().get(keysName);
 	}
 
-	public String address(String contractName) {
-		return info().contracts().get(contractName).address();
-	}
-
-	public ContractAbi abi(String contractName) throws JsonProcessingException {
-		return ContractAbi.ofString(info().contracts().get(contractName).abiJson());
+	private <T> T instatiateContract(Class<T> clazz,
+	                           Sdk sdk,
+	                           String contractName,
+	                           Credentials credentials) throws JsonProcessingException {
+		var contr = info().contracts().get(contractName);
+		if (Optional.ofNullable(contr).isEmpty()) {
+			return null;
+		}
+		return Contract.instantiate(clazz, sdk, contr.address(), ContractAbi.ofString(contr.abiJson()), credentials);
 	}
 
 	public <T> T contract(Class<T> clazz,
 	                      Sdk sdk,
 	                      String contractName,
 	                      String keysName) throws JsonProcessingException {
-		return Contract.instantiate(clazz, sdk, address(contractName), abi(contractName), keys(keysName));
+		return instatiateContract(clazz, sdk, contractName, keys(keysName));
 	}
 
 	public <T> T contract(Class<T> clazz,
 	                      Sdk sdk,
 	                      String contractName) throws JsonProcessingException {
-		return Contract.instantiate(clazz, sdk, address(contractName), abi(contractName), Credentials.NONE);
+		return instatiateContract(clazz, sdk, contractName, Credentials.NONE);
 	}
 
 	/**
@@ -91,12 +95,14 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		info().contracts().put(name,
 		                       new OnchainConfig.SavedContract(contract.abi().json(), contract.address()));
 		sync();
+		logger.log(System.Logger.Level.INFO, "Saved contract: %s, name: %s".formatted(contract.address(), name));
 		return contract;
 	}
 
 	public Credentials addKeys(String name, Credentials keys) throws IOException {
 		info().credentials().put(name, keys);
 		sync();
+		logger.log(System.Logger.Level.INFO, "Saved keys: %s, name: %s".formatted(keys, name));
 		return keys;
 	}
 

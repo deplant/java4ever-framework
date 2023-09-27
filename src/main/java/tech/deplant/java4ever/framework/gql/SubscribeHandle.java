@@ -19,10 +19,10 @@ public record SubscribeHandle(Sdk sdk, long handle) {
 		var handle = Net.subscribe(sdk.context(),
 		              queryText,
 		              JsonContext.EMPTY_NODE(),
-		              handler -> {
+		              eventJson -> {
 			              try {
-				              subscribeEventConsumer.accept(new SubscribeEvent(JsonContext.ABI_JSON_MAPPER().readTree(handler.params())));
-				              logger.log(System.Logger.Level.TRACE, "Callback response type: " + handler.responseType());
+				              subscribeEventConsumer.accept(new SubscribeEvent(JsonContext.ABI_JSON_MAPPER().readTree(eventJson)));
+				              logger.log(System.Logger.Level.TRACE, "Event received: " + eventJson);
 			              } catch (JsonProcessingException e) {
 				              logger.log(System.Logger.Level.WARNING, e::getMessage);
 				              subscribeEventConsumer.accept(new SubscribeEvent(null));

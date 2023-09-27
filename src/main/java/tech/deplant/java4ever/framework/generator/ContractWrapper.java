@@ -33,11 +33,19 @@ public class ContractWrapper {
 	private static TypeName typeSwitch(String abiTypeString) throws EverSdkException {
 		var details = AbiType.of(abiTypeString);
 		TypeName resultTypeName = switch (details.prefix()) {
-			case INT, UINT -> ClassName.get(Uint.class);
-			case STRING -> ClassName.get(SolString.class);
-			case BYTE, BYTES -> ClassName.get(SolBytes.class);
+			case INT, UINT -> {
+				if (details.size() > 63) {
+					yield ClassName.get(BigInteger.class);
+				} else if (details.size() > 31) {
+					yield ClassName.get(Long.class);
+				} else {
+					yield ClassName.get(Integer.class);
+				}
+			}
+			case STRING -> ClassName.get(String.class);
+			case BYTE, BYTES -> ArrayTypeName.of(ClassName.get(Byte.class));
 			case ADDRESS -> ClassName.get(Address.class);
-			case BOOL -> ClassName.get(Bool.class);
+			case BOOL -> ClassName.get(Boolean.class);
 			case CELL -> ClassName.get(TvmCell.class);
 			case SLICE -> TypeName.STRING; //TODO Slices aren't implemented!!!
 			case BUILDER -> ClassName.get(TvmBuilder.class); //TODO Check this too
@@ -96,7 +104,7 @@ public class ContractWrapper {
 		String templatePackage = config.templatePkg();
 
 		for (var contract : config.contractList()) {
-			logger.log(System.Logger.Level.INFO, contract);
+			logger.log(System.Logger.Level.DEBUG, contract);
 			var tvc = Objs.isNull(contract.tvc()) ? null : Tvc.ofResource(contract.tvc());
 			ContractWrapper.generate(mapper.readValue(new JsonResource(contract.abi()).get(), Abi.AbiContract.class),
 			                         tvc,
@@ -219,7 +227,7 @@ public class ContractWrapper {
 			boolean isConstructor = Strings.notEmptyEquals(func.name(), "constructor");
 			if (isConstructor) {
 				methodBuilder = MethodSpec.methodBuilder("prepareDeploy");
-				logger.log(System.Logger.Level.INFO, "constructor!");
+				logger.log(System.Logger.Level.TRACE, "constructor!");
 				methodBuilder.addParameter(ParameterSpec.builder(Sdk.class, "sdk").build());
 				//methodBuilder.addParameter(ParameterSpec.builder(Integer.class, "workchainId").build());
 				methodBuilder.addParameter(ParameterSpec.builder(Credentials.class, "credentials").build());
@@ -251,7 +259,7 @@ public class ContractWrapper {
 				methodBuilder = MethodSpec.methodBuilder(func.name());
 			}
 			// all other functions
-			logger.log(System.Logger.Level.INFO, func.name());
+			logger.log(System.Logger.Level.TRACE, func.name());
 			//if (func.outputs().length == 0) {
 			methodBuilder.addModifiers(Modifier.PUBLIC);
 			StringBuilder mapStringBuilder = new StringBuilder("$T params = $T.of(");

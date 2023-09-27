@@ -213,7 +213,7 @@ public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
 			                                                                          () -> {
 				                                                                          try {
 					                                                                          giver.give(address, value)
-					                                                                                     .callTree(false);
+					                                                                                     .call();
 				                                                                          } catch (EverSdkException e) {
 					                                                                          logger.log(System.Logger.Level.ERROR, () -> "Error! Message: " + e.getMessage());
 					                                                                          throw new RuntimeException(

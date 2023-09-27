@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework.template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Integer;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.math.BigInteger;
@@ -34,7 +35,7 @@ public record SafeMultisigWallet2Template(ContractAbi abi, Tvc tvc) implements T
   }
 
   public DeployHandle<SafeMultisigWallet2> prepareDeploy(Sdk sdk, Credentials credentials,
-      BigInteger[] owners, Integer reqConfirms, Integer lifetime) {
+      BigInteger[] owners, Integer reqConfirms, Long lifetime) {
     Map<String, Object> initialDataFields = Map.of();
     Map<String, Object> params = Map.of("owners", owners, 
         "reqConfirms", reqConfirms, 

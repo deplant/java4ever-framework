@@ -35,21 +35,21 @@ public interface MultisigWallet extends Giver {
 	FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce,
 	                                     Integer flags, TvmCell payload);
 
-	FunctionHandle<Void> confirmTransaction(Long transactionId);
+	FunctionHandle<Void> confirmTransaction(BigInteger transactionId);
 
-	FunctionHandle<ResultOfIsConfirmed> isConfirmed(Integer mask, Integer index);
+	FunctionHandle<ResultOfIsConfirmed> isConfirmed(Long mask, Integer index);
 
 	FunctionHandle<ResultOfGetParameters> getParameters();
 
 	FunctionHandle<ResultOfGetCustodians> getCustodians();
 
 
-	FunctionHandle<Void> acceptTransfer(String payload);
+	FunctionHandle<Void> acceptTransfer(Byte[] payload);
 
 	FunctionHandle<ResultOfSubmitTransaction> submitTransaction(Address dest, BigInteger value,
 	                                                            Boolean bounce, Boolean allBalance, TvmCell payload);
 
-	FunctionHandle<ResultOfGetTransaction> getTransaction(Long transactionId);
+	FunctionHandle<ResultOfGetTransaction> getTransaction(BigInteger transactionId);
 
 	FunctionHandle<ResultOfGetTransactions> getTransactions() ;
 

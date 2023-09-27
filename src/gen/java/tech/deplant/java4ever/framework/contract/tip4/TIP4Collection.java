@@ -2,7 +2,7 @@ package tech.deplant.java4ever.framework.contract.tip4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
-import java.lang.Integer;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.lang.Void;
@@ -132,7 +132,7 @@ public record TIP4Collection(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfNftAddress>(ResultOfNftAddress.class, sdk(), address(), abi(), credentials(), "nftAddress", params, null);
   }
 
-  public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Integer interfaceID) {
+  public FunctionHandle<ResultOfSupportsInterface> supportsInterface(Long interfaceID) {
     Map<String, Object> params = Map.of("answerId", 0, 
         "interfaceID", interfaceID);
     return new FunctionHandle<ResultOfSupportsInterface>(ResultOfSupportsInterface.class, sdk(), address(), abi(), credentials(), "supportsInterface", params, null);

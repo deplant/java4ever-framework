@@ -24,13 +24,13 @@ public interface MultisigWallet2 extends Giver {
 	public FunctionHandle<ResultOfSubmitTransaction> submitTransaction(Address dest, BigInteger value,
 	                                                                   Boolean bounce, Boolean allBalance, TvmCell payload, Optional<TvmCell> stateInit);
 
-	public FunctionHandle<Void> confirmTransaction(Long transactionId);
+	public FunctionHandle<Void> confirmTransaction(BigInteger transactionId);
 
-	public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Integer mask, Integer index);
+	public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Long mask, Integer index);
 
 	public FunctionHandle<ResultOfGetParameters> getParameters();
 
-	public FunctionHandle<ResultOfGetTransaction> getTransaction(Long transactionId);
+	public FunctionHandle<ResultOfGetTransaction> getTransaction(BigInteger transactionId);
 
 	public FunctionHandle<ResultOfGetTransactions> getTransactions();
 

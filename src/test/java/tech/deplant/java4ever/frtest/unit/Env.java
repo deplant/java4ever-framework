@@ -66,8 +66,8 @@ public class Env {
 			// should be first
 			SDK_EMPTY = Sdk.builder().build(DEFAULT_LOADER);
 			SDK_LOCAL = Sdk.builder().networkEndpoints(LOCAL_ENDPOINT).build(DEFAULT_LOADER);
-			SDK_DEV = Sdk.builder().networkEndpoints(DEV_ENDPOINT).build(DEFAULT_LOADER);
-			SDK_MAIN = Sdk.builder().networkEndpoints(MAIN_ENDPOINT).build(DEFAULT_LOADER);
+			SDK_DEV = Sdk.builder().networkEndpoints(DEV_ENDPOINT).timeout(600_000).networkQueryTimeout(300_000L).build(DEFAULT_LOADER);
+			SDK_MAIN = Sdk.builder().networkEndpoints(MAIN_ENDPOINT).timeout(600_000).networkQueryTimeout(300_000L).build(DEFAULT_LOADER);
 
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
 

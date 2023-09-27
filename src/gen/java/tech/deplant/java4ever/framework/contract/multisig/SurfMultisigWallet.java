@@ -2,6 +2,7 @@ package tech.deplant.java4ever.framework.contract.multisig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
+import java.lang.Byte;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Object;
@@ -38,7 +39,7 @@ public record SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     return ContractAbi.ofString("{\"ABI version\":2,\"header\":[\"pubkey\",\"time\",\"expire\"],\"functions\":[{\"name\":\"constructor\",\"inputs\":[{\"name\":\"owners\",\"type\":\"uint256[]\"},{\"name\":\"reqConfirms\",\"type\":\"uint8\"}],\"outputs\":[]},{\"name\":\"acceptTransfer\",\"inputs\":[{\"name\":\"payload\",\"type\":\"bytes\"}],\"outputs\":[]},{\"name\":\"sendTransaction\",\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"},{\"name\":\"bounce\",\"type\":\"bool\"},{\"name\":\"flags\",\"type\":\"uint8\"},{\"name\":\"payload\",\"type\":\"cell\"}],\"outputs\":[]},{\"name\":\"submitTransaction\",\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"},{\"name\":\"bounce\",\"type\":\"bool\"},{\"name\":\"allBalance\",\"type\":\"bool\"},{\"name\":\"payload\",\"type\":\"cell\"}],\"outputs\":[{\"name\":\"transId\",\"type\":\"uint64\"}]},{\"name\":\"confirmTransaction\",\"inputs\":[{\"name\":\"transactionId\",\"type\":\"uint64\"}],\"outputs\":[]},{\"name\":\"isConfirmed\",\"inputs\":[{\"name\":\"mask\",\"type\":\"uint32\"},{\"name\":\"index\",\"type\":\"uint8\"}],\"outputs\":[{\"name\":\"confirmed\",\"type\":\"bool\"}]},{\"name\":\"getParameters\",\"inputs\":[],\"outputs\":[{\"name\":\"maxQueuedTransactions\",\"type\":\"uint8\"},{\"name\":\"maxCustodianCount\",\"type\":\"uint8\"},{\"name\":\"expirationTime\",\"type\":\"uint64\"},{\"name\":\"minValue\",\"type\":\"uint128\"},{\"name\":\"requiredTxnConfirms\",\"type\":\"uint8\"},{\"name\":\"requiredUpdConfirms\",\"type\":\"uint8\"}]},{\"name\":\"getTransaction\",\"inputs\":[{\"name\":\"transactionId\",\"type\":\"uint64\"}],\"outputs\":[{\"name\":\"trans\",\"type\":\"tuple\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\"},{\"name\":\"confirmationsMask\",\"type\":\"uint32\"},{\"name\":\"signsRequired\",\"type\":\"uint8\"},{\"name\":\"signsReceived\",\"type\":\"uint8\"},{\"name\":\"creator\",\"type\":\"uint256\"},{\"name\":\"index\",\"type\":\"uint8\"},{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"},{\"name\":\"sendFlags\",\"type\":\"uint16\"},{\"name\":\"payload\",\"type\":\"cell\"},{\"name\":\"bounce\",\"type\":\"bool\"}]}]},{\"name\":\"getTransactions\",\"inputs\":[],\"outputs\":[{\"name\":\"transactions\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\"},{\"name\":\"confirmationsMask\",\"type\":\"uint32\"},{\"name\":\"signsRequired\",\"type\":\"uint8\"},{\"name\":\"signsReceived\",\"type\":\"uint8\"},{\"name\":\"creator\",\"type\":\"uint256\"},{\"name\":\"index\",\"type\":\"uint8\"},{\"name\":\"dest\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint128\"},{\"name\":\"sendFlags\",\"type\":\"uint16\"},{\"name\":\"payload\",\"type\":\"cell\"},{\"name\":\"bounce\",\"type\":\"bool\"}]}]},{\"name\":\"getTransactionIds\",\"inputs\":[],\"outputs\":[{\"name\":\"ids\",\"type\":\"uint64[]\"}]},{\"name\":\"getCustodians\",\"inputs\":[],\"outputs\":[{\"name\":\"custodians\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"index\",\"type\":\"uint8\"},{\"name\":\"pubkey\",\"type\":\"uint256\"}]}]},{\"name\":\"submitUpdate\",\"inputs\":[{\"name\":\"codeHash\",\"type\":\"uint256\"},{\"name\":\"owners\",\"type\":\"uint256[]\"},{\"name\":\"reqConfirms\",\"type\":\"uint8\"}],\"outputs\":[{\"name\":\"updateId\",\"type\":\"uint64\"}]},{\"name\":\"confirmUpdate\",\"inputs\":[{\"name\":\"updateId\",\"type\":\"uint64\"}],\"outputs\":[]},{\"name\":\"executeUpdate\",\"inputs\":[{\"name\":\"updateId\",\"type\":\"uint64\"},{\"name\":\"code\",\"type\":\"cell\"}],\"outputs\":[]},{\"name\":\"getUpdateRequests\",\"inputs\":[],\"outputs\":[{\"name\":\"updates\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\"},{\"name\":\"index\",\"type\":\"uint8\"},{\"name\":\"signs\",\"type\":\"uint8\"},{\"name\":\"confirmationsMask\",\"type\":\"uint32\"},{\"name\":\"creator\",\"type\":\"uint256\"},{\"name\":\"codeHash\",\"type\":\"uint256\"},{\"name\":\"custodians\",\"type\":\"uint256[]\"},{\"name\":\"reqConfirms\",\"type\":\"uint8\"}]}]}],\"events\":[{\"name\":\"TransferAccepted\",\"inputs\":[{\"name\":\"payload\",\"type\":\"bytes\"}]}],\"data\":[]}");
   }
 
-  public FunctionHandle<Void> acceptTransfer(String payload) {
+  public FunctionHandle<Void> acceptTransfer(Byte[] payload) {
     Map<String, Object> params = Map.of("payload", payload);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "acceptTransfer", params, null);
   }
@@ -63,12 +64,12 @@ public record SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfSubmitTransaction>(ResultOfSubmitTransaction.class, sdk(), address(), abi(), credentials(), "submitTransaction", params, null);
   }
 
-  public FunctionHandle<Void> confirmTransaction(Long transactionId) {
+  public FunctionHandle<Void> confirmTransaction(BigInteger transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmTransaction", params, null);
   }
 
-  public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Integer mask, Integer index) {
+  public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Long mask, Integer index) {
     Map<String, Object> params = Map.of("mask", mask, 
         "index", index);
     return new FunctionHandle<ResultOfIsConfirmed>(ResultOfIsConfirmed.class, sdk(), address(), abi(), credentials(), "isConfirmed", params, null);
@@ -79,7 +80,7 @@ public record SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfGetParameters>(ResultOfGetParameters.class, sdk(), address(), abi(), credentials(), "getParameters", params, null);
   }
 
-  public FunctionHandle<ResultOfGetTransaction> getTransaction(Long transactionId) {
+  public FunctionHandle<ResultOfGetTransaction> getTransaction(BigInteger transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
     return new FunctionHandle<ResultOfGetTransaction>(ResultOfGetTransaction.class, sdk(), address(), abi(), credentials(), "getTransaction", params, null);
   }
@@ -107,12 +108,12 @@ public record SurfMultisigWallet(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfSubmitUpdate>(ResultOfSubmitUpdate.class, sdk(), address(), abi(), credentials(), "submitUpdate", params, null);
   }
 
-  public FunctionHandle<Void> confirmUpdate(Long updateId) {
+  public FunctionHandle<Void> confirmUpdate(BigInteger updateId) {
     Map<String, Object> params = Map.of("updateId", updateId);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmUpdate", params, null);
   }
 
-  public FunctionHandle<Void> executeUpdate(Long updateId, TvmCell code) {
+  public FunctionHandle<Void> executeUpdate(BigInteger updateId, TvmCell code) {
     Map<String, Object> params = Map.of("updateId", updateId, 
         "code", code);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "executeUpdate", params, null);

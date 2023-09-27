@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -22,6 +23,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
 
 public interface Contract {
 
@@ -73,6 +76,10 @@ public interface Contract {
 
 	String address();
 
+	default Address addr() {
+		return new Address(address());
+	}
+
 	ContractAbi abi();
 
 	/**
@@ -111,18 +118,21 @@ public interface Contract {
 	                                boolean onlySuccessful, Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
 		final AtomicBoolean awaitDone = new AtomicBoolean(false);
 		final Consumer<SubscribeEvent> subscribeEventConsumer = subscribeEvent -> {
-			var transaction = subscribeEvent.result().get("result").get("transactions");
-			if (Objs.isNotNull(transaction.get("in_message")) &&
-			    Objs.isNotNull(transaction.get("in_message").get("src")) &&
-			    transaction.get("in_message").get("src").asText().equals(from.toString())) {
-				if (!onlySuccessful ||
-				    (Objs.isNotNull(transaction.get("aborted")) &&
-				     Objs.isNotNull(transaction.get("status")) &&
-				     !transaction.get("aborted").asBoolean() &&
-				     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
-					logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
-					awaitDone.set(true);
-					logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
+			//TODO Possible shit
+			if (subscribeEvent != null) {
+				var transaction = subscribeEvent.result().get("result").get("transactions");
+				if (Objs.isNotNull(transaction.get("in_message")) &&
+				    Objs.isNotNull(transaction.get("in_message").get("src")) &&
+				    transaction.get("in_message").get("src").asText().equals(from.toString())) {
+					if (!onlySuccessful ||
+					    (Objs.isNotNull(transaction.get("aborted")) &&
+					     Objs.isNotNull(transaction.get("status")) &&
+					     !transaction.get("aborted").asBoolean() &&
+					     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
+						logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
+						awaitDone.set(true);
+						logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
+					}
 				}
 			}
 		};
@@ -136,7 +146,7 @@ public interface Contract {
 		while (true) {
 			if (awaitDone.get()) {
 				logger.log(System.Logger.Level.TRACE, () -> "Unsubscribe!!!");
-				handle.unsubscribe();
+				//handle.unsubscribe();
 				break;
 			} else if (waitCounter >= sdk().context().timeout()) {
 				throw new TimeoutException();

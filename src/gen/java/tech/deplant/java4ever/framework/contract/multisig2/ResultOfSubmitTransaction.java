@@ -1,6 +1,6 @@
 package tech.deplant.java4ever.framework.contract.multisig2;
 
-import java.lang.Long;
+import java.math.BigInteger;
 
-public record ResultOfSubmitTransaction(Long transId) {
+public record ResultOfSubmitTransaction(BigInteger transId) {
 }

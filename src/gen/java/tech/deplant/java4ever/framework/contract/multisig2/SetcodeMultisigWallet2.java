@@ -60,12 +60,12 @@ public record SetcodeMultisigWallet2(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfSubmitTransaction>(ResultOfSubmitTransaction.class, sdk(), address(), abi(), credentials(), "submitTransaction", params, null);
   }
 
-  public FunctionHandle<Void> confirmTransaction(Long transactionId) {
+  public FunctionHandle<Void> confirmTransaction(BigInteger transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmTransaction", params, null);
   }
 
-  public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Integer mask, Integer index) {
+  public FunctionHandle<ResultOfIsConfirmed> isConfirmed(Long mask, Integer index) {
     Map<String, Object> params = Map.of("mask", mask, 
         "index", index);
     return new FunctionHandle<ResultOfIsConfirmed>(ResultOfIsConfirmed.class, sdk(), address(), abi(), credentials(), "isConfirmed", params, null);
@@ -76,7 +76,7 @@ public record SetcodeMultisigWallet2(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfGetParameters>(ResultOfGetParameters.class, sdk(), address(), abi(), credentials(), "getParameters", params, null);
   }
 
-  public FunctionHandle<ResultOfGetTransaction> getTransaction(Long transactionId) {
+  public FunctionHandle<ResultOfGetTransaction> getTransaction(BigInteger transactionId) {
     Map<String, Object> params = Map.of("transactionId", transactionId);
     return new FunctionHandle<ResultOfGetTransaction>(ResultOfGetTransaction.class, sdk(), address(), abi(), credentials(), "getTransaction", params, null);
   }
@@ -92,7 +92,7 @@ public record SetcodeMultisigWallet2(Sdk sdk, String address, ContractAbi abi,
   }
 
   public FunctionHandle<ResultOfSubmitUpdate> submitUpdate(Optional<BigInteger> codeHash,
-      Optional<BigInteger[]> owners, Optional<Integer> reqConfirms, Optional<Integer> lifetime) {
+      Optional<BigInteger[]> owners, Optional<Integer> reqConfirms, Optional<Long> lifetime) {
     Map<String, Object> params = Map.of("codeHash", codeHash, 
         "owners", owners, 
         "reqConfirms", reqConfirms, 
@@ -100,12 +100,12 @@ public record SetcodeMultisigWallet2(Sdk sdk, String address, ContractAbi abi,
     return new FunctionHandle<ResultOfSubmitUpdate>(ResultOfSubmitUpdate.class, sdk(), address(), abi(), credentials(), "submitUpdate", params, null);
   }
 
-  public FunctionHandle<Void> confirmUpdate(Long updateId) {
+  public FunctionHandle<Void> confirmUpdate(BigInteger updateId) {
     Map<String, Object> params = Map.of("updateId", updateId);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "confirmUpdate", params, null);
   }
 
-  public FunctionHandle<Void> executeUpdate(Long updateId, Optional<TvmCell> code) {
+  public FunctionHandle<Void> executeUpdate(BigInteger updateId, Optional<TvmCell> code) {
     Map<String, Object> params = Map.of("updateId", updateId, 
         "code", code);
     return new FunctionHandle<Void>(Void.class, sdk(), address(), abi(), credentials(), "executeUpdate", params, null);

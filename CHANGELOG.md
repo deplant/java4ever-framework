@@ -1,5 +1,14 @@
+### 2.5.0
+
+- Updated EVER-SDK -> 1.44.3
+- Fixes for contracts generation
+- Better CurrencyUnit API
+- Partial ABI now in all FunctionHandle calls
+- Better subscriptions
+
 ### 2.4.0
 
+- Updated EVER-SDK -> 1.44.2
 - Fixed Uint conversions
 - Improved DeployHandle::deployWithGiver, uses subscription internally to know when to send deploy
 - Improved ABI type system

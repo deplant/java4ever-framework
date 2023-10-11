@@ -62,10 +62,11 @@ public class TemplateTests {
 		var safeTemplate = new SafeMultisigWalletTemplate();
 		Giver giver = null;
 		Sdk sdk = null;
-		if (true) {
+		if (false) {
 			giver = GIVER_LOCAL;
 			sdk = SDK_LOCAL;
 		} else {
+			giver = GIVER_DEV;
 			sdk = SDK_DEV;
 			//giver = new SafeMultisigWallet(sdk,
 			//                               "0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef",

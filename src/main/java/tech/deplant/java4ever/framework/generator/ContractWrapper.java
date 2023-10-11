@@ -11,7 +11,10 @@ import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.datatype.*;
+import tech.deplant.java4ever.framework.datatype.AbiType;
+import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.datatype.TvmBuilder;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.Template;
 import tech.deplant.javapoet.*;
 
@@ -110,6 +113,8 @@ public class ContractWrapper {
 			                         tvc,
 			                         targetDirectory,
 			                         contract.name(),
+			                         Objs.notNullElse(contract.contractNameMask(), "%sContract"),
+			                         Objs.notNullElse(contract.templateNameMask(), "%sTemplate"),
 			                         Objs.notNullElse(contract.contractPkg(), contractPackage),
 			                         templatePackage,
 			                         Objs.notNullElse(contract.shareOutputs(), false),
@@ -121,6 +126,8 @@ public class ContractWrapper {
 	                            Tvc tvc,
 	                            Path targetDirectory,
 	                            String contractName,
+								String contractNameMask,
+								String templateNameMask,
 	                            String wrapperPackage,
 	                            String templatePackage,
 	                            boolean externalOutputs,
@@ -128,7 +135,7 @@ public class ContractWrapper {
 
 		boolean hasTvc = Objs.isNotNull(tvc);
 
-		String wrapperName = ParserUtils.capitalize(contractName);
+		String wrapperName = contractNameMask.formatted(ParserUtils.capitalize(contractName));
 
 		var wrapperDocs = CodeBlock.builder().add(String.format("""
 				                                                        Java wrapper class for usage of <strong>%s</strong> contract for Everscale blockchain.
@@ -180,7 +187,7 @@ public class ContractWrapper {
 		                                   .addModifiers(Modifier.PUBLIC)
 		                                   .build());
 
-		final TypeSpec.Builder templateBuilder = TypeSpec.recordBuilder(wrapperName + "Template")
+		final TypeSpec.Builder templateBuilder = TypeSpec.recordBuilder(templateNameMask.formatted(ParserUtils.capitalize(contractName)))
 		                                                 .addSuperinterface(Template.class)
 		                                                 .addJavadoc(templateDocs.build())
 		                                                 .addModifiers(Modifier.PUBLIC);

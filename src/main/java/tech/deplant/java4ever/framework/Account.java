@@ -16,7 +16,7 @@ public record Account(String id,
                       String code,
                       String codeHash,
                       String initCodeHash,
-                      long last_paid) {
+                      String lastTransLt) {
 
 	private static System.Logger logger = System.getLogger(Account.class.getName());
 
@@ -37,7 +37,7 @@ public record Account(String id,
 		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
-		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
+		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
 		                                                         null,
 		                                                         null);
 		if (result.result().length > 0) {
@@ -45,10 +45,10 @@ public record Account(String id,
 				return JsonContext.SDK_JSON_MAPPER().readValue(result.result()[0].traverse(),Account.class);
 			} catch (IOException e) {
 				logger.log(System.Logger.Level.ERROR, e);
-				return new Account(address, 0, "0x00", null, null, null, null, null, null, 0);
+				return new Account(address, 0, "0x00", null, null, null, null, null, null, "0x00");
 			}
 		} else {
-			return new Account(address, 0, "0x00", null, null, null, null, null, null, 0);
+			return new Account(address, 0, "0x00", null, null, null, null, null, null, "0x00");
 		}
 	}
 
@@ -69,7 +69,7 @@ public record Account(String id,
 				.stream(Net.queryCollection(sdk.context(),
 				                            "accounts",
 				                            JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
-				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_paid",
+				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
 				                            null,
 				                            null).result())
 				.map(obj -> JsonContext.SDK_JSON_MAPPER().convertValue(obj, Account.class))

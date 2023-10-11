@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.Credentials;
@@ -54,14 +55,12 @@ public class Env {
 	static TIP3TokenWallet LOCAL_TIP3_WALLET2;
 	//static LibraryLoader LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
 
-	static LibraryLoader DEFAULT_LOADER = new DefaultLoader(Env.class.getClassLoader());
+	static LibraryLoader DEFAULT_LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
 
 	private static boolean isInitialized = false;
 
 	public static void INIT() throws IOException, EverSdkException {
 		if (!isInitialized) {
-
-
 
 			// should be first
 			SDK_EMPTY = Sdk.builder().build(DEFAULT_LOADER);

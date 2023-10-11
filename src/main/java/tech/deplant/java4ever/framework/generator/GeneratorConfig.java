@@ -6,7 +6,11 @@ public record GeneratorConfig(String targetDir,
                               String contractPkg,
                               String templatePkg,
                               List<GeneratorContract> contractList) {
-	public record GeneratorContract(String contractPkg, String name,
+	public record GeneratorContract(String contractPkg,
+	                                String name,
+
+									String contractNameMask,
+	                                String templateNameMask,
 	                                String abi,
 	                                String tvc,
 	                                Boolean shareOutputs,

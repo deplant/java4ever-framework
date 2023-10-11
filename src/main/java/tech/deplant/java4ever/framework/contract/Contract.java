@@ -136,7 +136,7 @@ public interface Contract {
 				}
 			}
 		};
-		SubscribeHandle handle = subscribeOnTransactions("account_addr balance_delta in_message { src } aborted status",
+		SubscribeHandle handle = subscribeOnTransactions("in_message { src } aborted status",
 		                                                 subscribeEventConsumer);
 		long waitCounter = 0L;
 		if (Objs.isNotNull(startEvent)) {

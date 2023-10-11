@@ -1,3 +1,7 @@
+### 3.0.0
+
+- Updated baseline JDK -> 21
+- 
 ### 2.5.0
 
 - Updated EVER-SDK -> 1.44.3

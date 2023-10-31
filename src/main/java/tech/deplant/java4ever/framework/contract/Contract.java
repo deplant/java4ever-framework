@@ -1,43 +1,35 @@
 package tech.deplant.java4ever.framework.contract;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.SubscribeEvent;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
-import tech.deplant.java4ever.framework.gql.SubscribeHandle;
-import tech.deplant.java4ever.framework.gql.TransactionStatus;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.RecordComponent;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.EVER;
+import static tech.deplant.java4ever.binding.JsonContext.ABI_JSON_MAPPER;
 
 public interface Contract {
 
 	static System.Logger logger = System.getLogger(Contract.class.getName());
 
-	static <IMPL> IMPL instantiate(Class<IMPL> clazz,
-	                               Sdk sdk,
-	                               String address,
-	                               ContractAbi abi,
-	                               Credentials credentials) {
-		List<?> componentTypes = Stream.of(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
+	static <IMPL extends AbstractContract> IMPL instantiate(Class<IMPL> clazz,
+	                                                        Sdk sdk,
+	                                                        String address,
+	                                                        ContractAbi abi,
+	                                                        Credentials credentials) {
+		//List<?> componentTypes = Stream.of(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
 		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
-			if (Arrays.asList(c.getParameterTypes()).equals(componentTypes)) {
+			if (Arrays.equals(c.getParameterTypes(),
+			                  new Class<?>[]{Sdk.class, String.class, ContractAbi.class, Credentials.class})) {
 				try {
 					return (IMPL) c.newInstance(sdk, address, abi, credentials);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
@@ -49,6 +41,13 @@ public interface Contract {
 			}
 		}
 		return null;
+
+/*		Map<String, Object> parameters = Map.of("sdk", sdk,
+		                                        "address", address,
+		                                        "abi", abi,
+		                                        "credentials", credentials);
+
+		return ABI_JSON_MAPPER().convertValue(parameters, clazz);*/
 	}
 
 	/**
@@ -112,112 +111,6 @@ public interface Contract {
 		                            functionName,
 		                            functionInputs,
 		                            functionHeader);
-	}
-
-	default void waitForTransaction(Address from,
-	                                boolean onlySuccessful, Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
-		final AtomicBoolean awaitDone = new AtomicBoolean(false);
-		final Consumer<SubscribeEvent> subscribeEventConsumer = subscribeEvent -> {
-			//TODO Possible shit
-			if (subscribeEvent != null) {
-				var transaction = subscribeEvent.result().get("result").get("transactions");
-				if (Objs.isNotNull(transaction.get("in_message")) &&
-				    Objs.isNotNull(transaction.get("in_message").get("src")) &&
-				    transaction.get("in_message").get("src").asText().equals(from.toString())) {
-					if (!onlySuccessful ||
-					    (Objs.isNotNull(transaction.get("aborted")) &&
-					     Objs.isNotNull(transaction.get("status")) &&
-					     !transaction.get("aborted").asBoolean() &&
-					     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
-						logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
-						awaitDone.set(true);
-						logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
-					}
-				}
-			}
-		};
-		SubscribeHandle handle = subscribeOnTransactions("in_message { src } aborted status",
-		                                                 subscribeEventConsumer);
-		long waitCounter = 0L;
-		if (Objs.isNotNull(startEvent)) {
-			startEvent.run();
-			logger.log(System.Logger.Level.TRACE, () -> "Event Done!!!");
-		}
-		while (true) {
-			if (awaitDone.get()) {
-				logger.log(System.Logger.Level.TRACE, () -> "Unsubscribe!!!");
-				//handle.unsubscribe();
-				break;
-			} else if (waitCounter >= sdk().context().timeout()) {
-				throw new TimeoutException();
-			}
-			Thread.sleep(2000L);
-			waitCounter += 2000L;
-		}
-	}
-
-	default SubscribeHandle subscribeOnTransactions(String resultFields,
-	                                                Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							transactions(
-									filter: {
-										account_addr: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
-	}
-
-	default SubscribeHandle subscribeOnIncomingMessages(String resultFields,
-	                                                    Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							messages(
-									filter: {
-										dst: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
-	}
-
-	default SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
-	                                                    Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							messages(
-									filter: {
-										src: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
-	}
-
-	default SubscribeHandle subscribeOnAccount(String resultFields,
-	                                           Consumer<SubscribeEvent> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							accounts(
-									filter: {
-										id: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return SubscribeHandle.subscribe(sdk(), queryText, subscribeEventConsumer);
 	}
 
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {

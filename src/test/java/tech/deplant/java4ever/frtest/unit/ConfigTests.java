@@ -32,7 +32,7 @@ public class ConfigTests {
 	@Test
 	public void serialized_then_deserialized_onchain_configs_are_equal() throws IOException, EverSdkException {
 		var keys = Credentials.RANDOM(SDK_EMPTY);
-		var contract = new AbstractContract(SDK_EMPTY, Address.ZERO.toString(), SafeMultisigWalletTemplate.DEFAULT_ABI());
+		var contract = new AbstractContract(SDK_EMPTY, Address.ZERO.toString(), SafeMultisigWalletTemplate.DEFAULT_ABI(), Credentials.NONE);
 		var conf = OnchainConfig.EMPTY("config/onchain-config.json");
 		conf.addKeys("test_keys", keys);
 		conf.addContract("test_contract", contract);

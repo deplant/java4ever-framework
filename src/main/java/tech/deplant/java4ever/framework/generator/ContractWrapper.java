@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.generator;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.commons.Objs;
@@ -10,7 +11,7 @@ import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.generator.ParserUtils;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
-import tech.deplant.java4ever.framework.contract.Contract;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.datatype.AbiType;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmBuilder;
@@ -126,8 +127,8 @@ public class ContractWrapper {
 	                            Tvc tvc,
 	                            Path targetDirectory,
 	                            String contractName,
-								String contractNameMask,
-								String templateNameMask,
+	                            String contractNameMask,
+	                            String templateNameMask,
 	                            String wrapperPackage,
 	                            String templatePackage,
 	                            boolean externalOutputs,
@@ -145,25 +146,25 @@ public class ContractWrapper {
 				                                                         Java template class for deploy of <strong>%s</strong> contract for Everscale blockchain.
 				                                                         """, wrapperName));
 
-		final TypeSpec.Builder wrapperBuilder = TypeSpec.recordBuilder(wrapperName)
+		final TypeSpec.Builder wrapperBuilder = TypeSpec.classBuilder(wrapperName)
 		                                                .addJavadoc(wrapperDocs.build())
 		                                                .addModifiers(Modifier.PUBLIC);
 
 		if (Objs.isNull(superInterfaces) || superInterfaces.length == 0) {
-			wrapperBuilder.addSuperinterface(Contract.class);
+			wrapperBuilder.superclass(AbstractContract.class);
 		} else {
 			for (var s : superInterfaces) {
-				wrapperBuilder.addSuperinterface(ClassName.bestGuess(s));
+				wrapperBuilder.superclass(ClassName.bestGuess(s));
 			}
 		}
 
-		wrapperBuilder.addRecordComponent(Sdk.class, "sdk");
-		wrapperBuilder.addRecordComponent(String.class, "address");
-		wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
-		wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
+		//wrapperBuilder.addRecordComponent(Sdk.class, "sdk");
+		//wrapperBuilder.addRecordComponent(String.class, "address");
+		//wrapperBuilder.addRecordComponent(ContractAbi.class, "abi");
+		//wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("this(sdk,address,DEFAULT_ABI(),Credentials.NONE)")
+		                                   .addStatement("super(sdk,address,DEFAULT_ABI(),Credentials.NONE)")
 		                                   .addParameter(Sdk.class, "sdk")
 		                                   .addParameter(String.class, "address")
 		                                   .addException(JsonProcessingException.class)
@@ -171,7 +172,7 @@ public class ContractWrapper {
 		                                   .build());
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("this(sdk,address,abi,Credentials.NONE)")
+		                                   .addStatement("super(sdk,address,abi,Credentials.NONE)")
 		                                   .addParameter(Sdk.class, "sdk")
 		                                   .addParameter(String.class, "address")
 		                                   .addParameter(ContractAbi.class, "abi")
@@ -179,7 +180,7 @@ public class ContractWrapper {
 		                                   .build());
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("this(sdk,address,DEFAULT_ABI(),credentials)")
+		                                   .addStatement("super(sdk,address,DEFAULT_ABI(),credentials)")
 		                                   .addParameter(Sdk.class, "sdk")
 		                                   .addParameter(String.class, "address")
 		                                   .addParameter(Credentials.class, "credentials")
@@ -187,7 +188,18 @@ public class ContractWrapper {
 		                                   .addModifiers(Modifier.PUBLIC)
 		                                   .build());
 
-		final TypeSpec.Builder templateBuilder = TypeSpec.recordBuilder(templateNameMask.formatted(ParserUtils.capitalize(contractName)))
+		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
+		                                   .addStatement("super(sdk,address,abi,credentials)")
+		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addParameter(String.class, "address")
+		                                   .addParameter(ContractAbi.class, "abi")
+		                                   .addParameter(Credentials.class, "credentials")
+		                                   .addAnnotation(JsonCreator.class)
+		                                   .addModifiers(Modifier.PUBLIC)
+		                                   .build());
+
+		final TypeSpec.Builder templateBuilder = TypeSpec.recordBuilder(templateNameMask.formatted(ParserUtils.capitalize(
+				                                                 contractName)))
 		                                                 .addSuperinterface(Template.class)
 		                                                 .addJavadoc(templateDocs.build())
 		                                                 .addModifiers(Modifier.PUBLIC);

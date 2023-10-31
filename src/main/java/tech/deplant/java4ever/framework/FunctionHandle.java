@@ -7,7 +7,7 @@ import tech.deplant.commons.Objs;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
@@ -394,7 +394,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return new ResultOfTree<>(result.queryTree(), toOutput(result.decodedOutput()));
 	}
 
-	public JsonNode sendFromAsMap(MultisigWallet sender,
+	public JsonNode sendFromAsMap(MultisigContract sender,
 	                              BigInteger value,
 	                              boolean bounce,
 	                              MessageFlag flag) throws EverSdkException, JsonProcessingException {
@@ -402,23 +402,23 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		             .callAsMap();
 	}
 
-	public JsonNode sendFromAsMap(MultisigWallet sender,
+	public JsonNode sendFromAsMap(MultisigContract sender,
 	                              BigInteger value) throws EverSdkException, JsonProcessingException {
 		return sendFromAsMap(sender, value, true, MessageFlag.EXACT_VALUE_GAS);
 	}
 
-	public RETURN sendFrom(MultisigWallet sender,
+	public RETURN sendFrom(MultisigContract sender,
 	                       BigInteger value,
 	                       boolean bounce,
 	                       MessageFlag flag) throws EverSdkException, JsonProcessingException {
 		return toOutput(sendFromAsMap(sender, value, bounce, flag));
 	}
 
-	public RETURN sendFrom(MultisigWallet sender, BigInteger value) throws EverSdkException, JsonProcessingException {
+	public RETURN sendFrom(MultisigContract sender, BigInteger value) throws EverSdkException, JsonProcessingException {
 		return toOutput(sendFromAsMap(sender, value));
 	}
 
-	public ResultOfTree<JsonNode> sendFromTreeAsMap(MultisigWallet sender,
+	public ResultOfTree<JsonNode> sendFromTreeAsMap(MultisigContract sender,
 	                                                BigInteger value,
 	                                                boolean bounce,
 	                                                MessageFlag flag,
@@ -431,7 +431,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                         SafeMultisigWalletTemplate.DEFAULT_ABI()));
 	}
 
-	public ResultOfTree<RETURN> sendFromTree(MultisigWallet sender,
+	public ResultOfTree<RETURN> sendFromTree(MultisigContract sender,
 	                                         BigInteger value,
 	                                         boolean bounce,
 	                                         MessageFlag flag,
@@ -462,6 +462,71 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                 null,
 		                                 null,
 		                                 false);
+	}
+
+	public Builder toBuilder() {
+		var builder = new Builder(clazz());
+		builder.clazz = clazz();
+		builder.contract = contract();
+		builder.functionName = functionName();
+		builder.functionInputs = functionInputs();
+		builder.functionHeader = functionHeader();
+		builder.debugOptions = debugOptions();
+		return builder;
+	}
+
+	public static class Builder {
+
+		public Class clazz;
+		public Contract contract;
+		public String functionName;
+		public Map<String, Object> functionInputs;
+		public Abi.FunctionHeader functionHeader;
+		public DebugOptions debugOptions;
+
+		public Builder(Class clazz) {
+			this.clazz = clazz;
+		}
+
+		public Builder setReturnClass(Class clazz) {
+			this.clazz = clazz;
+			return this;
+		}
+
+		public Builder setContract(Contract contract) {
+			this.contract = contract;
+			return this;
+		}
+
+		public Builder setFunctionName(String functionName) {
+			this.functionName = functionName;
+			return this;
+		}
+
+		public Builder setFunctionInputs(Map<String, Object> functionInputs) {
+			this.functionInputs = functionInputs;
+			return this;
+		}
+
+		public Builder setFunctionHeader(Abi.FunctionHeader functionHeader) {
+			this.functionHeader = functionHeader;
+			return this;
+		}
+
+		public Builder setDebugOptions(DebugOptions debugOptions) {
+			this.debugOptions = debugOptions;
+			return this;
+		}
+
+		public FunctionHandle build() {
+			return new FunctionHandle(this.clazz,
+			                          this.contract,
+			                          this.functionName,
+			                          this.functionInputs,
+			                          this.functionHeader,
+			                          this.debugOptions);
+		}
+
 	}
 
 }

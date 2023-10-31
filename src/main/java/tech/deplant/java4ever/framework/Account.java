@@ -1,6 +1,8 @@
 package tech.deplant.java4ever.framework;
 
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,13 +29,13 @@ public record Account(String id,
 	 * method will construct empty Account object with accType=0 (not deployed).
 	 *
 	 * @param sdk     that will be used for query
-	 * @param address of account
+	 * @param addressString address of account
 	 * @return GraphQL result with fields (id acc_type balance boc data data_hash code code_hash init_code_hash last_paid) as Account object
 	 * @throws EverSdkException
 	 */
-	public static Account ofAddress(Sdk sdk, String address) throws EverSdkException {
+	public static Account ofAddress(Sdk sdk, String addressString) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
-		filter.put("id", new GraphQLFilter.In(new String[]{address}));
+		filter.put("id", new GraphQLFilter.In(new String[]{addressString}));
 		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
@@ -45,11 +47,23 @@ public record Account(String id,
 				return JsonContext.SDK_JSON_MAPPER().readValue(result.result()[0].traverse(),Account.class);
 			} catch (IOException e) {
 				logger.log(System.Logger.Level.ERROR, e);
-				return new Account(address, 0, "0x00", null, null, null, null, null, null, "0x00");
+				return ofUninit(addressString);
 			}
 		} else {
-			return new Account(address, 0, "0x00", null, null, null, null, null, null, "0x00");
+			return ofUninit(addressString);
 		}
+	}
+
+	public static Account ofAddress(Sdk sdk, Address address) throws EverSdkException {
+		return ofAddress(sdk, address.makeAddrStd());
+	}
+
+	public static Account ofUninit(Address address) {
+		return ofUninit(address.makeAddrStd());
+	}
+
+	public static Account ofUninit(String addressString) {
+		return new Account(addressString, 0, "0x00", TvmCell.EMPTY.cellBoc(), TvmCell.EMPTY.cellBoc(), "0x00", TvmCell.EMPTY.cellBoc(), "0x00", "0x00", "0x00");
 	}
 
 	/**

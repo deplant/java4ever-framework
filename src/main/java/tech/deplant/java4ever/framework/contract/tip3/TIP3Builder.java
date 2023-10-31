@@ -5,7 +5,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
-import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenWalletTemplate;
@@ -32,8 +32,8 @@ public class TIP3Builder {
 	public TIP3Builder() {
 	}
 
-	public TIP3TokenRoot build(Sdk sdk,
-	                           Giver giver,
+	public TIP3TokenRootContract build(Sdk sdk,
+	                           GiverContract giver,
 	                           BigInteger value) throws JsonProcessingException, EverSdkException {
 		return new TIP3TokenRootTemplate().prepareDeploy(sdk,
 		                                                 this.rootKeys,

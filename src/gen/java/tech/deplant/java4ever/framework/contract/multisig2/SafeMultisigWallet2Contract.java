@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract.multisig2;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -18,21 +19,26 @@ import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 /**
- * Java wrapper class for usage of <strong>SafeMultisigWallet2</strong> contract for Everscale blockchain.
+ * Java wrapper class for usage of <strong>SafeMultisigWallet2Contract</strong> contract for Everscale blockchain.
  */
-public record SafeMultisigWallet2(Sdk sdk, String address, ContractAbi abi,
-    Credentials credentials) implements MultisigWallet2 {
-  public SafeMultisigWallet2(Sdk sdk, String address) throws JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),Credentials.NONE);
+public class SafeMultisigWallet2Contract extends MultisigContract2 {
+  public SafeMultisigWallet2Contract(Sdk sdk, String address) throws JsonProcessingException {
+    super(sdk,address,DEFAULT_ABI(),Credentials.NONE);
   }
 
-  public SafeMultisigWallet2(Sdk sdk, String address, ContractAbi abi) {
-    this(sdk,address,abi,Credentials.NONE);
+  public SafeMultisigWallet2Contract(Sdk sdk, String address, ContractAbi abi) {
+    super(sdk,address,abi,Credentials.NONE);
   }
 
-  public SafeMultisigWallet2(Sdk sdk, String address, Credentials credentials) throws
+  public SafeMultisigWallet2Contract(Sdk sdk, String address, Credentials credentials) throws
       JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),credentials);
+    super(sdk,address,DEFAULT_ABI(),credentials);
+  }
+
+  @JsonCreator
+  public SafeMultisigWallet2Contract(Sdk sdk, String address, ContractAbi abi,
+      Credentials credentials) {
+    super(sdk,address,abi,credentials);
   }
 
   public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {

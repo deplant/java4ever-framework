@@ -1,17 +1,14 @@
 package tech.deplant.java4ever.frtest.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;
@@ -58,9 +55,10 @@ public class TemplateTests {
 
 
 	@Test
+	@Disabled
 	public void giver_switch_networks() throws Throwable {
 		var safeTemplate = new SafeMultisigWalletTemplate();
-		Giver giver = null;
+		GiverContract giver = null;
 		Sdk sdk = null;
 		if (false) {
 			giver = GIVER_LOCAL;
@@ -68,17 +66,13 @@ public class TemplateTests {
 		} else {
 			giver = GIVER_DEV;
 			sdk = SDK_DEV;
-			//giver = new SafeMultisigWallet(sdk,
-			//                               "0:bd7a935b78f85929bc870e466a948f5b9927ac17299f9e45213c598979b83bef",
-			//                               keysOfMsig);
-
 		}
 		var keys = RNG_KEYS();
 		safeTemplate.prepareDeploy(
 				sdk,
 				RNG_KEYS(), new BigInteger[]{keys.publicBigInt()}, 1
 		).deployWithGiver(giver,
-		                  CurrencyUnit.VALUE(EVER,"1"));
+		                  CurrencyUnit.VALUE(EVER, "1"));
 	}
 
 }

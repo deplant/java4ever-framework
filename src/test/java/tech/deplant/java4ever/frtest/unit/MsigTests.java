@@ -9,7 +9,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class MsigTests {
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
-		MultisigWallet msig = new MultisigBuilder().setType(MultisigWallet.Type.SAFE).build(SDK_LOCAL, keys, GIVER_LOCAL, EVER_ONE);
+		MultisigContract msig = new MultisigBuilder().setType(MultisigContract.Type.SAFE).build(SDK_LOCAL, keys, GIVER_LOCAL, EVER_ONE);
 		assertTrue(Account.ofAddress(Env.SDK_LOCAL, msig.address()).isActive());
 		try {
 			deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);

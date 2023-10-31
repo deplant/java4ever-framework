@@ -21,6 +21,55 @@ public record Solc(String compilerPath) {
 		}
 	}
 
+
+	public int compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder, String libsFolder) {
+
+		File sourceFolderFile = null;
+		if (Files.isDirectory(Path.of(sourceFolder))) {
+			sourceFolderFile = new File(sourceFolder);
+		} else {
+			logger.log(System.Logger.Level.ERROR, () -> "ERROR! Source path is not a folder!");
+		}
+		if (!Files.isDirectory(Path.of(outputFolder))) {
+			logger.log(System.Logger.Level.ERROR, () -> "ERROR! Output path is not a folder!");
+		}
+		if (!Files.exists(Path.of(sourceFolder + "/" + sourceFileName))) {
+			logger.log(System.Logger.Level.ERROR, () -> "ERROR! No such contract file in source folder!");
+		}
+		try {
+			logger.log(System.Logger.Level.INFO, () -> "Begging compilation of Solidity source...");
+			Process p = new ProcessBuilder()
+					.inheritIO()
+					.directory(sourceFolderFile)
+					.command(
+							this.compilerPath,
+							"--contract",
+							contractName,
+							"--base-path",
+							sourceFolder,
+//							"--include-path",
+//							libsFolder,
+							"--output-dir",
+							outputFolder,
+							"--tvm-version",
+							"ever",
+							sourceFileName
+					)
+					.start();
+			//return outputFolder + "/" + contractName + ".code";
+			return p.onExit().get(30, TimeUnit.SECONDS).exitValue();
+		} catch (IOException e) {
+			logger.log(System.Logger.Level.ERROR, () -> e.getMessage());
+			return -1;
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (TimeoutException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public int compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder) {
 
 		File sourceFolderFile = null;
@@ -43,6 +92,10 @@ public record Solc(String compilerPath) {
 					.command(
 							this.compilerPath,
 							sourceFileName,
+							"--base-path",
+							sourceFolder,
+							"--include-path",
+							sourceFolder,
 							"--output-dir",
 							outputFolder,
 							"-c",

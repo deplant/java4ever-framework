@@ -6,6 +6,7 @@ import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.Artifact;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 
 import java.io.IOException;
@@ -59,10 +60,10 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return info().credentials().get(keysName);
 	}
 
-	private <T> T instatiateContract(Class<T> clazz,
-	                           Sdk sdk,
-	                           String contractName,
-	                           Credentials credentials) throws JsonProcessingException {
+	private <T extends AbstractContract> T instatiateContract(Class<T> clazz,
+	                                                          Sdk sdk,
+	                                                          String contractName,
+	                                                          Credentials credentials) throws JsonProcessingException {
 		var contr = info().contracts().get(contractName);
 		if (Optional.ofNullable(contr).isEmpty()) {
 			return null;
@@ -70,14 +71,14 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return Contract.instantiate(clazz, sdk, contr.address(), ContractAbi.ofString(contr.abiJson()), credentials);
 	}
 
-	public <T> T contract(Class<T> clazz,
+	public <T extends AbstractContract> T contract(Class<T> clazz,
 	                      Sdk sdk,
 	                      String contractName,
 	                      String keysName) throws JsonProcessingException {
 		return instatiateContract(clazz, sdk, contractName, keys(keysName));
 	}
 
-	public <T> T contract(Class<T> clazz,
+	public <T extends AbstractContract> T contract(Class<T> clazz,
 	                      Sdk sdk,
 	                      String contractName) throws JsonProcessingException {
 		return instatiateContract(clazz, sdk, contractName, Credentials.NONE);

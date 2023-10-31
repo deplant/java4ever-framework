@@ -38,26 +38,26 @@ public class SubscriptionTests {
 		INIT_LOCAL_WALLETS();
 	}
 
-	@Test
-	public void try_account_subscription() throws Throwable {
-		String subscribedIdPre = LOCAL_MSIG_ROOT.address();
-		BigInteger subscribedBalancePre = LOCAL_MSIG_ROOT.accountBalance();
-		logger.log(System.Logger.Level.INFO, subscribedBalancePre);
-		Executors.newVirtualThreadPerTaskExecutor().submit( () -> LOCAL_MSIG_ROOT.subscribeOnTransactions("account_addr balance_delta", event -> {
-				//String accountAddr = ((Map<String, Object>)((Map<String, Object>)event.result().get("result")).get("transactions")).get("account_addr").toString();
-				var transactions = event.result().get("result").get("transactions");
-				String accountAddr = transactions.get("account_addr").asText();
-				String accountBalanceDelta = transactions.get("balance_delta").asText();
-				assertEquals(subscribedIdPre, accountAddr);
-				logger.log(System.Logger.Level.INFO, accountBalanceDelta);
-				assertNotEquals(BigInteger.ZERO, Uint.of(128, accountBalanceDelta).toBigInteger());
-		}));
-		LOCAL_MSIG_WALLET1.sendTransaction(new Address(subscribedIdPre),
-		                                CurrencyUnit.VALUE(CurrencyUnit.Ever.EVER, "2"),
-		                                false,
-		                                MessageFlag.EXACT_VALUE_GAS.flag(),
-		                                TvmCell.EMPTY).call();
-		assertNotEquals(subscribedBalancePre, LOCAL_MSIG_ROOT.accountBalance());
-	}
+//	@Test
+//	public void try_account_subscription() throws Throwable {
+//		String subscribedIdPre = LOCAL_MSIG_ROOT.address();
+//		BigInteger subscribedBalancePre = LOCAL_MSIG_ROOT.accountBalance();
+//		logger.log(System.Logger.Level.INFO, subscribedBalancePre);
+//		Executors.newVirtualThreadPerTaskExecutor().submit( () -> LOCAL_MSIG_ROOT.subscribeOnTransactions("account_addr balance_delta", event -> {
+//				//String accountAddr = ((Map<String, Object>)((Map<String, Object>)event.result().get("result")).get("transactions")).get("account_addr").toString();
+//				var transactions = event.result().get("result").get("transactions");
+//				String accountAddr = transactions.get("account_addr").asText();
+//				String accountBalanceDelta = transactions.get("balance_delta").asText();
+//				assertEquals(subscribedIdPre, accountAddr);
+//				logger.log(System.Logger.Level.INFO, accountBalanceDelta);
+//				assertNotEquals(BigInteger.ZERO, Uint.of(128, accountBalanceDelta).toBigInteger());
+//		}));
+//		LOCAL_MSIG_WALLET1.sendTransaction(new Address(subscribedIdPre),
+//		                                CurrencyUnit.VALUE(CurrencyUnit.Ever.EVER, "2"),
+//		                                false,
+//		                                MessageFlag.EXACT_VALUE_GAS.flag(),
+//		                                TvmCell.EMPTY).call();
+//		assertNotEquals(subscribedBalancePre, LOCAL_MSIG_ROOT.accountBalance());
+//	}
 
 }

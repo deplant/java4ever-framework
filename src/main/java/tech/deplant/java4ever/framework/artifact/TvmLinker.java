@@ -43,6 +43,8 @@ public record TvmLinker(String linkerPath, String stdlibSolPath) {
 							outputPath,
 							"--lib",
 							stdlibSolPath(),
+							"--debug-map",
+							codePath + ".txt",
 							"--abi-json",
 							abiPath,
 							codePath

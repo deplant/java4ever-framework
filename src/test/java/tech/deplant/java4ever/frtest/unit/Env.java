@@ -9,11 +9,10 @@ import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Seed;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
+import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigWallet;
-import tech.deplant.java4ever.framework.contract.tip3.TIP3Builder;
-import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenRoot;
-import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWallet;
+import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
+import tech.deplant.java4ever.framework.contract.tip3.*;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 import java.io.IOException;
@@ -39,23 +38,23 @@ public class Env {
 	public static Sdk SDK_LOCAL;
 	public static Sdk SDK_DEV;
 	public static Sdk SDK_MAIN;
-	public static EverOSGiver GIVER_LOCAL;
-	public static MultisigWallet GIVER_DEV;
-	public static MultisigWallet GIVER_MAIN;
+	public static GiverContract GIVER_LOCAL;
+	public static GiverContract GIVER_DEV;
+	public static GiverContract GIVER_MAIN;
 	public static System.Logger LOG = System.getLogger(Env.class.getName());
 	static BigInteger TIP3_NONCE;
 	static Credentials LOCAL_KEYS_ROOT;
 	static Credentials LOCAL_KEYS_WALLET1;
 	static Credentials LOCAL_KEYS_WALLET2;
-	static MultisigWallet LOCAL_MSIG_ROOT;
-	static MultisigWallet LOCAL_MSIG_WALLET1;
-	static MultisigWallet LOCAL_MSIG_WALLET2;
-	static TIP3TokenRoot LOCAL_TIP3_ROOT;
-	static TIP3TokenWallet LOCAL_TIP3_WALLET1;
-	static TIP3TokenWallet LOCAL_TIP3_WALLET2;
+	static MultisigContract LOCAL_MSIG_ROOT;
+	static MultisigContract LOCAL_MSIG_WALLET1;
+	static MultisigContract LOCAL_MSIG_WALLET2;
+	static TIP3TokenRootContract LOCAL_TIP3_ROOT;
+	static TIP3TokenWalletContract LOCAL_TIP3_WALLET1;
+	static TIP3TokenWalletContract LOCAL_TIP3_WALLET2;
 	//static LibraryLoader LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
 
-	static LibraryLoader DEFAULT_LOADER = AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
+	static LibraryLoader DEFAULT_LOADER = new DefaultLoader(ClassLoader.getSystemClassLoader());//AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB");
 
 	private static boolean isInitialized = false;
 
@@ -79,19 +78,19 @@ public class Env {
 		LOCAL_KEYS_WALLET1 = RNG_KEYS();
 		LOCAL_KEYS_WALLET2 = RNG_KEYS();
 
-		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigWallet.Type.SAFE)
+		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigContract.Type.SAFE)
 		                                       .build(SDK_LOCAL,
 		                                              LOCAL_KEYS_ROOT,
 		                                              GIVER_LOCAL,
 		                                              CurrencyUnit.VALUE(EVER, "4.5"));
 
-		LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigWallet.Type.SURF)
+		LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigContract.Type.SURF)
 		                                          .build(SDK_LOCAL,
 		                                                 LOCAL_KEYS_ROOT,
 		                                                 GIVER_LOCAL,
 		                                                 CurrencyUnit.VALUE(EVER, "4.5"));
 
-		LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigWallet.Type.SETCODE)
+		LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigContract.Type.SETCODE)
 		                                          .build(SDK_LOCAL,
 		                                                 LOCAL_KEYS_ROOT,
 		                                                 GIVER_LOCAL,
@@ -109,20 +108,18 @@ public class Env {
 				.setRandomNonce(new Random().nextInt())
 				.build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
 
-		LOCAL_TIP3_WALLET1 = new TIP3TokenWallet(SDK_LOCAL,
-		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
-		                                                                      CurrencyUnit.VALUE(EVER, "0.5"))
-		                                                        .sendFrom(LOCAL_MSIG_ROOT,
-		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
-		                                                        .tokenWallet()
-		                                                        .toString());
-		LOCAL_TIP3_WALLET2 = new TIP3TokenWallet(SDK_LOCAL,
-		                                         LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
-		                                                                      CurrencyUnit.VALUE(EVER, "0.5"))
-		                                                        .sendFrom(LOCAL_MSIG_ROOT,
-		                                                                  CurrencyUnit.VALUE(EVER, "1.5"))
-		                                                        .tokenWallet()
-		                                                        .toString());
+		LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
+		                             CurrencyUnit.VALUE(EVER, "0.5"))
+		               .sendFrom(LOCAL_MSIG_ROOT,
+		                         CurrencyUnit.VALUE(EVER, "1.5"));
+
+		LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
+		                             CurrencyUnit.VALUE(EVER, "0.5"))
+		               .sendFrom(LOCAL_MSIG_ROOT,
+		                         CurrencyUnit.VALUE(EVER, "1.5"));
+
+		LOCAL_TIP3_WALLET1 = new TIP3TokenWalletContract(SDK_LOCAL,LOCAL_TIP3_ROOT.walletOf(new Address(LOCAL_MSIG_WALLET1.address())).get().value0().toString());
+		LOCAL_TIP3_WALLET2 = new TIP3TokenWalletContract(SDK_LOCAL,LOCAL_TIP3_ROOT.walletOf(new Address(LOCAL_MSIG_WALLET2.address())).get().value0().toString());
 	}
 
 	public static Credentials RNG_KEYS() throws EverSdkException {

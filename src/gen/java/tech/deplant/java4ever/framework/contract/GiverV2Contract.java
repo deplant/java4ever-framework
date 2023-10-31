@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Boolean;
 import java.lang.Object;
@@ -15,20 +16,25 @@ import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 
 /**
- * Java wrapper class for usage of <strong>GiverV2</strong> contract for Everscale blockchain.
+ * Java wrapper class for usage of <strong>GiverV2Contract</strong> contract for Everscale blockchain.
  */
-public record GiverV2(Sdk sdk, String address, ContractAbi abi,
-    Credentials credentials) implements EverOSGiver {
-  public GiverV2(Sdk sdk, String address) throws JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),Credentials.NONE);
+public class GiverV2Contract extends GiverContract {
+  public GiverV2Contract(Sdk sdk, String address) throws JsonProcessingException {
+    super(sdk,address,DEFAULT_ABI(),Credentials.NONE);
   }
 
-  public GiverV2(Sdk sdk, String address, ContractAbi abi) {
-    this(sdk,address,abi,Credentials.NONE);
+  public GiverV2Contract(Sdk sdk, String address, ContractAbi abi) {
+    super(sdk,address,abi,Credentials.NONE);
   }
 
-  public GiverV2(Sdk sdk, String address, Credentials credentials) throws JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),credentials);
+  public GiverV2Contract(Sdk sdk, String address, Credentials credentials) throws
+      JsonProcessingException {
+    super(sdk,address,DEFAULT_ABI(),credentials);
+  }
+
+  @JsonCreator
+  public GiverV2Contract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) {
+    super(sdk,address,abi,credentials);
   }
 
   public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {

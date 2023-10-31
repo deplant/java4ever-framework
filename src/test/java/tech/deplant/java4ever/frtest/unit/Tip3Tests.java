@@ -10,7 +10,7 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Account;
 import tech.deplant.java4ever.framework.CurrencyUnit;
 import tech.deplant.java4ever.framework.MessageFlag;
-import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWallet;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWalletContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 
@@ -51,14 +51,14 @@ public class Tip3Tests {
 		var receiverAddress = new Address(LOCAL_MSIG_WALLET1.address());
 		GIVER_LOCAL.give(LOCAL_TIP3_ROOT.address(), EVER_TEN);
 		GIVER_LOCAL.give(LOCAL_MSIG_ROOT.address(), EVER_TEN);
-		LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ONE, receiverAddress, false,
+		LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ZERO, receiverAddress, false,
 		                     TvmCell.EMPTY)
 		               .sendFromTree(LOCAL_MSIG_ROOT,
 		                             CurrencyUnit.VALUE(EVER, "0.3"),
 		                             true,
 		                             MessageFlag.FEE_EXTRA,
 		                             true,
-		                             TIP3TokenWallet.DEFAULT_ABI());
+		                             TIP3TokenWalletContract.DEFAULT_ABI());
 		assertEquals(mintAmount, LOCAL_TIP3_ROOT.totalSupply().get().value0());
 		assertEquals(mintAmount, LOCAL_TIP3_WALLET1.balance().get().value0());
 	}

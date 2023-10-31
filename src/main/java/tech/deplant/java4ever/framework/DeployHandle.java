@@ -11,7 +11,7 @@ import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
-import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
 import tech.deplant.java4ever.framework.template.Template;
@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNullElse;
  * @param constructorHeader
  * @param <RETURN>
  */
-public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
+public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
                                                     Sdk sdk,
                                                     Template template,
                                                     long workchainId,
@@ -116,7 +116,7 @@ public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
 		                          debugOptions);
 	}
 
-	public <T extends Contract> DeployHandle<T> withReturnClass(Class<T> returnClass) {
+	public <T extends AbstractContract> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,
 		                          sdk(),
 		                          template(),
@@ -205,10 +205,10 @@ public record DeployHandle<RETURN extends Contract>(Class<RETURN> clazz,
 		                         null).address();
 	}
 
-	public RETURN deployWithGiver(Giver giver, BigInteger value) throws EverSdkException {
+	public RETURN deployWithGiver(GiverContract giver, BigInteger value) throws EverSdkException {
 		var address = toAddress();
 		try {
-			new AbstractContract(sdk(), address, template().abi()).waitForTransaction(new Address(giver.address()),
+			new AbstractContract(sdk(), address, template().abi(), Credentials.NONE).waitForTransaction(new Address(giver.address()),
 			                                                                          false,
 			                                                                          () -> {
 				                                                                          try {

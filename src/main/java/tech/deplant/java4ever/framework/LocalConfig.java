@@ -63,34 +63,37 @@ public record LocalConfig(Artifact<String, String> artifact,
 		return compileTemplate(info().sourcePath(),
 		                       info().buildPath(),
 		                       filename,
-		                       contractName);
+		                       contractName,
+		                       info().sourcePath());
 	}
 
 	public Template compileTemplate(String sourcePath,
 	                                String buildPath,
 	                                String filename,
-	                                String contractName) throws JsonProcessingException, EverSdkException {
+	                                String contractName,
+	                                String libsPath) throws JsonProcessingException, EverSdkException {
 		var compilerResult = info().compiler().compileContract(
 				contractName,
 				filename,
 				sourcePath,
-				buildPath);
+				buildPath,
+				libsPath);
 
 		if (compilerResult == 0) {
-			var linkerResult = info().linker().assemblyContract(contractName, buildPath);
-			if (linkerResult == 0) {
+			//var linkerResult = info().linker().assemblyContract(contractName, buildPath);
+			//if (linkerResult == 0) {
 				return new AbstractTemplate(
 						ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
 						Tvc.ofFile(buildPath + "/" + contractName + ".tvc")
 				);
-			} else {
-				error(logger, () -> "TvmLinker exit code:" + linkerResult);
-				return null;
-			}
+			//} else {
+				//error(logger, () -> "TvmLinker exit code:" + linkerResult);
+				//return null;
+			//}
 		} else {
-			error(logger, () -> "Solc exit code:" + compilerResult);
+			error(logger, () -> "Sold exit code:" + compilerResult);
 			throw new EverSdkException(new EverSdkException.ErrorResult(-600,
-			                                                            "Compilation failed. Solc exit code:" +
+			                                                            "Compilation failed. Sold exit code:" +
 			                                                            compilerResult), new Exception());
 		}
 	}

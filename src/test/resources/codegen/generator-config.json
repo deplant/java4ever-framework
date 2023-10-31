@@ -7,7 +7,7 @@
       "name": "GiverV2",
       "abi": "artifacts/giver/GiverV2.abi.json",
       "interfaces": [
-        "EverOSGiver"
+        "GiverContract"
       ]
     },
     {
@@ -17,7 +17,7 @@
       "tvc": "artifacts/multisig/SafeMultisigWallet.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet"
+        "MultisigContract"
       ]
     },
     {
@@ -27,7 +27,7 @@
       "tvc": "artifacts/multisig/SetcodeMultisigWallet.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet"
+        "MultisigContract"
       ]
     },
     {
@@ -37,7 +37,7 @@
       "tvc": "artifacts/multisig/SurfMultisigWallet.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet"
+        "MultisigContract"
       ]
     },
     {
@@ -47,7 +47,7 @@
       "tvc": "artifacts/multisig2/SafeMultisig.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet2"
+        "MultisigContract2"
       ]
     },
     {
@@ -57,7 +57,7 @@
       "tvc": "artifacts/multisig2/SetcodeMultisig.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet2"
+        "MultisigContract2"
       ]
     },
     {
@@ -67,7 +67,7 @@
       "tvc": "artifacts/multisig2/UpdateMultisig.tvc",
       "shareOutputs": true,
       "interfaces": [
-        "MultisigWallet2"
+        "MultisigContract2"
       ]
     },
     {

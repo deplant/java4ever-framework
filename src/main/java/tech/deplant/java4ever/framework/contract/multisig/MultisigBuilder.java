@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.contract.Giver;
+import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;
@@ -13,9 +13,11 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
+import static tech.deplant.java4ever.framework.contract.multisig.MultisigContract.Type.SURF;
+
 public class MultisigBuilder {
 
-	private MultisigWallet.Type type = MultisigWallet.Type.SURF;
+	private MultisigContract.Type type = MultisigContract.Type.SURF;
 
 	private int confirmations = 1; // Min confirmations for consensus
 
@@ -26,7 +28,7 @@ public class MultisigBuilder {
 	public MultisigBuilder() {
 	}
 
-	public MultisigWallet build(Sdk sdk, Credentials deployKeys, Giver giver, BigInteger value) throws JsonProcessingException, EverSdkException {
+	public MultisigContract build(Sdk sdk, Credentials deployKeys, GiverContract giver, BigInteger value) throws JsonProcessingException, EverSdkException {
 		BigInteger[] owners = null;
 		if (publicKeys.isEmpty()) {
 			owners = new BigInteger[]{deployKeys.publicBigInt()};
@@ -65,11 +67,11 @@ public class MultisigBuilder {
 		return this;
 	}
 
-	public MultisigWallet.Type type() {
+	public MultisigContract.Type type() {
 		return type;
 	}
 
-	public MultisigBuilder setType(MultisigWallet.Type type) {
+	public MultisigBuilder setType(MultisigContract.Type type) {
 		this.type = type;
 		return this;
 	}

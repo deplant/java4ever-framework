@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.framework.contract.tip4;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.Object;
 import java.lang.String;
@@ -9,25 +10,29 @@ import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.Sdk;
-import tech.deplant.java4ever.framework.contract.Contract;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 
 /**
- * Java wrapper class for usage of <strong>TIP4IndexBasis</strong> contract for Everscale blockchain.
+ * Java wrapper class for usage of <strong>TIP4IndexBasisContract</strong> contract for Everscale blockchain.
  */
-public record TIP4IndexBasis(Sdk sdk, String address, ContractAbi abi,
-    Credentials credentials) implements Contract {
-  public TIP4IndexBasis(Sdk sdk, String address) throws JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),Credentials.NONE);
+public class TIP4IndexBasisContract extends AbstractContract {
+  public TIP4IndexBasisContract(Sdk sdk, String address) throws JsonProcessingException {
+    super(sdk,address,DEFAULT_ABI(),Credentials.NONE);
   }
 
-  public TIP4IndexBasis(Sdk sdk, String address, ContractAbi abi) {
-    this(sdk,address,abi,Credentials.NONE);
+  public TIP4IndexBasisContract(Sdk sdk, String address, ContractAbi abi) {
+    super(sdk,address,abi,Credentials.NONE);
   }
 
-  public TIP4IndexBasis(Sdk sdk, String address, Credentials credentials) throws
+  public TIP4IndexBasisContract(Sdk sdk, String address, Credentials credentials) throws
       JsonProcessingException {
-    this(sdk,address,DEFAULT_ABI(),credentials);
+    super(sdk,address,DEFAULT_ABI(),credentials);
+  }
+
+  @JsonCreator
+  public TIP4IndexBasisContract(Sdk sdk, String address, ContractAbi abi, Credentials credentials) {
+    super(sdk,address,abi,credentials);
   }
 
   public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {

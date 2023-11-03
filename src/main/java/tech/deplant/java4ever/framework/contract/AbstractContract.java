@@ -4,12 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.ContractAbi;
-import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.FunctionHandle;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.datatype.Address;
-import tech.deplant.java4ever.framework.gql.SubscribeHandle;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +28,10 @@ public class AbstractContract implements Contract {
 	private Credentials credentials;
 
 	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-	public AbstractContract(@JsonProperty(value = "sdk") Sdk sdk, @JsonProperty(value = "address") String address, @JsonProperty(value = "abi") ContractAbi abi, @JsonProperty(value = "credentials") Credentials credentials) {
+	public AbstractContract(@JsonProperty(value = "sdk") Sdk sdk,
+	                        @JsonProperty(value = "address") String address,
+	                        @JsonProperty(value = "abi") ContractAbi abi,
+	                        @JsonProperty(value = "credentials") Credentials credentials) {
 		this.sdk = sdk;
 		this.address = address;
 		this.abi = abi;
@@ -47,9 +46,9 @@ public class AbstractContract implements Contract {
 
 		new SubscribeHandle(sdk(),
 		                    SubscribeHandle.TRANSACTIONS_SUB.formatted(address(),
-		                                                               "in_message { src } aborted status")).setStopOnFilter(
-				SubscribeHandle.TR_SUCCESSFUL).subscribe(
-				futureSubscriptionResult::complete);
+		                                                               "in_message { src } aborted status"))
+				.setStopOnFilter(SubscribeHandle.TR_SUCCESSFUL)
+				.subscribe(futureSubscriptionResult::complete);
 
 		startEvent.run();
 		try {
@@ -57,10 +56,6 @@ public class AbstractContract implements Contract {
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
-//		final AtomicBoolean awaitDone = new AtomicBoolean(false);
-//		final Consumer<SubscribeEvent> subscribeEventConsumer = subscribeEvent -> {
-//			//TODO Possible shit
-//			if (subscribeEvent != null) {
 //				var transaction = subscribeEvent.result().get("result").get("transactions");
 //				if (Objs.isNotNull(transaction.get("in_message")) &&
 //				    Objs.isNotNull(transaction.get("in_message").get("src")) &&
@@ -76,25 +71,6 @@ public class AbstractContract implements Contract {
 //					}
 //				}
 //			}
-//		};
-//		//subscribeOnTransactions("in_message { src } aborted status",
-//		//                                                 subscribeEventConsumer);
-//		long waitCounter = 0L;
-//		if (Objs.isNotNull(startEvent)) {
-//			startEvent.run();
-//			logger.log(System.Logger.Level.TRACE, () -> "Event Done!!!");
-//		}
-//		while (true) {
-//			if (awaitDone.get()) {
-//				logger.log(System.Logger.Level.TRACE, () -> "Unsubscribe!!!");
-//				//handle.unsubscribe();
-//				break;
-//			} else if (waitCounter >= sdk().context().timeout()) {
-//				throw new TimeoutException();
-//			}
-//			Thread.sleep(2000L);
-//			waitCounter += 2000L;
-//		}
 	}
 
 	public SubscribeHandle subscribeOnIncomingMessages(String resultFields,

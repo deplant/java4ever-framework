@@ -1,10 +1,10 @@
-package tech.deplant.java4ever.framework.gql;
+package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.binding.Net;
-import tech.deplant.java4ever.framework.Sdk;
+import tech.deplant.java4ever.framework.gql.TransactionStatus;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;

@@ -397,24 +397,24 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	public JsonNode sendFromAsMap(MultisigContract sender,
 	                              BigInteger value,
 	                              boolean bounce,
-	                              MessageFlag flag) throws EverSdkException, JsonProcessingException {
+	                              MessageFlag flag) throws EverSdkException {
 		return sender.sendTransaction(new Address(contract().address()), value, bounce, flag.flag(), toPayload())
 		             .callAsMap();
 	}
 
 	public JsonNode sendFromAsMap(MultisigContract sender,
-	                              BigInteger value) throws EverSdkException, JsonProcessingException {
+	                              BigInteger value) throws EverSdkException {
 		return sendFromAsMap(sender, value, true, MessageFlag.EXACT_VALUE_GAS);
 	}
 
 	public RETURN sendFrom(MultisigContract sender,
 	                       BigInteger value,
 	                       boolean bounce,
-	                       MessageFlag flag) throws EverSdkException, JsonProcessingException {
+	                       MessageFlag flag) throws EverSdkException {
 		return toOutput(sendFromAsMap(sender, value, bounce, flag));
 	}
 
-	public RETURN sendFrom(MultisigContract sender, BigInteger value) throws EverSdkException, JsonProcessingException {
+	public RETURN sendFrom(MultisigContract sender, BigInteger value) throws EverSdkException {
 		return toOutput(sendFromAsMap(sender, value));
 	}
 
@@ -423,12 +423,16 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                                                boolean bounce,
 	                                                MessageFlag flag,
 	                                                boolean throwOnTreeError,
-	                                                ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
-		return sender.sendTransaction(new Address(contract().address()), value, bounce, flag.flag(), toPayload())
-		             .callTreeAsMap(throwOnTreeError,
-		                            concatAbiSet(otherAbisForDecode,
-		                                         contract().abi(),
-		                                         SafeMultisigWalletTemplate.DEFAULT_ABI()));
+	                                                ContractAbi... otherAbisForDecode) throws EverSdkException {
+		try {
+			return sender.sendTransaction(new Address(contract().address()), value, bounce, flag.flag(), toPayload())
+			             .callTreeAsMap(throwOnTreeError,
+			                            concatAbiSet(otherAbisForDecode,
+			                                         contract().abi(),
+			                                         SafeMultisigWalletTemplate.DEFAULT_ABI()));
+		} catch (JsonProcessingException e) {
+			throw new EverSdkException(new EverSdkException.ErrorResult(-500,e.getMessage()));
+		}
 	}
 
 	public ResultOfTree<RETURN> sendFromTree(MultisigContract sender,
@@ -436,7 +440,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                                         boolean bounce,
 	                                         MessageFlag flag,
 	                                         boolean throwOnTreeError,
-	                                         ContractAbi... otherAbisForDecode) throws EverSdkException, JsonProcessingException {
+	                                         ContractAbi... otherAbisForDecode) throws EverSdkException {
 		var result = sendFromTreeAsMap(sender, value, bounce, flag, throwOnTreeError, otherAbisForDecode);
 		return new ResultOfTree<>(result.queryTree(), toOutput(result.decodedOutput()));
 	}

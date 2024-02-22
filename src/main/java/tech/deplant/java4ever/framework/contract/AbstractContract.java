@@ -22,18 +22,28 @@ import java.util.function.Consumer;
  */
 public class AbstractContract implements Contract {
 
-	private final Sdk sdk;
-	private final String address;
+	private final int sdk;
+	private final Address address;
 	private final ContractAbi abi;
 	private Credentials credentials;
 
 	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-	public AbstractContract(@JsonProperty(value = "sdk") Sdk sdk,
-	                        @JsonProperty(value = "address") String address,
+	public AbstractContract(@JsonProperty(value = "sdk") int sdk,
+	                        @JsonProperty(value = "address") Address address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
 	                        @JsonProperty(value = "credentials") Credentials credentials) {
 		this.sdk = sdk;
 		this.address = address;
+		this.abi = abi;
+		this.credentials = credentials;
+	}
+
+	public AbstractContract(@JsonProperty(value = "sdk") int sdk,
+	                        @JsonProperty(value = "address") String address,
+	                        @JsonProperty(value = "abi") ContractAbi abi,
+	                        @JsonProperty(value = "credentials") Credentials credentials) {
+		this.sdk = sdk;
+		this.address = new Address(address);
 		this.abi = abi;
 		this.credentials = credentials;
 	}
@@ -142,12 +152,12 @@ public class AbstractContract implements Contract {
 	}
 
 	@Override
-	public Sdk sdk() {
+	public int sdk() {
 		return sdk;
 	}
 
 	@Override
-	public String address() {
+	public Address address() {
 		return address;
 	}
 

@@ -12,7 +12,6 @@ import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.GiverContract;
-import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
 import tech.deplant.java4ever.framework.template.Template;
 
@@ -36,14 +35,14 @@ import static java.util.Objects.requireNonNullElse;
  * @param <RETURN>
  */
 public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
-                                                    Sdk sdk,
-                                                    Template template,
-                                                    long workchainId,
-                                                    Credentials credentials,
-                                                    Map<String, Object> initialDataFields,
-                                                    Map<String, Object> constructorInputs,
-                                                    Abi.FunctionHeader constructorHeader,
-                                                    DebugOptions debugOptions) {
+                                                            int sdk,
+                                                            Template template,
+                                                            long workchainId,
+                                                            Credentials credentials,
+                                                            Map<String, Object> initialDataFields,
+                                                            Map<String, Object> constructorInputs,
+                                                            Abi.FunctionHeader constructorHeader,
+                                                            DebugOptions debugOptions) {
 
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
@@ -55,7 +54,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	                                             .build();
 
 	public DeployHandle(Class<RETURN> clazz,
-	                    Sdk sdk,
+	                    int sdk,
 	                    ContractAbi abi,
 	                    Tvc tvc,
 	                    long workchainId,
@@ -74,7 +73,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	}
 
 	public DeployHandle(Class<RETURN> clazz,
-	                    Sdk sdk,
+	                    int sdk,
 	                    Template template,
 	                    long workchainId,
 	                    Credentials credentials,
@@ -89,10 +88,14 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		     initialDataFields,
 		     constructorInputs,
 		     constructorHeader,
-		     new DebugOptions(false, 60000L, false));
+		     new DebugOptions(false, 60000L, false, 50L));
 	}
 
-	public DeployHandle<RETURN> withDebugTree(boolean enabled, long timeout, boolean throwErrors, ContractAbi... treeAbis) {
+	public DeployHandle<RETURN> withDebugTree(boolean enabled,
+	                                          long timeout,
+	                                          boolean throwErrors,
+	                                          long maxTransactionCount,
+	                                          ContractAbi... treeAbis) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
 		                          template(),
@@ -101,7 +104,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          initialDataFields(),
 		                          constructorInputs(),
 		                          constructorHeader(),
-		                          new DebugOptions(enabled, timeout, throwErrors, treeAbis));
+		                          new DebugOptions(enabled, timeout, throwErrors, maxTransactionCount, treeAbis));
 	}
 
 	public DeployHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
@@ -195,7 +198,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	}
 
 	public String toAddress() throws EverSdkException {
-		return Abi.encodeMessage(sdk().context(),
+		return Abi.encodeMessage(sdk(),
 		                         template().abi().ABI(),
 		                         null,
 		                         toDeploySet(),
@@ -208,29 +211,34 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	public RETURN deployWithGiver(GiverContract giver, BigInteger value) throws EverSdkException {
 		var address = toAddress();
 		try {
-			new AbstractContract(sdk(), address, template().abi(), Credentials.NONE).waitForTransaction(new Address(giver.address()),
-			                                                                          false,
-			                                                                          () -> {
-				                                                                          try {
-					                                                                          giver.give(address, value)
-					                                                                                     .call();
-				                                                                          } catch (EverSdkException e) {
-					                                                                          logger.log(System.Logger.Level.ERROR, () -> "Error! Message: " + e.getMessage());
-					                                                                          throw new RuntimeException(
-							                                                                          e);
-				                                                                          }
-			                                                                          });
+			new AbstractContract(sdk(), address, template().abi(), Credentials.NONE).waitForTransaction(giver.address(),
+			                                                                                            false,
+			                                                                                            () -> {
+				                                                                                            try {
+					                                                                                            giver.give(
+							                                                                                                 address,
+							                                                                                                 value)
+					                                                                                                 .call();
+				                                                                                            } catch (
+						                                                                                            EverSdkException e) {
+					                                                                                            logger.log(
+							                                                                                            System.Logger.Level.ERROR,
+							                                                                                            () -> "Error! Message: " +
+							                                                                                                  e.getMessage());
+					                                                                                            throw new RuntimeException(
+							                                                                                            e);
+				                                                                                            }
+			                                                                                            });
 			return deploy(address);
 		} catch (InterruptedException e) {
 			logger.log(System.Logger.Level.ERROR, () -> "Wait for giver funds interrupted! Message: " + e.getMessage());
 			throw new EverSdkException(new EverSdkException.ErrorResult(-400, "EVER-SDK call interrupted!"), e);
 		} catch (TimeoutException e) {
 			logger.log(System.Logger.Level.ERROR,
-			           () -> "Wait for giver funds timeout! Timeout: " + sdk().context().timeout() + " Message: " +
+			           () -> "Wait for giver funds timeout! Message: " +
 			                 e.getMessage());
 			throw new EverSdkException(new EverSdkException.ErrorResult(-402,
-			                                                            "EVER-SDK Execution expired on Timeout! Current timeout: " +
-			                                                            sdk().context().timeout()), e);
+			                                                            "EVER-SDK Execution expired on Timeout!"), e);
 		}
 
 	}
@@ -241,7 +249,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	}
 
 	private RETURN deploy(String address) throws EverSdkException {
-		Processing.processMessage(sdk().context(),
+		Processing.processMessage(sdk(),
 		                          template().abi().ABI(),
 		                          address,
 		                          toDeploySet(),

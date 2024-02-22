@@ -3,7 +3,6 @@ package tech.deplant.java4ever.framework.contract.multisig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
@@ -13,22 +12,20 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
-import static tech.deplant.java4ever.framework.contract.multisig.MultisigContract.Type.SURF;
-
 public class MultisigBuilder {
 
-	private MultisigContract.Type type = MultisigContract.Type.SURF;
-
-	private int confirmations = 1; // Min confirmations for consensus
-
 	private final Set<BigInteger> publicKeys = new HashSet<>();
-
+	private MultisigContract.Type type = MultisigContract.Type.SURF;
+	private int confirmations = 1; // Min confirmations for consensus
 	private Credentials deployKeys;
 
 	public MultisigBuilder() {
 	}
 
-	public MultisigContract build(Sdk sdk, Credentials deployKeys, GiverContract giver, BigInteger value) throws JsonProcessingException, EverSdkException {
+	public MultisigContract build(int sdk,
+	                              Credentials deployKeys,
+	                              GiverContract giver,
+	                              BigInteger value) throws JsonProcessingException, EverSdkException {
 		BigInteger[] owners = null;
 		if (publicKeys.isEmpty()) {
 			owners = new BigInteger[]{deployKeys.publicBigInt()};
@@ -37,13 +34,13 @@ public class MultisigBuilder {
 		}
 		return switch (type) {
 			case SURF -> new SurfMultisigWalletTemplate()
-					.prepareDeploy(sdk,deployKeys,owners,confirmations)
+					.prepareDeploy(sdk, deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 			case SAFE -> new SafeMultisigWalletTemplate()
-					.prepareDeploy(sdk,deployKeys,owners,confirmations)
+					.prepareDeploy(sdk, deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 			case SETCODE -> new SetcodeMultisigWalletTemplate()
-					.prepareDeploy(sdk,deployKeys,owners,confirmations)
+					.prepareDeploy(sdk, deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 		};
 	}

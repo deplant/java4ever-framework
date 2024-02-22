@@ -27,14 +27,13 @@ public class SubscribeHandle {
 						}
 				""";
 	private static System.Logger logger = System.getLogger(SubscribeHandle.class.getName());
-	private final Sdk sdk;
+	private final int sdk;
 	private final String queryText;
 	private long handle;
 	private Predicate<JsonNode> stopOnFilter = eventNode -> true;
 	private Consumer<JsonNode> eventsConsumer;
 
-
-	public SubscribeHandle(Sdk sdk, String queryText) {
+	public SubscribeHandle(int sdk, String queryText) {
 		this.sdk = sdk;
 		this.queryText = queryText;
 	}
@@ -43,7 +42,7 @@ public class SubscribeHandle {
 
 		setEventsConsumer(eventsConsumer);
 
-		var handle = Net.subscribe(sdk.context(),
+		var handle = Net.subscribe(this.sdk,
 		                           queryText(),
 		                           JsonContext.EMPTY_NODE(),
 		                           eventJson -> {
@@ -64,7 +63,7 @@ public class SubscribeHandle {
 				logger.log(System.Logger.Level.TRACE,
 				           () -> "HANDLE:%d Unsubscribing...".formatted(
 						           this.handle));
-				Net.unsubscribe(sdk().context(), new Net.ResultOfSubscribeCollection(handle()));
+				Net.unsubscribe(this.sdk, new Net.ResultOfSubscribeCollection(handle()));
 			}
 		} catch (EverSdkException e) {
 			// I think there's no reason to fail everything if unsubscribe failed...
@@ -75,7 +74,7 @@ public class SubscribeHandle {
 
 	}
 
-	public Sdk sdk() {
+	public int sdk() {
 		return sdk;
 	}
 

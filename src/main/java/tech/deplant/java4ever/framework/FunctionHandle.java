@@ -34,12 +34,17 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                      String functionName,
 	                      Map<String, Object> functionInputs,
 	                      Abi.FunctionHeader functionHeader) {
-		this(clazz, contract, functionName, functionInputs, functionHeader, new DebugOptions(false, 60000L, false));
+		this(clazz,
+		     contract,
+		     functionName,
+		     functionInputs,
+		     functionHeader,
+		     new DebugOptions(false, 60000L, false, 50L));
 	}
 
 	public FunctionHandle(Class<RETURN> clazz,
-	                      Sdk sdk,
-	                      String address,
+	                      int sdk,
+	                      Address address,
 	                      ContractAbi abi,
 	                      Credentials credentials,
 	                      String functionName,
@@ -48,8 +53,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		this(clazz, new AbstractContract(sdk, address, abi, credentials), functionName, functionInputs, functionHeader);
 	}
 
-	public FunctionHandle(Sdk sdk,
-	                      String address,
+	public FunctionHandle(int sdk,
+	                      Address address,
 	                      ContractAbi abi,
 	                      Credentials credentials,
 	                      String functionName,
@@ -65,13 +70,14 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	public FunctionHandle<RETURN> withDebugTree(boolean enabled,
 	                                            long timeout,
 	                                            boolean throwErrors,
+	                                            long transactionMaxCount,
 	                                            ContractAbi... treeAbis) {
 		return new FunctionHandle<>(clazz(),
 		                            contract(),
 		                            functionName(),
 		                            functionInputs(),
 		                            functionHeader(),
-		                            new DebugOptions(enabled, timeout, throwErrors, treeAbis));
+		                            new DebugOptions(enabled, timeout, throwErrors, transactionMaxCount, treeAbis));
 	}
 
 	public FunctionHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
@@ -140,13 +146,13 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * @throws EverSdkException
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return new TvmCell(Abi.encodeMessageBody(contract().sdk().context(),
+		return new TvmCell(Abi.encodeMessageBody(contract().sdk(),
 		                                         contract().abi().functionCallABI(functionName()),
 		                                         toCallSet(),
 		                                         true,
 		                                         toSigner(),
 		                                         null,
-		                                         contract().address(),
+		                                         contract().address().makeAddrStd(),
 		                                         null).body());
 	}
 
@@ -164,16 +170,16 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 */
 	public JsonNode getAsMap() throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
-		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address()}));
-		Net.ResultOfQueryCollection result = Net.queryCollection(contract().sdk().context(),
+		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address().makeAddrStd()}));
+		Net.ResultOfQueryCollection result = Net.queryCollection(contract().sdk(),
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id boc",
 		                                                         null,
 		                                                         null);
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk().context(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
 		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address(),
+		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
@@ -181,7 +187,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                  null);
 		for (var map : result.result()) {
 			String boc = map.get("boc").asText();
-			return Optional.ofNullable(Tvm.runTvm(contract().sdk().context(),
+			return Optional.ofNullable(Tvm.runTvm(contract().sdk(),
 			                                      msg.message(),
 			                                      boc,
 			                                      null,
@@ -221,15 +227,15 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * there's no guarantee that it corresponds to current blockchain state.
 	 */
 	public JsonNode getLocalAsMap(String boc) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk().context(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
 		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address(),
+		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
 		                                                  null,
 		                                                  null);
-		return Optional.ofNullable(Tvm.runTvm(contract().sdk().context(),
+		return Optional.ofNullable(Tvm.runTvm(contract().sdk(),
 		                                      msg.message(),
 		                                      boc,
 		                                      null,
@@ -246,15 +252,15 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	public JsonNode callLocalAsMap(String boc,
 	                               Tvm.ExecutionOptions options,
 	                               boolean unlimitedBalance) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk().context(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
 		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address(),
+		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
 		                                                  null,
 		                                                  null);
-		return Optional.ofNullable(Tvm.runExecutor(contract().sdk().context(),
+		return Optional.ofNullable(Tvm.runExecutor(contract().sdk(),
 		                                           msg.message(),
 		                                           new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
 		                                           options,
@@ -331,11 +337,11 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                .toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall();
 		var msgId = resultOfProcess.transaction().get("in_msg").asText();
-		var debugOutResult = Net.queryTransactionTree(contract().sdk().context(),
+		var debugOutResult = Net.queryTransactionTree(contract().sdk(),
 		                                              msgId,
 		                                              finalABIArray,
-		                                              contract().sdk().debugTreeTimeout(),
-		                                              0L);
+		                                              debugOptions().timeout(),
+		                                              debugOptions().transactionMaxCount());
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
@@ -398,12 +404,10 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                              BigInteger value,
 	                              boolean bounce,
 	                              MessageFlag flag) throws EverSdkException {
-		return sender.sendTransaction(new Address(contract().address()), value, bounce, flag.flag(), toPayload())
-		             .callAsMap();
+		return sender.sendTransaction(contract().address(), value, bounce, flag.flag(), toPayload()).callAsMap();
 	}
 
-	public JsonNode sendFromAsMap(MultisigContract sender,
-	                              BigInteger value) throws EverSdkException {
+	public JsonNode sendFromAsMap(MultisigContract sender, BigInteger value) throws EverSdkException {
 		return sendFromAsMap(sender, value, true, MessageFlag.EXACT_VALUE_GAS);
 	}
 
@@ -425,13 +429,13 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                                                boolean throwOnTreeError,
 	                                                ContractAbi... otherAbisForDecode) throws EverSdkException {
 		try {
-			return sender.sendTransaction(new Address(contract().address()), value, bounce, flag.flag(), toPayload())
+			return sender.sendTransaction(contract().address(), value, bounce, flag.flag(), toPayload())
 			             .callTreeAsMap(throwOnTreeError,
 			                            concatAbiSet(otherAbisForDecode,
 			                                         contract().abi(),
 			                                         SafeMultisigWalletTemplate.DEFAULT_ABI()));
 		} catch (JsonProcessingException e) {
-			throw new EverSdkException(new EverSdkException.ErrorResult(-500,e.getMessage()));
+			throw new EverSdkException(new EverSdkException.ErrorResult(-500, e.getMessage()));
 		}
 	}
 
@@ -457,9 +461,9 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
-		return Processing.processMessage(contract().sdk().context(),
+		return Processing.processMessage(contract().sdk(),
 		                                 contract().abi().functionCallABI(functionName()),
-		                                 contract().address(),
+		                                 contract().address().makeAddrStd(),
 		                                 null,
 		                                 toCallSet(),
 		                                 toSigner(),

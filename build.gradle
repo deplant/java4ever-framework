@@ -122,10 +122,10 @@ task generateEverscaleContracts(type: JavaExec) {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = JavaVersion.VERSION_20
-    targetCompatibility = JavaVersion.VERSION_20
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     options.compilerArgs += "--enable-preview"
     options.compilerArgs += "--add-modules=jdk.incubator.concurrent"
@@ -133,7 +133,7 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(JavaExec).configureEach {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     jvmArgs += "--enable-preview"
     jvmArgs += "--add-modules=jdk.incubator.concurrent"
@@ -141,21 +141,21 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Javadoc).configureEach {
     javadocTool = javaToolchains.javadocToolFor {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     failOnError false
     options.addBooleanOption('html5', true)
     options.addStringOption('encoding', 'UTF-8')
     options.addStringOption('charSet', 'UTF-8')
     options.addBooleanOption('-enable-preview', true)
-    options.addStringOption('-release', '20')
+    options.addStringOption('-release', '21')
     options.addBooleanOption('-ignore-source-errors', true)
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 tasks.withType(Test) {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     useJUnitPlatform()
     jvmArgs += "--enable-preview"

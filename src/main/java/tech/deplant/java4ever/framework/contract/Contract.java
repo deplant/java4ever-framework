@@ -22,14 +22,14 @@ public interface Contract {
 	static System.Logger logger = System.getLogger(Contract.class.getName());
 
 	static <IMPL extends AbstractContract> IMPL instantiate(Class<IMPL> clazz,
-	                                                        Sdk sdk,
+	                                                        int sdk,
 	                                                        String address,
 	                                                        ContractAbi abi,
 	                                                        Credentials credentials) {
 		//List<?> componentTypes = Stream.of(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
 		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
 			if (Arrays.equals(c.getParameterTypes(),
-			                  new Class<?>[]{Sdk.class, String.class, ContractAbi.class, Credentials.class})) {
+			                  new Class<?>[]{Integer.class, String.class, ContractAbi.class, Credentials.class})) {
 				try {
 					return (IMPL) c.newInstance(sdk, address, abi, credentials);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
@@ -71,13 +71,13 @@ public interface Contract {
 		return Account.ofAddress(sdk(), address());
 	}
 
-	Sdk sdk();
+	int sdk();
 
-	String address();
+	Address address();
 
-	default Address addr() {
-		return new Address(address());
-	}
+//	default String addressString() {
+//		return address().makeAddrStd();
+//	}
 
 	ContractAbi abi();
 
@@ -114,7 +114,7 @@ public interface Contract {
 	}
 
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {
-		return Abi.decodeMessage(sdk().context(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
+		return Abi.decodeMessage(sdk(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
 	}
 
 }

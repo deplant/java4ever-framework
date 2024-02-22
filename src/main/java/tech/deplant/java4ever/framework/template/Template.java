@@ -25,19 +25,19 @@ public interface Template {
 //	}
 
 
-	default JsonNode decodeInitialData(Sdk sdk) throws EverSdkException {
+	default JsonNode decodeInitialData(int sdk) throws EverSdkException {
 		return tvc().decodeInitialData(sdk, abi());
 	}
 
-	default String decodeInitialPubkey(Sdk sdk) throws EverSdkException {
+	default String decodeInitialPubkey(int sdk) throws EverSdkException {
 		return tvc().decodeInitialPubkey(sdk, abi());
 	}
 
-	default String addressFromEncodedTvc(Sdk sdk) throws EverSdkException {
-		return String.format("0:%s", Boc.getBocHash(sdk.context(), tvc().base64String()).hash());
+	default String addressFromEncodedTvc(int sdk) throws EverSdkException {
+		return String.format("0:%s", Boc.getBocHash(sdk, tvc().base64String()).hash());
 	}
 
-	default boolean isDeployed(Sdk sdk) throws EverSdkException {
+	default boolean isDeployed(int sdk) throws EverSdkException {
 		return Account.ofAddress(sdk, addressFromEncodedTvc(sdk)).isActive();
 	}
 

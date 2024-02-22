@@ -33,10 +33,10 @@ public record Account(String id,
 	 * @return GraphQL result with fields (id acc_type balance boc data data_hash code code_hash init_code_hash last_paid) as Account object
 	 * @throws EverSdkException
 	 */
-	public static Account ofAddress(Sdk sdk, String addressString) throws EverSdkException {
+	public static Account ofAddress(int sdk, String addressString) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new GraphQLFilter.In(new String[]{addressString}));
-		Net.ResultOfQueryCollection result = Net.queryCollection(sdk.context(),
+		Net.ResultOfQueryCollection result = Net.queryCollection(sdk,
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
@@ -54,7 +54,7 @@ public record Account(String id,
 		}
 	}
 
-	public static Account ofAddress(Sdk sdk, Address address) throws EverSdkException {
+	public static Account ofAddress(int sdk, Address address) throws EverSdkException {
 		return ofAddress(sdk, address.makeAddrStd());
 	}
 
@@ -74,13 +74,13 @@ public record Account(String id,
 	 * @return list of created Account objects
 	 * @throws EverSdkException
 	 */
-	public static List<Account> ofAddressList(Sdk sdk,
+	public static List<Account> ofAddressList(int sdk,
 	                                          String... addresses) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id",
 		           new GraphQLFilter.In(addresses));
 		return Arrays
-				.stream(Net.queryCollection(sdk.context(),
+				.stream(Net.queryCollection(sdk,
 				                            "accounts",
 				                            JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
@@ -107,8 +107,8 @@ public record Account(String id,
 	 * @return pubkey string
 	 * @throws EverSdkException
 	 */
-	public String tvmPubkey(Sdk sdk, ContractAbi abi) throws EverSdkException {
-		return Abi.decodeInitialData(sdk.context(), abi.ABI(), data(), false).initialPubkey();
+	public String tvmPubkey(int sdk, ContractAbi abi) throws EverSdkException {
+		return Abi.decodeInitialData(sdk, abi.ABI(), data(), false).initialPubkey();
 	}
 
 	public interface GraphQLFilter {

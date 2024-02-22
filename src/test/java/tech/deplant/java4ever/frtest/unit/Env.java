@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.frtest.unit;
 
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoader;
@@ -34,10 +35,10 @@ public class Env {
 	public static BigInteger EVER_TWO = CurrencyUnit.VALUE(EVER, "2");
 	public static BigInteger EVER_FIVE = CurrencyUnit.VALUE(EVER, "5");
 	public static BigInteger EVER_TEN = CurrencyUnit.VALUE(EVER, "10");
-	public static Sdk SDK_EMPTY;
-	public static Sdk SDK_LOCAL;
-	public static Sdk SDK_DEV;
-	public static Sdk SDK_MAIN;
+	public static int SDK_EMPTY;
+	public static int SDK_LOCAL;
+	public static int SDK_DEV;
+	public static int SDK_MAIN;
 	public static GiverContract GIVER_LOCAL;
 	public static GiverContract GIVER_DEV;
 	public static GiverContract GIVER_MAIN;
@@ -62,10 +63,10 @@ public class Env {
 		if (!isInitialized) {
 
 			// should be first
-			SDK_EMPTY = Sdk.builder().build(DEFAULT_LOADER);
-			SDK_LOCAL = Sdk.builder().networkEndpoints(LOCAL_ENDPOINT).build(DEFAULT_LOADER);
-			SDK_DEV = Sdk.builder().networkEndpoints(DEV_ENDPOINT).timeout(600_000).networkQueryTimeout(300_000L).build(DEFAULT_LOADER);
-			SDK_MAIN = Sdk.builder().networkEndpoints(MAIN_ENDPOINT).timeout(600_000).networkQueryTimeout(300_000L).build(DEFAULT_LOADER);
+			SDK_EMPTY = EverSdk.builder().build().orElseThrow();
+			SDK_LOCAL = EverSdk.builder().networkEndpoints(LOCAL_ENDPOINT).build().orElseThrow();
+			SDK_DEV = EverSdk.builder().networkEndpoints(DEV_ENDPOINT).networkQueryTimeout(300_000L).build().orElseThrow();
+			SDK_MAIN = EverSdk.builder().networkEndpoints(MAIN_ENDPOINT).networkQueryTimeout(300_000L).build().orElseThrow();
 
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
 

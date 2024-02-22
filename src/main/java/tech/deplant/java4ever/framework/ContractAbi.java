@@ -43,8 +43,8 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 		                  .writeValueAsString(abiContract());
 	}
 
-	public String functionId(Sdk sdk, String name) throws EverSdkException {
-		return Uint.of(32, Abi.calcFunctionId(sdk.context(), ABI(), name, false).functionId()).toABI();
+	public String functionId(int sdk, String name) throws EverSdkException {
+		return Uint.of(32, Abi.calcFunctionId(sdk, ABI(), name, false).functionId()).toABI();
 	}
 
 	public boolean hasHeader(String name) {
@@ -91,7 +91,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 
 	public Abi.AbiParam initDataType(String initDataName) {
 		var dataParam = Arrays.stream(data()).filter(data -> initDataName.equals(data.name())).findAny().orElseThrow();
-		return new Abi.AbiParam(dataParam.name(), dataParam.type(), dataParam.components());
+		return new Abi.AbiParam(dataParam.name(), dataParam.type(), dataParam.components(), true);
 	}
 
 	public Abi.AbiParam functionOutputType(String functionName, String outputName) {
@@ -197,7 +197,7 @@ public record ContractAbi(Abi.AbiContract abiContract) {
 	 */
 	public Map<String, Object> convertInitDataInputs(Map<String, Object> initDataInputs) throws EverSdkException {
 		var initDataParams = Arrays.stream(data())
-		                           .map(data -> new Abi.AbiParam(data.name(), data.type(), data.components()))
+		                           .map(data -> new Abi.AbiParam(data.name(), data.type(), data.components(), true))
 		                           .toArray(Abi.AbiParam[]::new);
 		return SolStruct.fromJava(initDataParams, initDataInputs).values();
 	}

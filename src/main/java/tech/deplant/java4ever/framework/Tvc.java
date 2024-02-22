@@ -30,65 +30,65 @@ public record Tvc(byte[] bytes) {
 		return Base64.getEncoder().encodeToString(bytes());
 	}
 
-	public JsonNode decodeInitialData(Sdk sdk, ContractAbi abi) throws EverSdkException {
-		return Abi.decodeInitialData(sdk.context(), abi.ABI(), decode(sdk).data(), false).initialData();
+	public JsonNode decodeInitialData(int sdk, ContractAbi abi) throws EverSdkException {
+		return Abi.decodeInitialData(sdk, abi.ABI(), decode(sdk).data(), false).initialData();
 	}
 
-	public String encodeInitialData(Sdk sdk,
+	public String encodeInitialData(int sdk,
 	                                ContractAbi abi,
 	                                Map<String, Object> initData,
 	                                String pubkey) throws EverSdkException {
-		return Abi.encodeInitialData(sdk.context(), abi.ABI(), JsonContext.ABI_JSON_MAPPER().valueToTree(initData), pubkey, null).data();
+		return Abi.encodeInitialData(sdk, abi.ABI(), JsonContext.ABI_JSON_MAPPER().valueToTree(initData), pubkey, null).data();
 	}
 
-	public String decodeInitialPubkey(Sdk sdk, ContractAbi abi) throws EverSdkException {
-		return Abi.decodeInitialData(sdk.context(), abi.ABI(), decode(sdk).data(), false).initialPubkey();
+	public String decodeInitialPubkey(int sdk, ContractAbi abi) throws EverSdkException {
+		return Abi.decodeInitialData(sdk, abi.ABI(), decode(sdk).data(), false).initialPubkey();
 	}
 
-	public String code(Sdk sdk) throws EverSdkException {
+	public String code(int sdk) throws EverSdkException {
 		return decode(sdk).code();
 	}
 
-	public TvmCell codeCell(Sdk sdk) throws EverSdkException {
+	public TvmCell codeCell(int sdk) throws EverSdkException {
 		return new TvmCell(decode(sdk).code());
 	}
 
-	public Boc.ResultOfDecodeStateInit decode(Sdk sdk) throws EverSdkException {
-		return Boc.decodeStateInit(sdk.context(), base64String(), null);
+	public Boc.ResultOfDecodeStateInit decode(int sdk) throws EverSdkException {
+		return Boc.decodeStateInit(sdk, base64String(), null);
 	}
 
-	public String data(Sdk sdk) throws EverSdkException {
+	public String data(int sdk) throws EverSdkException {
 		return decode(sdk).data();
 	}
 
-	public String saltedCode(Sdk sdk, String salt) throws EverSdkException {
-		return Boc.setCodeSalt(sdk.context(), code(sdk), salt, null).code();
+	public String saltedCode(int sdk, String salt) throws EverSdkException {
+		return Boc.setCodeSalt(sdk, code(sdk), salt, null).code();
 	}
 
-	public String codeHash(Sdk sdk) throws EverSdkException {
-		return Boc.getBocHash(sdk.context(), code(sdk)).hash();
+	public String codeHash(int sdk) throws EverSdkException {
+		return Boc.getBocHash(sdk, code(sdk)).hash();
 	}
 
-	public Number codeDepth(Sdk sdk) throws EverSdkException {
-		return Boc.getBocDepth(sdk.context(), code(sdk)).depth();
+	public Number codeDepth(int sdk) throws EverSdkException {
+		return Boc.getBocDepth(sdk, code(sdk)).depth();
 	}
 
-	public String saltedCodeHash(Sdk sdk, String salt) throws EverSdkException {
-		return Boc.getBocHash(sdk.context(), saltedCode(sdk, salt)).hash();
+	public String saltedCodeHash(int sdk, String salt) throws EverSdkException {
+		return Boc.getBocHash(sdk, saltedCode(sdk, salt)).hash();
 	}
 
-	public Tvc withUpdatedInitialData(Sdk sdk,
+	public Tvc withUpdatedInitialData(int sdk,
 	                                  ContractAbi abi,
 	                                  Map<String, Object> initialData,
 	                                  String publicKey) throws EverSdkException {
-		String updatedDataString = Abi.updateInitialData(sdk.context(),
+		String updatedDataString = Abi.updateInitialData(sdk,
 		                                                 abi.ABI(),
 		                                                 data(sdk),
 		                                                 JsonContext.ABI_JSON_MAPPER().valueToTree(abi.convertInitDataInputs(initialData)),
 		                                                                                           publicKey,
 		                                                                                           null).data();
 		var decoded = decode(sdk);
-		var newTvcString = Boc.encodeStateInit(sdk.context(),
+		var newTvcString = Boc.encodeStateInit(sdk,
 		                                 decoded.code(),
 		                                 updatedDataString,
 		                                 decoded.library(),
@@ -99,7 +99,7 @@ public record Tvc(byte[] bytes) {
 		return Tvc.ofBase64String(newTvcString);
 	}
 
-	public Builder toBuilder(Sdk sdk) throws EverSdkException {
+	public Builder toBuilder(int sdk) throws EverSdkException {
 		var decoded = decode(sdk);
 		return new Builder(decoded.code(),
 		                   decoded.data(),
@@ -178,8 +178,8 @@ public record Tvc(byte[] bytes) {
 			return this;
 		}
 
-		public Tvc build(Sdk sdk) throws EverSdkException {
-			return Tvc.ofBase64String(Boc.encodeStateInit(sdk.context(),
+		public Tvc build(int sdk) throws EverSdkException {
+			return Tvc.ofBase64String(Boc.encodeStateInit(sdk,
 			                                        this.code,
 			                                        this.data,
 			                                        this.library,

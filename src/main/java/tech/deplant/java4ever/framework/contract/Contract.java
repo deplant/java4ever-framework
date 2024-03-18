@@ -25,7 +25,7 @@ public interface Contract {
 		//List<?> componentTypes = Stream.of(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
 		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
 			if (Arrays.equals(c.getParameterTypes(),
-			                  new Class<?>[]{Integer.class, String.class, ContractAbi.class, Credentials.class})) {
+			                  new Class<?>[]{Integer.TYPE, String.class, ContractAbi.class, Credentials.class})) {
 				try {
 					return (IMPL) c.newInstance(sdk, address, abi, credentials);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |

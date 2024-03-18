@@ -115,7 +115,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 				convertedMap.put(AbiValue.of(keyDetails, entry.getKey()).toABI(),
 				                 serializeInputTree(new Abi.AbiParam(valueTypeString,
 				                                                     valueTypeString,
-				                                                     param.components()), entry.getValue()));
+				                                                     param.components(),
+				                                                     null), entry.getValue()));
 			}
 			return convertedMap;
 		} else {
@@ -195,7 +196,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 				convertedMap.put(AbiValue.of(keyDetails, entry.getKey()).toJava(),
 				                 serializeOutputTree(new Abi.AbiParam(valueTypeString,
 				                                                      valueTypeString,
-				                                                      param.components()), entry.getValue()));
+				                                                      param.components(),
+				                                                      null), entry.getValue()));
 			}
 			return convertedMap;
 		} else {

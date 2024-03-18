@@ -14,6 +14,7 @@ import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,11 +35,15 @@ public class MsigTests {
 
 
 
-		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,0,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},
 		                                                                     1);
 		MultisigContract msig = new MultisigBuilder().setType(MultisigContract.Type.SAFE).build(SDK_LOCAL, keys, GIVER_LOCAL, EVER_ONE);
+		String s = switch (msig) {
+			case null -> "";
+			case MultisigContract c -> c.tvmPubkey();
+		};
 		assertTrue(Account.ofAddress(Env.SDK_LOCAL, msig.address()).isActive());
 		try {
 			deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);

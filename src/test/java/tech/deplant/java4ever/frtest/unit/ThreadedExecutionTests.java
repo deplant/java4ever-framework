@@ -1,7 +1,6 @@
 package tech.deplant.java4ever.frtest.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jdk.incubator.concurrent.StructuredTaskScope;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -10,12 +9,12 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
 
 import java.io.IOException;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.stream.IntStream;
 
 import static tech.deplant.java4ever.frtest.unit.Env.*;
@@ -32,10 +31,10 @@ public class ThreadedExecutionTests {
 		Env.INIT();
 	}
 
-	private static void randomWalletDeployment(Sdk sdk, GiverContract giver) {
+	private static void randomWalletDeployment(int contextId, GiverContract giver) {
 		try {
 			new MultisigBuilder().setType(MultisigContract.Type.SAFE)
-			                     .build(sdk, Credentials.RANDOM(sdk), giver, EVER_ONE);
+			                     .build(contextId, Credentials.RANDOM(contextId), giver, EVER_ONE);
 		} catch (JsonProcessingException | EverSdkException e) {
 			logger.log(System.Logger.Level.ERROR, e);
 		}

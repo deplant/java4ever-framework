@@ -72,7 +72,7 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 	}
 
 	public Abi.AbiParam toAbiParam(String paramName, Abi.AbiParam[] components) {
-		return new Abi.AbiParam(paramName, abiName(), null);
+		return new Abi.AbiParam(paramName, abiName(), null, null);
 	}
 
 	public String abiName() {

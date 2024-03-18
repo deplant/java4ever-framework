@@ -11,11 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-
-import static tech.deplant.java4ever.binding.JsonContext.ABI_JSON_MAPPER;
 
 public interface Contract {
 
@@ -68,10 +64,10 @@ public interface Contract {
 	 * @throws EverSdkException
 	 */
 	default Account account() throws EverSdkException {
-		return Account.ofAddress(sdk(), address());
+		return Account.ofAddress(contextId(), address());
 	}
 
-	int sdk();
+	int contextId();
 
 	Address address();
 
@@ -98,13 +94,13 @@ public interface Contract {
 	 * @throws EverSdkException
 	 */
 	default String tvmPubkey() throws EverSdkException {
-		return account().tvmPubkey(sdk(), abi());
+		return account().tvmPubkey(contextId(), abi());
 	}
 
 	default FunctionHandle<Map<String, Object>> prepareCall(String functionName,
 	                                                        Map<String, Object> functionInputs,
 	                                                        Abi.FunctionHeader functionHeader) {
-		return new FunctionHandle<>(sdk(),
+		return new FunctionHandle<>(contextId(),
 		                            address(),
 		                            abi(),
 		                            credentials(),
@@ -114,7 +110,7 @@ public interface Contract {
 	}
 
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {
-		return Abi.decodeMessage(sdk(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
+		return Abi.decodeMessage(contextId(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
 	}
 
 }

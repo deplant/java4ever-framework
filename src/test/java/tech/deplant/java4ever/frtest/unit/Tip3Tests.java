@@ -48,7 +48,7 @@ public class Tip3Tests {
 	@Test
 	public void tip3_mint() throws Throwable {
 		var mintAmount = new BigInteger("9000000");
-		var receiverAddress = new Address(LOCAL_MSIG_WALLET1.address());
+		var receiverAddress = LOCAL_MSIG_WALLET1.address();
 		GIVER_LOCAL.give(LOCAL_TIP3_ROOT.address(), EVER_TEN);
 		GIVER_LOCAL.give(LOCAL_MSIG_ROOT.address(), EVER_TEN);
 		LOCAL_TIP3_ROOT.mint(mintAmount, receiverAddress, EVER_ZERO, receiverAddress, false,

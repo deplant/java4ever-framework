@@ -28,8 +28,8 @@ public abstract class MultisigContract2 extends GiverContract {
 	}
 
 	@Override
-	public FunctionHandle<Void> give(String to, BigInteger value) {
-		return sendTransaction(new Address(to), value, false,
+	public FunctionHandle<Void> give(Address to, BigInteger value) {
+		return sendTransaction(to, value, false,
 		                       1, TvmCell.EMPTY);
 	}
 

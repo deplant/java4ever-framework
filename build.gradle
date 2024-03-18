@@ -128,7 +128,6 @@ tasks.withType(JavaCompile).configureEach {
         languageVersion = JavaLanguageVersion.of(21)
     }
     options.compilerArgs += "--enable-preview"
-    options.compilerArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
 tasks.withType(JavaExec).configureEach {
@@ -136,7 +135,6 @@ tasks.withType(JavaExec).configureEach {
         languageVersion = JavaLanguageVersion.of(21)
     }
     jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.concurrent"
 }
 
 tasks.withType(Javadoc).configureEach {
@@ -159,6 +157,5 @@ tasks.withType(Test) {
     }
     useJUnitPlatform()
     jvmArgs += "--enable-preview"
-    jvmArgs += "--add-modules=jdk.incubator.concurrent"
     jvmArgs += "--enable-native-access=java4ever.binding"
 }

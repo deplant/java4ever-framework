@@ -3,7 +3,6 @@ package tech.deplant.java4ever.framework.contract.tip3;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Tvc;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.datatype.Address;
@@ -32,16 +31,16 @@ public class TIP3Builder {
 	public TIP3Builder() {
 	}
 
-	public TIP3TokenRootContract build(Sdk sdk,
-	                           GiverContract giver,
-	                           BigInteger value) throws JsonProcessingException, EverSdkException {
-		return new TIP3TokenRootTemplate().prepareDeploy(sdk,
+	public TIP3TokenRootContract build(int contextId,
+	                                   GiverContract giver,
+	                                   BigInteger value) throws JsonProcessingException, EverSdkException {
+		return new TIP3TokenRootTemplate().prepareDeploy(contextId, 0,
 		                                                 this.rootKeys,
 		                                                 this.name,
 		                                                 this.symbol,
 		                                                 this.decimals,
 		                                                 this.ownerAddress,
-		                                                 this.walletTvc.codeCell(sdk),
+		                                                 this.walletTvc.codeCell(contextId),
 		                                                 BigInteger.valueOf(this.randomNonce),
 		                                                 Address.ZERO,
 		                                                 Address.ZERO,

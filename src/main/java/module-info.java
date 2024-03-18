@@ -1,5 +1,4 @@
 module java4ever.framework {
-	requires jdk.incubator.concurrent;
 	requires transitive java4ever.binding;
 	requires transitive deplant.commons;
 	requires transitive deplant.javapoet;

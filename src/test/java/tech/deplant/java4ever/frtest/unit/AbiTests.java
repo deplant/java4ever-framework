@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;

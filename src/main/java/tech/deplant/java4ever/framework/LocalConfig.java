@@ -2,7 +2,6 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.java4ever.binding.EverSdkContext;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.*;
@@ -82,13 +81,13 @@ public record LocalConfig(Artifact<String, String> artifact,
 		if (compilerResult == 0) {
 			//var linkerResult = info().linker().assemblyContract(contractName, buildPath);
 			//if (linkerResult == 0) {
-				return new AbstractTemplate(
-						ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
-						Tvc.ofFile(buildPath + "/" + contractName + ".tvc")
-				);
+			return new AbstractTemplate(
+					ContractAbi.ofFile(buildPath + "/" + contractName + ".abi.json"),
+					Tvc.ofFile(buildPath + "/" + contractName + ".tvc")
+			);
 			//} else {
-				//error(logger, () -> "TvmLinker exit code:" + linkerResult);
-				//return null;
+			//error(logger, () -> "TvmLinker exit code:" + linkerResult);
+			//return null;
 			//}
 		} else {
 			error(logger, () -> "Sold exit code:" + compilerResult);

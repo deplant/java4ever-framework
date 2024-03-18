@@ -12,6 +12,7 @@ import tech.deplant.java4ever.binding.Processing;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.GiverContract;
+import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.AbstractTemplate;
 import tech.deplant.java4ever.framework.template.Template;
 
@@ -197,15 +198,15 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		return Objs.notNullElse(credentials(), Credentials.NONE).signer();
 	}
 
-	public String toAddress() throws EverSdkException {
-		return Abi.encodeMessage(sdk(),
+	public Address toAddress() throws EverSdkException {
+		return new Address(Abi.encodeMessage(sdk(),
 		                         template().abi().ABI(),
 		                         null,
 		                         toDeploySet(),
 		                         null,
 		                         toSigner(),
 		                         null,
-		                         null).address();
+		                         null).address());
 	}
 
 	public RETURN deployWithGiver(GiverContract giver, BigInteger value) throws EverSdkException {
@@ -248,10 +249,10 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		return deploy(address);
 	}
 
-	private RETURN deploy(String address) throws EverSdkException {
+	private RETURN deploy(Address address) throws EverSdkException {
 		Processing.processMessage(sdk(),
 		                          template().abi().ABI(),
-		                          address,
+		                          address.makeAddrStd(),
 		                          toDeploySet(),
 		                          toConstructorCallSet(),
 		                          toSigner(),
@@ -266,7 +267,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                                         template().abi(),
 		                                         "credentials",
 		                                         credentials());
-		return Contract.instantiate(clazz(), sdk(), address, template().abi(), credentials());
+		return Contract.instantiate(clazz(), sdk(), address.makeAddrStd(), template().abi(), credentials());
 	}
 
 

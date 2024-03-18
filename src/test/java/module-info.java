@@ -1,7 +1,6 @@
 module test {
 	requires java4ever.framework;
 	requires java4ever.binding;
-	requires jdk.incubator.concurrent;
 	requires org.junit.jupiter.api;
 	requires java.compiler;
 	requires java.net.http;

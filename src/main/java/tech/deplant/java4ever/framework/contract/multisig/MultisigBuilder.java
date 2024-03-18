@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.contract.multisig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.contract.GiverContract;
@@ -22,7 +23,7 @@ public class MultisigBuilder {
 	public MultisigBuilder() {
 	}
 
-	public MultisigContract build(int sdk,
+	public MultisigContract build(int contextId,
 	                              Credentials deployKeys,
 	                              GiverContract giver,
 	                              BigInteger value) throws JsonProcessingException, EverSdkException {
@@ -34,13 +35,16 @@ public class MultisigBuilder {
 		}
 		return switch (type) {
 			case SURF -> new SurfMultisigWalletTemplate()
-					.prepareDeploy(sdk, deployKeys, owners, confirmations)
+					.prepareDeploy(contextId,
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 			case SAFE -> new SafeMultisigWalletTemplate()
-					.prepareDeploy(sdk, deployKeys, owners, confirmations)
+					.prepareDeploy(contextId,
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 			case SETCODE -> new SetcodeMultisigWalletTemplate()
-					.prepareDeploy(sdk, deployKeys, owners, confirmations)
+					.prepareDeploy(contextId,
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
 					.deployWithGiver(giver, value);
 		};
 	}

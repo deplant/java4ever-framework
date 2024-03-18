@@ -10,22 +10,22 @@ public record Seed(String phrase, int words) {
 
 	public final static String HD_PATH = "m/44'/396'/0'/0/0";
 
-	private static String generateMnemonicPhraseFromRandom(Sdk sdk, int words) throws EverSdkException {
-		return Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.English, words).phrase();
+	private static String generateMnemonicPhraseFromRandom(int contextId, int words) throws EverSdkException {
+		return Crypto.mnemonicFromRandom(contextId, Crypto.MnemonicDictionary.English, words).phrase();
 	}
 
 	/**
 	 * Generates random 12-words seed phrase
 	 *
-	 * @param sdk
+	 * @param contextId
 	 * @return
 	 */
-	public static Seed RANDOM(Sdk sdk) throws EverSdkException {
-		return new Seed(Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.English, DEFAULT_WORD_COUNT).phrase(), DEFAULT_WORD_COUNT);
+	public static Seed RANDOM(int contextId) throws EverSdkException {
+		return new Seed(Crypto.mnemonicFromRandom(contextId, Crypto.MnemonicDictionary.English, DEFAULT_WORD_COUNT).phrase(), DEFAULT_WORD_COUNT);
 	}
 
-	public static Seed RANDOM_TON(Sdk sdk) throws EverSdkException {
-		return new Seed(Crypto.mnemonicFromRandom(sdk.context(), Crypto.MnemonicDictionary.Ton, 24).phrase(), 24);
+	public static Seed RANDOM_TON(int contextId) throws EverSdkException {
+		return new Seed(Crypto.mnemonicFromRandom(contextId, Crypto.MnemonicDictionary.Ton, 24).phrase(), 24);
 	}
 
 }

@@ -19,9 +19,9 @@ public abstract class GiverContract extends AbstractContract {
 
 	public abstract FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce);
 
-	public FunctionHandle<Void> give(String to, BigInteger value) {
+	public FunctionHandle<Void> give(Address to, BigInteger value) {
 		logger.log(System.Logger.Level.INFO, "Giver called!");
-		return sendTransaction(new Address(to), value, false);
+		return sendTransaction(to, value, false);
 	}
 
 }

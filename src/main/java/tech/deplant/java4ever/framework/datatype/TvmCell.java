@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
 
 
 public record TvmCell(String cellBoc) implements AbiValue<String> {
@@ -15,28 +14,28 @@ public record TvmCell(String cellBoc) implements AbiValue<String> {
 		return new TvmBuilder();
 	}
 
-	public JsonNode decode(Sdk sdk, Abi.AbiParam[] types) throws EverSdkException {
-		return Abi.decodeBoc(sdk.context(), types, cellBoc(), true).data();
+	public JsonNode decode(int contextId, Abi.AbiParam[] types) throws EverSdkException {
+		return Abi.decodeBoc(contextId, types, cellBoc(), true).data();
 	}
 
-	public JsonNode decode(Sdk sdk, String[] types) throws EverSdkException {
+	public JsonNode decode(int contextId, String[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
-			params[i] = new Abi.AbiParam(String.valueOf(i), types[i], null);
+			params[i] = new Abi.AbiParam(String.valueOf(i), types[i], null, false);
 		}
-		return decode(sdk, params);
+		return decode(contextId, params);
 	}
 
-	public JsonNode decode(Sdk sdk, AbiType[] types) throws EverSdkException {
+	public JsonNode decode(int contextId, AbiType[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
-			params[i] = new Abi.AbiParam(String.valueOf(i), types[i].abiName(), null);
+			params[i] = new Abi.AbiParam(String.valueOf(i), types[i].abiName(), null, false);
 		}
-		return decode(sdk, params);
+		return decode(contextId, params);
 	}
 
-	public JsonNode decodeAndGet(Sdk sdk, String[] types, int index) throws EverSdkException {
-		var result = decode(sdk, types);
+	public JsonNode decodeAndGet(int contextId, String[] types, int index) throws EverSdkException {
+		var result = decode(contextId, types);
 		return result.get(String.valueOf(index));
 	}
 
@@ -57,7 +56,7 @@ public record TvmCell(String cellBoc) implements AbiValue<String> {
 
 	@Override
 	public AbiType type() {
-		return new AbiType(AbiTypePrefix.STRING,0,false);
+		return new AbiType(AbiTypePrefix.STRING, 0, false);
 	}
 
 }

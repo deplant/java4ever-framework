@@ -3,7 +3,6 @@ package tech.deplant.java4ever.framework.datatype;
 import tech.deplant.commons.Strings;
 import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Sdk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +55,8 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 		return store(AbiValue.of(type, inputValue));
 	}
 
-	public TvmCell toCell(Sdk sdk) throws EverSdkException {
-		return new TvmCell(Boc.encodeBoc(sdk.context(), builders(), null).boc());
+	public TvmCell toCell(int contextId) throws EverSdkException {
+		return new TvmCell(Boc.encodeBoc(contextId, builders(), null).boc());
 	}
 
 	@Override
@@ -72,6 +71,6 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 
 	@Override
 	public AbiType type() {
-		return new AbiType(AbiTypePrefix.BUILDER,0,false);
+		return new AbiType(AbiTypePrefix.BUILDER, 0, false);
 	}
 }

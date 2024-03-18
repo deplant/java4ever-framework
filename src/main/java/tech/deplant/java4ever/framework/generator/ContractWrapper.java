@@ -164,24 +164,24 @@ public class ContractWrapper {
 		//wrapperBuilder.addRecordComponent(Credentials.class, "credentials");
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("super(sdk,address,DEFAULT_ABI(),Credentials.NONE)")
-		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addStatement("super(contextId,address,DEFAULT_ABI(),Credentials.NONE)")
+		                                   .addParameter(TypeName.INT, "contextId")
 		                                   .addParameter(String.class, "address")
 		                                   .addException(JsonProcessingException.class)
 		                                   .addModifiers(Modifier.PUBLIC)
 		                                   .build());
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("super(sdk,address,abi,Credentials.NONE)")
-		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addStatement("super(contextId,address,abi,Credentials.NONE)")
+		                                   .addParameter(TypeName.INT, "contextId")
 		                                   .addParameter(String.class, "address")
 		                                   .addParameter(ContractAbi.class, "abi")
 		                                   .addModifiers(Modifier.PUBLIC)
 		                                   .build());
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("super(sdk,address,DEFAULT_ABI(),credentials)")
-		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addStatement("super(contextId,address,DEFAULT_ABI(),credentials)")
+		                                   .addParameter(TypeName.INT, "contextId")
 		                                   .addParameter(String.class, "address")
 		                                   .addParameter(Credentials.class, "credentials")
 		                                   .addException(JsonProcessingException.class)
@@ -189,8 +189,8 @@ public class ContractWrapper {
 		                                   .build());
 
 		wrapperBuilder.addMethod(MethodSpec.constructorBuilder()
-		                                   .addStatement("super(sdk,address,abi,credentials)")
-		                                   .addParameter(Sdk.class, "sdk")
+		                                   .addStatement("super(contextId,address,abi,credentials)")
+		                                   .addParameter(TypeName.INT, "contextId")
 		                                   .addParameter(String.class, "address")
 		                                   .addParameter(ContractAbi.class, "abi")
 		                                   .addParameter(Credentials.class, "credentials")
@@ -247,8 +247,8 @@ public class ContractWrapper {
 			if (isConstructor) {
 				methodBuilder = MethodSpec.methodBuilder("prepareDeploy");
 				logger.log(System.Logger.Level.TRACE, "constructor!");
-				methodBuilder.addParameter(ParameterSpec.builder(Sdk.class, "sdk").build());
-				//methodBuilder.addParameter(ParameterSpec.builder(Integer.class, "workchainId").build());
+				methodBuilder.addParameter(ParameterSpec.builder(TypeName.INT, "contextId").build());
+				methodBuilder.addParameter(ParameterSpec.builder(TypeName.INT, "workchainId").build());
 				methodBuilder.addParameter(ParameterSpec.builder(Credentials.class, "credentials").build());
 
 
@@ -343,14 +343,14 @@ public class ContractWrapper {
 
 			if (isConstructor) {
 				bodyBuilder.addStatement(
-						"return new $T($T.class, sdk, abi(), tvc(), sdk.clientConfig().abi().workchain(), credentials, initialDataFields, params, null)",
+						"return new $T($T.class, contextId, abi(), tvc(), workchainId, credentials, initialDataFields, params, null)",
 						resultName,
 						handleParamTypeName);
 				methodBuilder.addCode(bodyBuilder.build());
 				templateBuilder.addMethod(methodBuilder.build());
 			} else {
 				bodyBuilder.addStatement(
-						"return new $T($T.class, sdk(), address(), abi(), credentials(), $S, params, null)",
+						"return new $T($T.class, contextId(), address(), abi(), credentials(), $S, params, null)",
 						resultName,
 						handleParamTypeName,
 						func.name());

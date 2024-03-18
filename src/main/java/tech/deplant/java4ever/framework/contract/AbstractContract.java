@@ -17,32 +17,32 @@ import java.util.function.Consumer;
  * Class that represents deployed contract in one of the networks. It holds info about
  * network (sdk), address and abi of contract. If you own this contract, initialize it
  * with correct credentials.
- * If it's foreign contract, use shorter constructor oe explicit Credentials.NONE.
+ * If it's you are not a contract owner, use shorter constructor or explicit Credentials.NONE.
  * You can make calls to contract with prepareCall() method.
  */
 public class AbstractContract implements Contract {
 
-	private final int sdk;
+	private final int contextId;
 	private final Address address;
 	private final ContractAbi abi;
 	private Credentials credentials;
 
 	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-	public AbstractContract(@JsonProperty(value = "sdk") int sdk,
+	public AbstractContract(@JsonProperty(value = "contextId") int contextId,
 	                        @JsonProperty(value = "address") Address address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
 	                        @JsonProperty(value = "credentials") Credentials credentials) {
-		this.sdk = sdk;
+		this.contextId = contextId;
 		this.address = address;
 		this.abi = abi;
 		this.credentials = credentials;
 	}
 
-	public AbstractContract(@JsonProperty(value = "sdk") int sdk,
+	public AbstractContract(@JsonProperty(value = "contextId") int contextId,
 	                        @JsonProperty(value = "address") String address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
 	                        @JsonProperty(value = "credentials") Credentials credentials) {
-		this.sdk = sdk;
+		this.contextId = contextId;
 		this.address = new Address(address);
 		this.abi = abi;
 		this.credentials = credentials;
@@ -54,7 +54,7 @@ public class AbstractContract implements Contract {
 
 		CompletableFuture<JsonNode> futureSubscriptionResult = new CompletableFuture<>();
 
-		new SubscribeHandle(sdk(),
+		new SubscribeHandle(contextId(),
 		                    SubscribeHandle.TRANSACTIONS_SUB.formatted(address(),
 		                                                               "in_message { src } aborted status"))
 				.setStopOnFilter(SubscribeHandle.TR_SUCCESSFUL)
@@ -96,7 +96,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(sdk(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
 	}
 
 	public SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
@@ -112,7 +112,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(sdk(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
 	}
 
 	public SubscribeHandle subscribeOnAccount(String resultFields,
@@ -128,7 +128,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(sdk(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
 	}
 
 	public SubscribeHandle subscribeOnTransactions(String resultFields,
@@ -144,7 +144,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(sdk(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
 	}
 
 	public FunctionHandle.Builder createFunctionCall() {
@@ -152,8 +152,8 @@ public class AbstractContract implements Contract {
 	}
 
 	@Override
-	public int sdk() {
-		return sdk;
+	public int contextId() {
+		return this.contextId;
 	}
 
 	@Override

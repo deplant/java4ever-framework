@@ -7,16 +7,17 @@ import tech.deplant.java4ever.framework.contract.AbstractContract;
 import java.util.Map;
 
 public record AbstractTemplate(ContractAbi abi, Tvc tvc) implements Template {
-	DeployHandle<AbstractContract> prepareDeploy(Sdk sdk,
+	DeployHandle<AbstractContract> prepareDeploy(int contextId,
+												 int workchainId,
 	                                             Credentials credentials,
 	                                             Map<String, Object> initialDataFields,
 	                                             Map<String, Object> constructorInputs,
 	                                             Abi.FunctionHeader constructorHeader) {
 		return new DeployHandle<AbstractContract>(AbstractContract.class,
-		                                          sdk,
+		                                          contextId,
 		                                          abi(),
 		                                          tvc(),
-		                                          sdk.clientConfig().abi().workchain(),
+		                                          workchainId,
 		                                          credentials,
 		                                          initialDataFields,
 		                                          constructorInputs,

@@ -2,19 +2,18 @@ package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.Seed;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
-import tech.deplant.java4ever.framework.contract.tip3.*;
-import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3Builder;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenRootContract;
+import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWalletContract;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -62,11 +61,21 @@ public class Env {
 	public static void INIT() throws IOException, EverSdkException {
 		if (!isInitialized) {
 
+			EverSdk.load();
+
 			// should be first
-			SDK_EMPTY = EverSdk.builder().build().orElseThrow();
-			SDK_LOCAL = EverSdk.builder().networkEndpoints(LOCAL_ENDPOINT).build().orElseThrow();
-			SDK_DEV = EverSdk.builder().networkEndpoints(DEV_ENDPOINT).networkQueryTimeout(300_000L).build().orElseThrow();
-			SDK_MAIN = EverSdk.builder().networkEndpoints(MAIN_ENDPOINT).networkQueryTimeout(300_000L).build().orElseThrow();
+			SDK_EMPTY = EverSdk.createDefault().orElseThrow();
+			SDK_LOCAL = EverSdk.createWithEndpoint(LOCAL_ENDPOINT).orElseThrow();
+			SDK_DEV = EverSdk.builder()
+			                 .networkEndpoints(DEV_ENDPOINT)
+			                 .networkQueryTimeout(300_000L)
+			                 .build()
+			                 .orElseThrow();
+			SDK_MAIN = EverSdk.builder()
+			                  .networkEndpoints(MAIN_ENDPOINT)
+			                  .networkQueryTimeout(300_000L)
+			                  .build()
+			                  .orElseThrow();
 
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
 
@@ -109,18 +118,26 @@ public class Env {
 				.setRandomNonce(new Random().nextInt())
 				.build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
 
-		LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET1.address()),
+		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET1.address(),
 		                             CurrencyUnit.VALUE(EVER, "0.5"))
 		               .sendFrom(LOCAL_MSIG_ROOT,
 		                         CurrencyUnit.VALUE(EVER, "1.5"));
 
-		LOCAL_TIP3_ROOT.deployWallet(new Address(LOCAL_MSIG_WALLET2.address()),
+		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET2.address(),
 		                             CurrencyUnit.VALUE(EVER, "0.5"))
 		               .sendFrom(LOCAL_MSIG_ROOT,
 		                         CurrencyUnit.VALUE(EVER, "1.5"));
 
-		LOCAL_TIP3_WALLET1 = new TIP3TokenWalletContract(SDK_LOCAL,LOCAL_TIP3_ROOT.walletOf(new Address(LOCAL_MSIG_WALLET1.address())).get().value0().toString());
-		LOCAL_TIP3_WALLET2 = new TIP3TokenWalletContract(SDK_LOCAL,LOCAL_TIP3_ROOT.walletOf(new Address(LOCAL_MSIG_WALLET2.address())).get().value0().toString());
+		LOCAL_TIP3_WALLET1 = new TIP3TokenWalletContract(SDK_LOCAL,
+		                                                 LOCAL_TIP3_ROOT.walletOf(LOCAL_MSIG_WALLET1.address())
+		                                                                .get()
+		                                                                .value0()
+		                                                                .toString());
+		LOCAL_TIP3_WALLET2 = new TIP3TokenWalletContract(SDK_LOCAL,
+		                                                 LOCAL_TIP3_ROOT.walletOf(LOCAL_MSIG_WALLET2.address())
+		                                                                .get()
+		                                                                .value0()
+		                                                                .toString());
 	}
 
 	public static Credentials RNG_KEYS() throws EverSdkException {

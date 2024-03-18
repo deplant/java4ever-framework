@@ -91,7 +91,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 
 	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
 		return new FunctionHandle<>(clazz(),
-		                            new AbstractContract(contract().sdk(),
+		                            new AbstractContract(contract().contextId(),
 		                                                 contract().address(),
 		                                                 contract().abi(),
 		                                                 credentials),
@@ -146,7 +146,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * @throws EverSdkException
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return new TvmCell(Abi.encodeMessageBody(contract().sdk(),
+		return new TvmCell(Abi.encodeMessageBody(contract().contextId(),
 		                                         contract().abi().functionCallABI(functionName()),
 		                                         toCallSet(),
 		                                         true,
@@ -171,13 +171,13 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	public JsonNode getAsMap() throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address().makeAddrStd()}));
-		Net.ResultOfQueryCollection result = Net.queryCollection(contract().sdk(),
+		Net.ResultOfQueryCollection result = Net.queryCollection(contract().contextId(),
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id boc",
 		                                                         null,
 		                                                         null);
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
@@ -187,7 +187,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                  null);
 		for (var map : result.result()) {
 			String boc = map.get("boc").asText();
-			return Optional.ofNullable(Tvm.runTvm(contract().sdk(),
+			return Optional.ofNullable(Tvm.runTvm(contract().contextId(),
 			                                      msg.message(),
 			                                      boc,
 			                                      null,
@@ -227,7 +227,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * there's no guarantee that it corresponds to current blockchain state.
 	 */
 	public JsonNode getLocalAsMap(String boc) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
@@ -235,7 +235,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                  toSigner(),
 		                                                  null,
 		                                                  null);
-		return Optional.ofNullable(Tvm.runTvm(contract().sdk(),
+		return Optional.ofNullable(Tvm.runTvm(contract().contextId(),
 		                                      msg.message(),
 		                                      boc,
 		                                      null,
@@ -252,7 +252,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	public JsonNode callLocalAsMap(String boc,
 	                               Tvm.ExecutionOptions options,
 	                               boolean unlimitedBalance) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().sdk(),
+		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
@@ -260,7 +260,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                  toSigner(),
 		                                                  null,
 		                                                  null);
-		return Optional.ofNullable(Tvm.runExecutor(contract().sdk(),
+		return Optional.ofNullable(Tvm.runExecutor(contract().contextId(),
 		                                           msg.message(),
 		                                           new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
 		                                           options,
@@ -337,7 +337,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                .toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall();
 		var msgId = resultOfProcess.transaction().get("in_msg").asText();
-		var debugOutResult = Net.queryTransactionTree(contract().sdk(),
+		var debugOutResult = Net.queryTransactionTree(contract().contextId(),
 		                                              msgId,
 		                                              finalABIArray,
 		                                              debugOptions().timeout(),
@@ -461,7 +461,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
-		return Processing.processMessage(contract().sdk(),
+		return Processing.processMessage(contract().contextId(),
 		                                 contract().abi().functionCallABI(functionName()),
 		                                 contract().address().makeAddrStd(),
 		                                 null,

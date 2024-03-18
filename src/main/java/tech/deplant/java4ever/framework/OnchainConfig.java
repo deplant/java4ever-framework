@@ -61,27 +61,27 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 	}
 
 	private <T extends AbstractContract> T instatiateContract(Class<T> clazz,
-	                                                          Sdk sdk,
+	                                                          int contextId,
 	                                                          String contractName,
 	                                                          Credentials credentials) throws JsonProcessingException {
 		var contr = info().contracts().get(contractName);
 		if (Optional.ofNullable(contr).isEmpty()) {
 			return null;
 		}
-		return Contract.instantiate(clazz, sdk, contr.address(), ContractAbi.ofString(contr.abiJson()), credentials);
+		return Contract.instantiate(clazz, contextId, contr.address(), ContractAbi.ofString(contr.abiJson()), credentials);
 	}
 
 	public <T extends AbstractContract> T contract(Class<T> clazz,
-	                      Sdk sdk,
+	                      int contextId,
 	                      String contractName,
 	                      String keysName) throws JsonProcessingException {
-		return instatiateContract(clazz, sdk, contractName, keys(keysName));
+		return instatiateContract(clazz, contextId, contractName, keys(keysName));
 	}
 
 	public <T extends AbstractContract> T contract(Class<T> clazz,
-	                      Sdk sdk,
+	                      int contextId,
 	                      String contractName) throws JsonProcessingException {
-		return instatiateContract(clazz, sdk, contractName, Credentials.NONE);
+		return instatiateContract(clazz, contextId, contractName, Credentials.NONE);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 	 */
 	public Contract addContract(String name, Contract contract) throws IOException {
 		info().contracts().put(name,
-		                       new OnchainConfig.SavedContract(contract.abi().json(), contract.address()));
+		                       new OnchainConfig.SavedContract(contract.abi().json(), contract.address().makeAddrStd()));
 		sync();
 		logger.log(System.Logger.Level.INFO, "Saved contract: %s, name: %s".formatted(contract.address(), name));
 		return contract;

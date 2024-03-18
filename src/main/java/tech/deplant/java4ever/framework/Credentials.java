@@ -28,8 +28,8 @@ public record Credentials(@JsonProperty("public") String publicKey, @JsonPropert
 	/**
 	 * Generates new random KeyPair by using crypto.generate_random_sign_keys() method of SDK.
 	 */
-	public static Credentials RANDOM(Sdk sdk) throws EverSdkException {
-		var pair = Crypto.generateRandomSignKeys(sdk.context());
+	public static Credentials RANDOM(int contextId) throws EverSdkException {
+		var pair = Crypto.generateRandomSignKeys(contextId);
 		return new Credentials(pair.publicKey(), pair.secretKey());
 	}
 
@@ -50,14 +50,14 @@ public record Credentials(@JsonProperty("public") String publicKey, @JsonPropert
 		}
 	}
 
-	public static Credentials ofSeed(Sdk sdk, String seedString, int seedWords) throws EverSdkException {
-		return ofSeed(sdk, new Seed(seedString, seedWords));
+	public static Credentials ofSeed(int contextId, String seedString, int seedWords) throws EverSdkException {
+		return ofSeed(contextId, new Seed(seedString, seedWords));
 	}
 
 	//TODO Convert to Async
-	public static Credentials ofSeed(Sdk sdk, Seed seed) throws EverSdkException {
-		if (Crypto.mnemonicVerify(sdk.context(), seed.phrase(), null, seed.words()).valid()) {
-			var pairFromSeed = Crypto.mnemonicDeriveSignKeys(sdk.context(), seed.phrase(), null, null, seed.words());
+	public static Credentials ofSeed(int contextId, Seed seed) throws EverSdkException {
+		if (Crypto.mnemonicVerify(contextId, seed.phrase(), null, seed.words()).valid()) {
+			var pairFromSeed = Crypto.mnemonicDeriveSignKeys(contextId, seed.phrase(), null, null, seed.words());
 			return new Credentials(pairFromSeed.publicKey(), pairFromSeed.secretKey());
 		} else {
 			throw new RuntimeException("Seed/mnemonic phrase checksum is not valid.");
@@ -76,8 +76,8 @@ public record Credentials(@JsonProperty("public") String publicKey, @JsonPropert
 		return new Crypto.KeyPair(this.publicKey, this.secretKey);
 	}
 
-	public String publicKeyTonSafe(Sdk sdk) throws EverSdkException {
-		return Crypto.convertPublicKeyToTonSafeFormat(sdk.context(), this.publicKey).tonPublicKey();
+	public String publicKeyTonSafe(int contextId) throws EverSdkException {
+		return Crypto.convertPublicKeyToTonSafeFormat(contextId, this.publicKey).tonPublicKey();
 	}
 
 	public BigInteger publicBigInt() {

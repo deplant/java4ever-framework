@@ -7,7 +7,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.CurrencyUnit;
-import tech.deplant.java4ever.framework.Sdk;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
@@ -44,8 +43,8 @@ public class TemplateTests {
 		var keys = new Credentials("a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48", "");
 		assertEquals("0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
 		             new SurfMultisigWalletTemplate()
-				             .prepareDeploy(SDK_EMPTY, keys, new BigInteger[]{keys.publicBigInt()}, 1)
-				             .toAddress());
+				             .prepareDeploy(SDK_EMPTY, 0,keys, new BigInteger[]{keys.publicBigInt()}, 1)
+				             .toAddress().makeAddrStd());
 	}
 
 	@Test
@@ -59,7 +58,7 @@ public class TemplateTests {
 	public void giver_switch_networks() throws Throwable {
 		var safeTemplate = new SafeMultisigWalletTemplate();
 		GiverContract giver = null;
-		Sdk sdk = null;
+		Integer sdk = null;
 		if (false) {
 			giver = GIVER_LOCAL;
 			sdk = SDK_LOCAL;
@@ -69,7 +68,7 @@ public class TemplateTests {
 		}
 		var keys = RNG_KEYS();
 		safeTemplate.prepareDeploy(
-				sdk,
+				sdk,0,
 				RNG_KEYS(), new BigInteger[]{keys.publicBigInt()}, 1
 		).deployWithGiver(giver,
 		                  CurrencyUnit.VALUE(EVER, "1"));

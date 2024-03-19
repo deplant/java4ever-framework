@@ -33,8 +33,6 @@ public class MsigTests {
 	public void first_msig_deploy_passes_second_throws() throws Throwable {
 		var keys = Env.RNG_KEYS();
 
-
-
 		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,0,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicBigInt()},

@@ -99,17 +99,20 @@ public record Account(String id,
 		return 1 == this.accType;
 	}
 
-	/**
-	 * Method to extract pubkey from data field of account query.
-	 *
-	 * @param sdk that will be used for extraction
-	 * @param abi of contract (needed to correctly find place of pubkey in the account data)
-	 * @return pubkey string
-	 * @throws EverSdkException
-	 */
-	public String tvmPubkey(int sdk, ContractAbi abi) throws EverSdkException {
-		return Abi.decodeInitialData(sdk, abi.ABI(), data(), false).initialPubkey();
-	}
+//	/**
+//	 * Method to extract pubkey from data field of account query.
+//	 *
+//	 * @param contextId that will be used for extraction
+//	 * @param abi of contract (needed to correctly find place of pubkey in the account data)
+//	 * @return pubkey string
+//	 * @throws EverSdkException
+//	 */
+//	public String tvmPubkey(int contextId, ContractAbi abi) throws EverSdkException {
+//		return switch (abi.abiContract().version()) {
+//			case "2.4" -> throw new UnsupportedOperationException("ABI 2.4 doesn't contain separate pubkey field!");
+//			default -> Abi.decodeInitialData(contextId, abi.ABI(), data(), false).initialPubkey();
+//		};
+//	}
 
 	public interface GraphQLFilter {
 		record In(String[] in) implements GraphQLFilter {

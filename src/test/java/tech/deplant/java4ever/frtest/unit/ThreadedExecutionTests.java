@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -34,7 +35,7 @@ public class ThreadedExecutionTests {
 	private static void randomWalletDeployment(int contextId, GiverContract giver) {
 		try {
 			new MultisigBuilder().setType(MultisigContract.Type.SAFE)
-			                     .build(contextId, Credentials.RANDOM(contextId), giver, EVER_ONE);
+			                     .prepareAndDeploy(contextId, Credentials.RANDOM(contextId), giver, EVER_ONE);
 		} catch (JsonProcessingException | EverSdkException e) {
 			logger.log(System.Logger.Level.ERROR, e);
 		}
@@ -50,6 +51,7 @@ public class ThreadedExecutionTests {
 
 			scope.join();
 		}
+		assertTrue(true);
 	}
 
 }

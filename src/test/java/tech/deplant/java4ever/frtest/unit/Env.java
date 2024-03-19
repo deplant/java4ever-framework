@@ -89,22 +89,22 @@ public class Env {
 		LOCAL_KEYS_WALLET2 = RNG_KEYS();
 
 		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigContract.Type.SAFE)
-		                                       .build(SDK_LOCAL,
-		                                              LOCAL_KEYS_ROOT,
-		                                              GIVER_LOCAL,
-		                                              CurrencyUnit.VALUE(EVER, "4.5"));
+		                                       .prepareAndDeploy(SDK_LOCAL,
+		                                                         LOCAL_KEYS_ROOT,
+		                                                         GIVER_LOCAL,
+		                                                         CurrencyUnit.VALUE(EVER, "4.5"));
 
 		LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigContract.Type.SURF)
-		                                          .build(SDK_LOCAL,
-		                                                 LOCAL_KEYS_ROOT,
-		                                                 GIVER_LOCAL,
-		                                                 CurrencyUnit.VALUE(EVER, "4.5"));
+		                                          .prepareAndDeploy(SDK_LOCAL,
+		                                                            LOCAL_KEYS_ROOT,
+		                                                            GIVER_LOCAL,
+		                                                            CurrencyUnit.VALUE(EVER, "4.5"));
 
 		LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigContract.Type.SETCODE)
-		                                          .build(SDK_LOCAL,
-		                                                 LOCAL_KEYS_ROOT,
-		                                                 GIVER_LOCAL,
-		                                                 CurrencyUnit.VALUE(EVER, "4.5"));
+		                                          .prepareAndDeploy(SDK_LOCAL,
+		                                                            LOCAL_KEYS_ROOT,
+		                                                            GIVER_LOCAL,
+		                                                            CurrencyUnit.VALUE(EVER, "4.5"));
 	}
 
 	public static void INIT_LOCAL_TIP3() throws IOException, EverSdkException {

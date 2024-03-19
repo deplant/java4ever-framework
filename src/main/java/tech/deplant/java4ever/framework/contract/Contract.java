@@ -86,16 +86,16 @@ public interface Contract {
 	 */
 	Credentials credentials();
 
-	/**
-	 * Returns actual tvm.pubkey() of smart contract. If you want to get Credentials specified at
-	 * OwnedContract constructor - use credentials() method.
-	 *
-	 * @return
-	 * @throws EverSdkException
-	 */
-	default String tvmPubkey() throws EverSdkException {
-		return account().tvmPubkey(contextId(), abi());
-	}
+//	/**
+//	 * Returns actual tvm.pubkey() of smart contract. If you want to get Credentials specified at
+//	 * OwnedContract constructor - use credentials() method.
+//	 *
+//	 * @return
+//	 * @throws EverSdkException
+//	 */
+//	default String tvmPubkey() throws EverSdkException {
+//		return account().tvmPubkey(contextId(), abi());
+//	}
 
 	default FunctionHandle<Map<String, Object>> prepareCall(String functionName,
 	                                                        Map<String, Object> functionInputs,

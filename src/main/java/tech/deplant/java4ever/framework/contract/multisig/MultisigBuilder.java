@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.DeployHandle;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
@@ -23,10 +24,8 @@ public class MultisigBuilder {
 	public MultisigBuilder() {
 	}
 
-	public MultisigContract build(int contextId,
-	                              Credentials deployKeys,
-	                              GiverContract giver,
-	                              BigInteger value) throws JsonProcessingException, EverSdkException {
+	public DeployHandle<? extends MultisigContract> prepare(int contextId,
+	                                                        Credentials deployKeys) throws JsonProcessingException {
 		BigInteger[] owners = null;
 		if (publicKeys.isEmpty()) {
 			owners = new BigInteger[]{deployKeys.publicBigInt()};
@@ -36,17 +35,27 @@ public class MultisigBuilder {
 		return switch (type) {
 			case SURF -> new SurfMultisigWalletTemplate()
 					.prepareDeploy(contextId,
-					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
-					.deployWithGiver(giver, value);
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations);
 			case SAFE -> new SafeMultisigWalletTemplate()
 					.prepareDeploy(contextId,
-					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
-					.deployWithGiver(giver, value);
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations);
 			case SETCODE -> new SetcodeMultisigWalletTemplate()
 					.prepareDeploy(contextId,
-					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations)
-					.deployWithGiver(giver, value);
+					               (int) EverSdk.getDefaultWorkchainId(contextId), deployKeys, owners, confirmations);
 		};
+	}
+
+	public MultisigContract prepareAndDeploy(int contextId,
+	                                         Credentials deployKeys,
+	                                         GiverContract giver,
+	                                         BigInteger value) throws JsonProcessingException, EverSdkException {
+		BigInteger[] owners = null;
+		if (publicKeys.isEmpty()) {
+			owners = new BigInteger[]{deployKeys.publicBigInt()};
+		} else {
+			owners = publicKeys.toArray(BigInteger[]::new);
+		}
+		return prepare(contextId, deployKeys).deployWithGiver(giver, value);
 	}
 
 	public Credentials deployKeys() {

@@ -1,21 +1,14 @@
-# Java4Ever
+# Jodan
 
 [![JDK version](https://img.shields.io/badge/Java-20-green.svg)](https://shields.io/)
-[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.44.3-orange)](https://github.com/tonlabs/ever-sdk)
+[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.45.0-orange)](https://github.com/tonlabs/ever-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/deplant\_chat\_en)
-[![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
+[![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/jodan/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
 
-<p align="center">
-  <a href="https://github.com/venom-blockchain/developer-program">
-    <img src="https://raw.githubusercontent.com/venom-blockchain/developer-program/main/vf-dev-program.png" alt="Logo" width="366.8" height="146.4">
-  </a>
-</p>
+**Jodan** is a feature-rich framework for smart-contracts development, testing & accessing [AckiNacki](https://www.ackinacki.com) blockchain.
 
-
-
-**Java4Ever** is a feature-rich framework for smart-contracts development, testing & accessing 
-TVM-compatible blockchains like [Everscale](https://everscale.network/), [Venom](https://venom.network/), [GOSH](https://gosh.sh/) and so on. Closest alternative is a TypeScript-based [locklift](https://github.com/broxus/locklift) framework by Broxus.
+**Jodan** means "_Java-Optimized Data Access to Network_" or just "_high-level_" in Japanese
 
 Framework internally uses JSON-RPC connection to wrapped native EVER-SDK library ([java4ever-binding](https://github.com/deplant/java4ever-binding)).
 
@@ -35,7 +28,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 ## Contents
 
 <!-- TOC -->
-* [Java4Ever](#java4ever)
+* [Jodan](#jodan)
   * [Features](#features)
   * [Contents](#contents)
   * [Quick start](#quick-start)
@@ -71,15 +64,15 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ### Prerequisites
 
-* Install **JDK 20** ([link](https://adoptium.net/temurin/releases?version=20))
+* Install **OpenJDK 21** ([link](https://adoptium.net/temurin/releases?version=21)) or any other JDK 21 implementation
 
-### Add java4ever to your Maven or Gradle setup:
+### Add Jodan to your Maven or Gradle setup:
 
 * Gradle
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:2.5.0'
+    implementation 'tech.deplant.java4ever:jodan:3.0.0'
 }
 ```
 
@@ -89,8 +82,8 @@ dependencies {
 
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
-    <artifactId>java4ever-framework</artifactId>
-    <version>2.5.0</version>
+    <artifactId>jodan</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
@@ -99,20 +92,28 @@ dependencies {
 ### SDK Provider
 
 **Sdk** class is a provider of connection to EVER-SDK lib and TVM blockchain.
-It is a primary object that you need to run most interactions in **Java4Ever**:
+It is a primary object that you need to run most interactions in **Jodan**:
 
-#### Creating SDK
+#### Initializing SDK library
 
 ```java
-var sdk1 = Sdk.DEFAULT();
-var sdk2 = Sdk.DEFAULT("http://localhost/graphql");
-var sdk3 = Sdk.builder().networkEndpoints("http://localhost/graphql").build();
+Sdk.load(); // uses included library
+Sdk.load(new JavaLibraryPathLoader("ton_client"));
+Sdk.load(new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so")));
 ```
-You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
+
+#### Custom EVER-SDK Library loading variants
+
+If you want to use custom `ton-client` lib or have some problem with the included ones, specify custom location as:
+
+* `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
+* `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
+* `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path
+* `new JavaLibraryPathLoader("ton_client");` - gets library from java.library.path JVM argument
 
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
 
-#### Configuring SDK with Builder
+#### Starting new contex
 
 **Sdk.Builder** is a Builder-style config for **EVER-SDK**, so you can easily config only needed parts of library.
 ```java
@@ -123,9 +124,9 @@ var sdk = Sdk.builder()
              .abiMessageExpirationTimeout(30000)
              .build();
 ```
+You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
-If you want to use custom `ton-client` lib or have some problem with the included ones, specify custom location as:
-
+I
 ```java
 var sdk = Sdk.builder()
              .networkEndpoints("http://localhost/graphql")
@@ -135,12 +136,7 @@ You can find [precompiled ton_client files](https://github.com/tonlabs/ever-sdk/
 Specifying path to downloaded custom "ton_client" libs can be done 
 in multiple ways by using different loaders.
 
-#### Custom EVER-SDK Library loading variants
 
-* `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
-* `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
-* `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path
-* `new JavaLibraryPathLoader("ton_client");` - gets library from java.library.path JVM argument
 
 ### ABI, TVC & other artifacts
 

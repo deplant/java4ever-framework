@@ -111,6 +111,16 @@
       "name": "TIP4Wallet",
       "abi": "artifacts/tip4/Wallet.abi.json",
       "tvc": "artifacts/tip4/Wallet.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "MultisigWalletGosh",
+      "abi": "artifacts/gosh/multisig/MultisigWallet.abi.json",
+      "tvc": "artifacts/gosh/multisig/MultisigWallet.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
     }
   ]
 }

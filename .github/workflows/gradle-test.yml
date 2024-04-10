@@ -1,0 +1,45 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
+
+name: Gradle Package
+
+on:
+  #push:
+  #  branches:
+  #    - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  junit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: JDK 21 / Setup
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
+    - name: Grant Permissions to gradlew
+      run: chmod +x gradlew
+    - name: Gradle / Task (Build)
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 8.6
+        arguments: build

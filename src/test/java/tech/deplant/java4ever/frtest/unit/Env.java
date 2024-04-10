@@ -2,6 +2,7 @@ package tech.deplant.java4ever.frtest.unit;
 
 import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 import tech.deplant.java4ever.framework.Credentials;
@@ -11,6 +12,7 @@ import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.GiverContract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
+import tech.deplant.java4ever.framework.contract.multisig.SafeMultisigWalletContract;
 import tech.deplant.java4ever.framework.contract.tip3.TIP3Builder;
 import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenRootContract;
 import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWalletContract;
@@ -58,10 +60,52 @@ public class Env {
 
 	private static boolean isInitialized = false;
 
+	public static int CTX;
+	public static String ENDPOINT;
+	public static long TIMEOUT = 30000L;
+	public static GiverContract GIVER;
+
+	public static void INIT2(String networkName) throws IOException, EverSdkException {
+		if (!isInitialized) {
+			EverSdk.load();
+			ENDPOINT = switch (networkName) {
+				case "local" -> System.getenv("LOCAL_NODE_ENDPOINT");
+				case "everscale_dev" -> System.getenv("DEV_NET_OSIRIS_ENDPOINT");
+				case "everscale_main" -> System.getenv("MAIN_NET_OSIRIS_ENDPOINT");
+				case "venom_test" -> System.getenv("DEV_NET_OSIRIS_ENDPOINT");
+				case "venom_main" -> System.getenv("MAIN_NET_OSIRIS_ENDPOINT");
+				case "ackinacki_test" -> System.getenv("MAIN_NET_OSIRIS_ENDPOINT");
+				case "gosh_main" -> System.getenv("MAIN_NET_OSIRIS_ENDPOINT");
+				case "ton_main" -> "https://ton-testnet.tvmlabs.dev/graphql";
+				default -> throw new IllegalStateException("Unexpected network name: " + networkName);
+			};
+			CTX = EverSdk.builder()
+			             .networkEndpoints(ENDPOINT)
+			             .networkQueryTimeout(TIMEOUT)
+			             .build()
+			             .orElseThrow();
+
+			GIVER = switch (networkName) {
+				case "local" -> EverOSGiver.V2(CTX);
+				case "everscale_dev" -> new SafeMultisigWalletContract(CTX,
+				                                          "0:b238570f9ebe536885b6060c7c9d74a20704e5efa844b17afcf814c7b9ddcfee",
+				                                          new Credentials(
+						                                          "a08ba000d026068f90541f111e2c700a796222d8ab4bb4ae8b4e680f64f875da",
+						                                          "17011c9157f3cf9e3c75ce8778be6b1adc42cd7abc1aebc0d288d2c338d2d93b"));
+				case "venom_test" -> new SafeMultisigWalletContract(CTX,
+				                                            "0:6b02864de6aac2310fa41a0a7b94c497f61206fd7479cbced6bf47ef31aac761",
+				                                            new Credentials(
+						                                            "7253cc1f3187647207bf18253ce8ecd6951209065073b5e4d0eea7f8c97f811a",
+						                                            "f3583ed4d4a99db3586431d41f5c1478cc28d6f7ab556ac6144e7a78b299d2ba"));
+				default -> throw new IllegalStateException("Unexpected network name: " + networkName);
+			};
+		}
+	}
+
 	public static void INIT() throws IOException, EverSdkException {
 		if (!isInitialized) {
 
-			EverSdk.load();
+			EverSdk.load(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
 
 			// should be first
 			SDK_EMPTY = EverSdk.createDefault().orElseThrow();

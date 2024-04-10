@@ -1,6 +1,7 @@
+/config/
 explorer.json
 local.json
-
+onchain-config.json
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm

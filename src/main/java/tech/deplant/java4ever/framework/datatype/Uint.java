@@ -2,8 +2,8 @@ package tech.deplant.java4ever.framework.datatype;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.commons.Numbers;
+import tech.deplant.commons.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,7 +19,7 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 			case BigInteger bi -> bi.abs();
 			case BigDecimal bd -> bd.toBigInteger().abs();
 			case Instant inst -> BigInteger.valueOf(inst.getEpochSecond()).abs();
-			case String str when str.length() >= 3 && ("-0x".equals(str.substring(0, 3)) || "0x".equals(str.substring(0, 2))) ->
+			case String str when Strings.isHexadecimal(str)/*str.length() >= 3 && ("-0x".equals(str.substring(0, 3)) || "0x".equals(str.substring(0, 2)))*/ ->
 					Numbers.hexStringToBigInt(str);
 			case String str -> new BigInteger(str);
 			default -> throw new IllegalStateException(
@@ -38,7 +38,8 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 			case BigInteger bi -> new Uint(size, bi.abs());
 			case BigDecimal bd -> new Uint(size, bd.toBigInteger().abs());
 			case Instant inst -> new Uint(size, BigInteger.valueOf(inst.getEpochSecond()).abs());
-			case String str when str.length() >= 3 && ("-0x".equals(str.substring(0, 3)) || "0x".equals(str.substring(0, 2))) ->
+			case String str when str.length() >= 3 &&
+			                     ("-0x".equals(str.substring(0, 3)) || "0x".equals(str.substring(0, 2))) ->
 					new Uint(size, Numbers.hexStringToBigInt(str));
 			case String str -> new Uint(size, new BigInteger(str));
 			default -> throw new IllegalStateException(
@@ -67,6 +68,6 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 
 	@Override
 	public AbiType type() {
-		return new AbiType(AbiTypePrefix.UINT,size(),false);
+		return new AbiType(AbiTypePrefix.UINT, size(), false);
 	}
 }

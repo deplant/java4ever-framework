@@ -1,6 +1,5 @@
 package tech.deplant.java4ever.frtest.unit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -8,13 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.Account;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
-import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
-import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +16,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
-public class DeployTests {
+public class DeployHandleTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws Throwable {

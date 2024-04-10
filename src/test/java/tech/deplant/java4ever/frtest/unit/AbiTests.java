@@ -6,12 +6,16 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SetcodeMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.SurfMultisigWalletTemplate;
 import tech.deplant.java4ever.framework.template.TIP3TokenRootTemplate;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +44,15 @@ public class AbiTests {
 	@Test
 	public void false_if_abi_lacks_function() throws JsonProcessingException {
 		assertFalse(SafeMultisigWalletTemplate.DEFAULT_ABI().hasFunction("releaseKraken"));
+	}
+
+	@Test
+	public void conversion_of_bigint_input_should_be_correct() throws JsonProcessingException, EverSdkException {
+		Map<String,Object> converted = SafeMultisigWalletTemplate
+				.DEFAULT_ABI()
+				.convertFunctionInputs("sendTransaction",
+				                       Map.of("value", new BigInteger("123")));
+		assertEquals("0x7b", converted.get("value"));
 	}
 
 }

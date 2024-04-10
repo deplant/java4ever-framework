@@ -13,14 +13,17 @@ import tech.deplant.java4ever.framework.Seed;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static tech.deplant.java4ever.frtest.unit.Env.RNG_KEYS;
-import static tech.deplant.java4ever.frtest.unit.Env.RNG_SEED;
+import static org.junit.jupiter.api.Assertions.*;
+import static tech.deplant.java4ever.frtest.unit.Env.*;
 
+/**
+ * Tests for crypto functionalities (keys, signatures and so on)
+ * @see Credentials
+ * @see Seed
+ */
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
-public class CredentialsTests {
+public class CryptoTests {
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
@@ -59,13 +62,15 @@ public class CredentialsTests {
 	public void make_seed_and_keys() throws Throwable {
 		var seed = Seed.RANDOM(Env.SDK_EMPTY);
 		Env.LOG.log(System.Logger.Level.DEBUG, seed.toString());
+		assertNotNull(seed);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          seed).toString());
+
 	}
 
 	@Test
 	public void make_seed_and_keys_old() throws Throwable {
-		Env.LOG.log(System.Logger.Level.DEBUG, Seed.RANDOM(Env.SDK_EMPTY).toString());
+		Seed.RANDOM(Env.SDK_EMPTY);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          new Seed(
 				                                                          "object burger primary dish harbor luxury morning mystery sausage wide this time",

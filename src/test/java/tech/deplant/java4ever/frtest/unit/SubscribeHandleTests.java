@@ -1,25 +1,13 @@
 package tech.deplant.java4ever.frtest.unit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.JsonContext;
-import tech.deplant.java4ever.framework.CurrencyUnit;
-import tech.deplant.java4ever.framework.MessageFlag;
-import tech.deplant.java4ever.framework.datatype.Address;
-import tech.deplant.java4ever.framework.datatype.TvmCell;
-import tech.deplant.java4ever.framework.datatype.Uint;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Map;
-import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -27,9 +15,9 @@ import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
-public class SubscriptionTests {
+public class SubscribeHandleTests {
 
-	private static System.Logger logger = System.getLogger(SubscriptionTests.class.getName());
+	private static System.Logger logger = System.getLogger(SubscribeHandleTests.class.getName());
 
 
 	@BeforeAll

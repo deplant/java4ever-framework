@@ -57,8 +57,9 @@ public class AbstractContract implements Contract {
 		new SubscribeHandle(contextId(),
 		                    SubscribeHandle.TRANSACTIONS_SUB.formatted(address(),
 		                                                               "in_message { src } aborted status"))
-				.setStopOnFilter(SubscribeHandle.TR_SUCCESSFUL)
-				.subscribe(futureSubscriptionResult::complete);
+				//.addConsumeFilter(SubscribeHandle.TR_SUCCESSFUL)
+				.addEventConsumer(futureSubscriptionResult::complete)
+				.subscribe();
 
 		startEvent.run();
 		try {
@@ -96,7 +97,9 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText)
+				.addEventConsumer(subscribeEventConsumer)
+				.subscribe();
 	}
 
 	public SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
@@ -112,7 +115,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
 	public SubscribeHandle subscribeOnAccount(String resultFields,
@@ -128,7 +131,7 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
 	public SubscribeHandle subscribeOnTransactions(String resultFields,
@@ -144,10 +147,10 @@ public class AbstractContract implements Contract {
 							}
 						}
 				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).subscribe(subscribeEventConsumer);
+		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
-	public FunctionHandle.Builder createFunctionCall() {
+	public FunctionHandle.Builder functionCallBuilder() {
 		return new FunctionHandle.Builder(JsonNode.class).setContract(this);
 	}
 

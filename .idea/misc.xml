@@ -26,7 +26,7 @@
     <option name="priority" value="Medium" />
     <option name="excludeFilter" value="" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21_PREVIEW" project-jdk-name="temurin-21" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_19_PREVIEW" project-jdk-name="temurin-21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="SuppressionsComponent">

@@ -14,8 +14,17 @@ group v_groupId
 version v_version
 
 repositories {
-    mavenLocal()
+    //mavenLocal()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
+        credentials {
+            username = githubUsername
+            password = githubUploadToken
+        }
+    }
     mavenCentral()
+    mavenLocal()
 }
 
 
@@ -30,7 +39,7 @@ sourceSets {
 dependencies {
 
     // RUNTIME **************************
-    api "tech.deplant.java4ever:java4ever-binding:$v_version" // java4ever-binding
+    api "tech.deplant.java4ever:java4ever-binding:$bindingVersion" // java4ever-binding
 
     // TESTS **************************
 
@@ -40,6 +49,7 @@ dependencies {
 
     // JUnit 5
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
 }
@@ -48,18 +58,18 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/" + v_repository)
+            url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
             credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("GH_PACKAGES_UPLOAD_TOKEN")
+                username = githubUsername
+                password = githubUploadToken
             }
         }
         maven {
             name = "Sonatype"
             url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
             credentials {
-                username = System.getenv("OSSRH_USERNAME")
-                password = System.getenv("OSSRH_PASSWORD")
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
@@ -135,6 +145,7 @@ tasks.withType(JavaExec).configureEach {
         languageVersion = JavaLanguageVersion.of(21)
     }
     jvmArgs += "--enable-preview"
+    jvmArgs += "--enable-native-access=java4ever.binding"
 }
 
 tasks.withType(Javadoc).configureEach {

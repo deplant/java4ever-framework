@@ -4,6 +4,7 @@ module test {
 	requires org.junit.jupiter.api;
 	requires java.compiler;
 	requires java.net.http;
+	requires org.junit.jupiter.params;
 	opens tech.deplant.java4ever.frtest.unit to org.junit.platform.commons;
 	opens tech.deplant.java4ever.frtest.unit.datatype to org.junit.platform.commons;
 	exports tech.deplant.java4ever.frtest.unit;

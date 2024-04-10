@@ -25,7 +25,7 @@ import static tech.deplant.java4ever.frtest.unit.Env.*;
 public class ThreadedExecutionTests {
 
 
-	private static System.Logger logger = System.getLogger(SubscriptionTests.class.getName());
+	private static System.Logger logger = System.getLogger(SubscribeHandleTests.class.getName());
 
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {

@@ -7,7 +7,12 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
+import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
 import tech.deplant.java4ever.framework.datatype.Address;
@@ -15,6 +20,7 @@ import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
@@ -44,4 +50,23 @@ public class MultisigContractTests {
 		assertNotEquals(addressTemplate.makeAddrStd(), Address.ZERO.makeAddrStd());
 		assertEquals(addressTemplate.makeAddrStd(),addressBuilder.makeAddrStd());
 	}
+
+	@Test
+	public void readmeSnippet01() throws JsonProcessingException, EverSdkException {
+		// initialize EVER-SDK library
+		EverSdk.load();
+		// create config context, save its id
+		int contextId = EverSdk.createWithEndpoint("http://localhost/graphql").orElseThrow();
+		// creates random pair of keys
+		var keys = Credentials.ofRandom(contextId);
+		// use it to deploy a new contract
+		var contract = new SafeMultisigWalletTemplate()
+				.prepareDeploy(contextId,0, keys, new BigInteger[]{keys.publicKeyBigInt()}, 1)
+				.deployWithGiver(EverOSGiver.V2(contextId), EVER_ONE);
+		// get the contract info
+		System.out.println(contract.account().id() + " is active: " + contract.account().isActive());
+	}
+
+
+
 }

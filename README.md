@@ -71,9 +71,12 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ### Prerequisites
 
-* Install **JDK 22** ([link](https://adoptium.net/temurin/releases?version=20))
+* Install **JDK 22** ([downloaded here](https://adoptium.net/temurin/releases/?version=22))
+* Install **EverNode-SE** ([installation guide here](https://github.com/everx-labs/evernode-se))
 
-### Add java4ever to your Maven or Gradle setup:
+**Note:** EverNode-SE needed only for quick start example, it's not a requirement
+
+### Add java4ever to your Maven/Gradle setup:
 
 * Gradle
 
@@ -94,55 +97,88 @@ dependencies {
 </dependency>
 ```
 
-## Examples
-
-### SDK Provider
-
-**Sdk** class is a provider of connection to EVER-SDK lib and TVM blockchain.
-It is a primary object that you need to run most interactions in **Java4Ever**:
-
-#### Creating SDK
+### Deploy your first contract
 
 ```java
-var sdk1 = Sdk.DEFAULT();
-var sdk2 = Sdk.DEFAULT("http://localhost/graphql");
-var sdk3 = Sdk.builder().networkEndpoints("http://localhost/graphql").build();
+// initialize EVER-SDK library
+EverSdk.load(); 
+// create config context, save its id
+int contextId = EverSdk.createWithEndpoint("http://localhost/graphql").orElseThrow();
+// creates random pair of keys
+var keys = Credentials.ofRandom(contextId); 
+// use it to deploy a new contract
+var contract = new SafeMultisigWalletTemplate()
+        .prepareDeploy(contextId,0, keys, new BigInteger[]{keys.publicKeyBigInt()}, 1)
+        .deployWithGiver(EverOSGiver.V2(contextId), EVER_ONE);
+// get the contract info
+System.out.println(contract.account().id() + " is active: " + contract.account().isActive());
 ```
-You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 
+## Examples and Guides
+
+### Setting up SDK
+
+**SDK** setup consists of two steps:
+1. Loading EVER-SDK library (should be done once)
+2. Creating context/session with certain config (should be done for every new endpoint or config change)
+
+Both steps are described below.
+
+#### Loading EVER-SDK library
+
+To load EVER-SDK connection to JVM, use `EverSdk.load()` static method. 
+Loaded EVER-SDK is a singleton, you can't use other version of library simultaneously.
+Java4Ever stores wrapped copy of actual EVER-SDK libraries in its resources. To load wrapped library, run:
+```java
+EverSdk.load();
+```
+**Note: We found problems with loading library from resources using Spring's fatJar bundles. Please, use alternative loaders if you use fatJar too.**
+
+If you want to use custom binaries or version, you should use other loaders. 
+All loaders are just ways to reach library, so you should get/build `ton_client` library first.
+You can find EverX [precompiled EVER-SDK files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here.
+Here are the examples of loader options:
+```java
+// loads library from path saved in environment variable
+EverSdk.load(AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")); 
+// loads library from ~ (user home)
+EverSdk.load(AbsolutePathLoader.ofUserDir("libton_client.so")); 
+// loads from any absolute path
+EverSdk.load(new AbsolutePathLoader(Path.of("/home/ton/lib/libton_client.so"))); 
+// loads library from java.library.path JVM argument
+EverSdk.load(new JavaLibraryPathLoader("ton_client")); 
+```
+
+#### Creating config context and specifying endpoints
+
+Context configuration is needed to provide EVER-SDK library with your endpoints, timeouts and other settings.
+You can find a list of endpoints here: https://docs.evercloud.dev/products/evercloud/networks-endpoints
 If you're working with Everscale mainnet, here you can register your app and receive "ProjectID" part of the URL: https://dashboard.evercloud.dev/
+
+```java
+// creates default EVER-SDK context without specifying endpoints
+int contextId1 = EverSdk.createDefault(); 
+// creates default EVER-SDK with specified endpoint
+int contextId2 = EverSdk.createWithEndpoint("http://localhost/graphql"); 
+// creates EVER-SDK context from ready JSON string
+int contextId4 = EverSdk.createWithJson(configJsonString);
+```
+
+Save your contextId, you will use this id to call EVER-SDK methods.
 
 #### Configuring SDK with Builder
 
-**Sdk.Builder** is a Builder-style config for **EVER-SDK**, so you can easily config only needed parts of library.
+Alternatively, you can call EverSdk.builder() that provides builder methods for all config values of EVER-SDK.
+Thus you can easily configure only needed parts of library.
 ```java
-var sdk = Sdk.builder()
-             .networkEndpoints("http://localhost/graphql")
-             .abiWorkchain(-1)
-             .networkRetriesCount(10)
-             .abiMessageExpirationTimeout(30000)
-             .build();
+int contextId3 = EverSdk.builder()
+                       .networkEndpoints("http://localhost/graphql")
+                       .networkQueryTimeout(300_000L)
+                       .build()
+                       .orElseThrow();
 ```
 
-If you want to use custom `ton-client` lib or have some problem with the included ones, specify custom location as:
-
-```java
-var sdk = Sdk.builder()
-             .networkEndpoints("http://localhost/graphql")
-             .build(new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so")));
-```
-You can find [precompiled ton_client files](https://github.com/tonlabs/ever-sdk/blob/master/README.md#download-precompiled-binaries) here. 
-Specifying path to downloaded custom "ton_client" libs can be done 
-in multiple ways by using different loaders.
-
-#### Custom EVER-SDK Library loading variants
-
-* `AbsolutePathLoader.ofSystemEnv("TON_CLIENT_LIB")` - path from Environment variable
-* `AbsolutePathLoader.ofUserDir("libton_client.so")` - file from ~ (user home)
-* `new AbsolutePathLoader(Path.of("\home\ton\lib\libton_client.so"))` - any absolute path
-* `new JavaLibraryPathLoader("ton_client");` - gets library from java.library.path JVM argument
-
-### ABI, TVC & other artifacts
+### Adding ABI, TVC & other artifacts
 
 **Java4Ever** includes easy API to work with files and java resources
 (both json-based and byte[]-based). 

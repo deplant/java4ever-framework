@@ -5,10 +5,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.commons.Objs;
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.JsonContext;
-import tech.deplant.java4ever.binding.Processing;
+import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.GiverContract;
@@ -18,22 +15,16 @@ import tech.deplant.java4ever.framework.template.Template;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNullElse;
+import static tech.deplant.java4ever.binding.Processing.processMessage;
 
 /**
  * Representation of prepared deployment set. Usually this object is returned by template's prepareDeploy() method.
  *
- * @param clazz             class of contract wrapper
- * @param sdk
- * @param template
- * @param workchainId
- * @param credentials
- * @param initialDataFields
- * @param constructorInputs
- * @param constructorHeader
- * @param <RETURN>
+ * @param <RETURN> the type parameter
  */
 public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
                                                             int sdk,
@@ -54,6 +45,19 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	                                                         new JavaTimeModule())
 	                                             .build();
 
+	/**
+	 * Instantiates a new Deploy handle.
+	 *
+	 * @param clazz             the clazz
+	 * @param sdk               the sdk
+	 * @param abi               the abi
+	 * @param tvc               the tvc
+	 * @param workchainId       the workchain id
+	 * @param credentials       the credentials
+	 * @param initialDataFields the initial data fields
+	 * @param constructorInputs the constructor inputs
+	 * @param constructorHeader the constructor header
+	 */
 	public DeployHandle(Class<RETURN> clazz,
 	                    int sdk,
 	                    ContractAbi abi,
@@ -73,6 +77,18 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		     constructorHeader);
 	}
 
+	/**
+	 * Instantiates a new Deploy handle.
+	 *
+	 * @param clazz             the clazz
+	 * @param sdk               the sdk
+	 * @param template          the template
+	 * @param workchainId       the workchain id
+	 * @param credentials       the credentials
+	 * @param initialDataFields the initial data fields
+	 * @param constructorInputs the constructor inputs
+	 * @param constructorHeader the constructor header
+	 */
 	public DeployHandle(Class<RETURN> clazz,
 	                    int sdk,
 	                    Template template,
@@ -92,6 +108,16 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		     new DebugOptions(false, 60000L, false, 50L));
 	}
 
+	/**
+	 * With debug tree deploy handle.
+	 *
+	 * @param enabled             the enabled
+	 * @param timeout             the timeout
+	 * @param throwErrors         the throw errors
+	 * @param maxTransactionCount the max transaction count
+	 * @param treeAbis            the tree abis
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withDebugTree(boolean enabled,
 	                                          long timeout,
 	                                          boolean throwErrors,
@@ -108,6 +134,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          new DebugOptions(enabled, timeout, throwErrors, maxTransactionCount, treeAbis));
 	}
 
+	/**
+	 * With debug tree deploy handle.
+	 *
+	 * @param debugOptions the debug options
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
@@ -120,6 +152,13 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          debugOptions);
 	}
 
+	/**
+	 * With return class deploy handle.
+	 *
+	 * @param <T>         the type parameter
+	 * @param returnClass the return class
+	 * @return the deploy handle
+	 */
 	public <T extends AbstractContract> DeployHandle<T> withReturnClass(Class<T> returnClass) {
 		return new DeployHandle<>(returnClass,
 		                          sdk(),
@@ -131,6 +170,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          constructorHeader());
 	}
 
+	/**
+	 * With constructor header deploy handle.
+	 *
+	 * @param constructorHeader the constructor header
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withConstructorHeader(Abi.FunctionHeader constructorHeader) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
@@ -142,6 +187,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          constructorHeader);
 	}
 
+	/**
+	 * With constructor inputs deploy handle.
+	 *
+	 * @param constructorInputs the constructor inputs
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withConstructorInputs(Map<String, Object> constructorInputs) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
@@ -153,6 +204,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          constructorHeader());
 	}
 
+	/**
+	 * With init data fields deploy handle.
+	 *
+	 * @param initialDataFields the initial data fields
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withInitDataFields(Map<String, Object> initialDataFields) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
@@ -164,6 +221,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          constructorHeader());
 	}
 
+	/**
+	 * With credentials deploy handle.
+	 *
+	 * @param credentials the credentials
+	 * @return the deploy handle
+	 */
 	public DeployHandle<RETURN> withCredentials(Credentials credentials) {
 		return new DeployHandle<>(clazz(),
 		                          sdk(),
@@ -175,6 +238,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          constructorHeader());
 	}
 
+	/**
+	 * To deploy set abi . deploy set.
+	 *
+	 * @return the abi . deploy set
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public Abi.DeploySet toDeploySet() throws EverSdkException {
 		return new Abi.DeploySet(template().tvc().base64String(),
 		                         null,
@@ -185,6 +254,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                         requireNonNullElse(credentials(), Credentials.NONE).publicKey());
 	}
 
+	/**
+	 * To constructor call set abi . call set.
+	 *
+	 * @return the abi . call set
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public Abi.CallSet toConstructorCallSet() throws EverSdkException {
 		return new Abi.CallSet("constructor",
 		                       constructorHeader(),
@@ -194,21 +269,40 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                                                                                constructorInputs())));
 	}
 
+	/**
+	 * To signer abi . signer.
+	 *
+	 * @return the abi . signer
+	 */
 	public Abi.Signer toSigner() {
 		return Objs.notNullElse(credentials(), Credentials.NONE).signer();
 	}
 
+	/**
+	 * To address address.
+	 *
+	 * @return the address
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public Address toAddress() throws EverSdkException {
-		return new Address(Abi.encodeMessage(sdk(),
-		                         template().abi().ABI(),
-		                         null,
-		                         toDeploySet(),
-		                         null,
-		                         toSigner(),
-		                         null,
-		                         null).address());
+		return new Address(EverSdk.await(Abi.encodeMessage(sdk(),
+		                                                   template().abi().ABI(),
+		                                                   null,
+		                                                   toDeploySet(),
+		                                                   null,
+		                                                   toSigner(),
+		                                                   null,
+		                                                   null)).address());
 	}
 
+	/**
+	 * Deploy with giver return.
+	 *
+	 * @param giver the giver
+	 * @param value the value
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public RETURN deployWithGiver(GiverContract giver, BigInteger value) throws EverSdkException {
 		var address = toAddress();
 		try {
@@ -244,21 +338,27 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 
 	}
 
+	/**
+	 * Deploy return.
+	 *
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public RETURN deploy() throws EverSdkException {
 		var address = toAddress();
 		return deploy(address);
 	}
 
 	private RETURN deploy(Address address) throws EverSdkException {
-		Processing.processMessage(sdk(),
-		                          template().abi().ABI(),
-		                          address.makeAddrStd(),
-		                          toDeploySet(),
-		                          toConstructorCallSet(),
-		                          toSigner(),
-		                          null,
-		                          null,
-		                          false);
+		EverSdk.await(processMessage(sdk(),
+		                             template().abi().ABI(),
+		                             address.makeAddrStd(),
+		                             toDeploySet(),
+		                             toConstructorCallSet(),
+		                             toSigner(),
+		                             null,
+		                             null,
+		                             false));
 		Map<String, Object> contractMap = Map.of("sdk",
 		                                         sdk(),
 		                                         "address",
@@ -267,7 +367,9 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                                         template().abi(),
 		                                         "credentials",
 		                                         credentials());
-		return Contract.instantiate(clazz(), sdk(), address.makeAddrStd(), template().abi(), credentials());
+		var contract = Contract.instantiate(clazz(), sdk(), address.makeAddrStd(), template().abi(), credentials());
+		logger.log(System.Logger.Level.TRACE, () -> "Contract deployed and instantiated: %s".formatted(contract == null ? "" : contract.toString()));
+		return contract;
 	}
 
 

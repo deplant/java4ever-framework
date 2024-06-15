@@ -7,9 +7,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Represents JSON-organized external artifacts with absolute and relative disk paths to file
+ */
 public record JsonFile(Path filePath) implements Artifact<String,String> {
 
-    public JsonFile(String filePathString) {
+	/**
+	 * Instantiates a new Json file.
+	 *
+	 * @param filePathString the file path string
+	 */
+	public JsonFile(String filePathString) {
     this(Paths.get(filePathString));
     }
 

@@ -2,22 +2,41 @@ package tech.deplant.java4ever.framework.datatype;
 
 import tech.deplant.commons.Strings;
 import tech.deplant.java4ever.binding.Boc;
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The type Tvm builder.
+ */
 public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operations) implements AbiValue {
 
+	/**
+	 * Instantiates a new Tvm builder.
+	 */
 	public TvmBuilder() {
 		this(new AtomicInteger(0), new ArrayList<>());
 	}
 
+	/**
+	 * Builders boc . builder op [ ].
+	 *
+	 * @return the boc . builder op [ ]
+	 */
 	public Boc.BuilderOp[] builders() {
 		return this.operations.toArray(Boc.BuilderOp[]::new);
 	}
 
+	/**
+	 * Store tvm builder.
+	 *
+	 * @param types the types
+	 * @return the tvm builder
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public TvmBuilder store(AbiValue... types) throws EverSdkException {
 		for (var type : types) {
 			this.operations.add(switch (type) {
@@ -51,12 +70,27 @@ public record TvmBuilder(AtomicInteger refCounter, List<Boc.BuilderOp> operation
 		}
 	}
 
+	/**
+	 * Store tvm builder.
+	 *
+	 * @param type       the type
+	 * @param inputValue the input value
+	 * @return the tvm builder
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public TvmBuilder store(AbiType type, Object inputValue) throws EverSdkException {
 		return store(AbiValue.of(type, inputValue));
 	}
 
+	/**
+	 * To cell tvm cell.
+	 *
+	 * @param contextId the context id
+	 * @return the tvm cell
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public TvmCell toCell(int contextId) throws EverSdkException {
-		return new TvmCell(Boc.encodeBoc(contextId, builders(), null).boc());
+		return new TvmCell(EverSdk.await(Boc.encodeBoc(contextId, builders(), null)).boc());
 	}
 
 	@Override

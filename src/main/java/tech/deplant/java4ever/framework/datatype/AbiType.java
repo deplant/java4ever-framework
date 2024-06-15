@@ -7,18 +7,39 @@ import tech.deplant.java4ever.binding.EverSdkException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+/**
+ * The type Abi type.
+ */
 public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 
 	private final static System.Logger logger = System.getLogger(AbiType.class.getName());
 
+	/**
+	 * Instantiates a new Abi type.
+	 *
+	 * @param prefix the prefix
+	 * @param size   the size
+	 */
 	public AbiType(AbiTypePrefix prefix, int size) {
 		this(prefix, size, false);
 	}
 
+	/**
+	 * Instantiates a new Abi type.
+	 *
+	 * @param prefix the prefix
+	 */
 	public AbiType(AbiTypePrefix prefix) {
 		this(prefix, 0, false);
 	}
 
+	/**
+	 * Of abi type.
+	 *
+	 * @param typeString the type string
+	 * @return the abi type
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static AbiType of(String typeString) throws EverSdkException {
 		if (typeString.contains("optional")) {
 			return new AbiType(AbiTypePrefix.OPTIONAL, 0, false);
@@ -47,6 +68,12 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 		throw ex;
 	}
 
+	/**
+	 * Array matcher boolean.
+	 *
+	 * @param typeString the type string
+	 * @return the boolean
+	 */
 	public static boolean arrayMatcher(String typeString) {
 		var arrayPattern = new Then(new GroupOf(new Then(new Occurences(new AnyOf(new Word("a-zA-Z")), 1),
 		                                                 new Occurences(Special.DIGIT, 0, 3))),
@@ -58,6 +85,11 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 		return false;
 	}
 
+	/**
+	 * Has size boolean.
+	 *
+	 * @return the boolean
+	 */
 	boolean hasSize() {
 		return switch (prefix()){
 			case INT, UINT, BYTES -> {
@@ -71,10 +103,22 @@ public record AbiType(AbiTypePrefix prefix, int size, boolean isArray) {
 		};
 	}
 
+	/**
+	 * To abi param abi . abi param.
+	 *
+	 * @param paramName  the param name
+	 * @param components the components
+	 * @return the abi . abi param
+	 */
 	public Abi.AbiParam toAbiParam(String paramName, Abi.AbiParam[] components) {
 		return new Abi.AbiParam(paramName, abiName(), null, null);
 	}
 
+	/**
+	 * Abi name string.
+	 *
+	 * @return the string
+	 */
 	public String abiName() {
 		var builder = new StringBuilder();
 		builder.append(prefix().name().toLowerCase(Locale.ROOT));

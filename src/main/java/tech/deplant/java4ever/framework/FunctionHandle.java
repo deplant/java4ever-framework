@@ -8,6 +8,7 @@ import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
+import tech.deplant.java4ever.framework.contract.multisig2.MultisigContract2;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
@@ -20,6 +21,11 @@ import java.util.function.Supplier;
 
 import static tech.deplant.java4ever.framework.LogUtils.*;
 
+/**
+ * The type Function handle.
+ *
+ * @param <RETURN> the type parameter
+ */
 public record FunctionHandle<RETURN>(Class<RETURN> clazz,
                                      Contract contract,
                                      String functionName,
@@ -29,6 +35,15 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
+	/**
+	 * Instantiates a new Function handle.
+	 *
+	 * @param clazz          the clazz
+	 * @param contract       the contract
+	 * @param functionName   the function name
+	 * @param functionInputs the function inputs
+	 * @param functionHeader the function header
+	 */
 	public FunctionHandle(Class<RETURN> clazz,
 	                      Contract contract,
 	                      String functionName,
@@ -42,6 +57,18 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		     new DebugOptions(false, 60000L, false, 50L));
 	}
 
+	/**
+	 * Instantiates a new Function handle.
+	 *
+	 * @param clazz          the clazz
+	 * @param sdk            the sdk
+	 * @param address        the address
+	 * @param abi            the abi
+	 * @param credentials    the credentials
+	 * @param functionName   the function name
+	 * @param functionInputs the function inputs
+	 * @param functionHeader the function header
+	 */
 	public FunctionHandle(Class<RETURN> clazz,
 	                      int sdk,
 	                      Address address,
@@ -53,6 +80,17 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		this(clazz, new AbstractContract(sdk, address, abi, credentials), functionName, functionInputs, functionHeader);
 	}
 
+	/**
+	 * Instantiates a new Function handle.
+	 *
+	 * @param sdk            the sdk
+	 * @param address        the address
+	 * @param abi            the abi
+	 * @param credentials    the credentials
+	 * @param functionName   the function name
+	 * @param functionInputs the function inputs
+	 * @param functionHeader the function header
+	 */
 	public FunctionHandle(int sdk,
 	                      Address address,
 	                      ContractAbi abi,
@@ -67,6 +105,16 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		     functionHeader);
 	}
 
+	/**
+	 * With debug tree function handle.
+	 *
+	 * @param enabled             the enabled
+	 * @param timeout             the timeout
+	 * @param throwErrors         the throw errors
+	 * @param transactionMaxCount the transaction max count
+	 * @param treeAbis            the tree abis
+	 * @return the function handle
+	 */
 	public FunctionHandle<RETURN> withDebugTree(boolean enabled,
 	                                            long timeout,
 	                                            boolean throwErrors,
@@ -80,6 +128,12 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                            new DebugOptions(enabled, timeout, throwErrors, transactionMaxCount, treeAbis));
 	}
 
+	/**
+	 * With debug tree function handle.
+	 *
+	 * @param debugOptions the debug options
+	 * @return the function handle
+	 */
 	public FunctionHandle<RETURN> withDebugTree(DebugOptions debugOptions) {
 		return new FunctionHandle<>(clazz(),
 		                            contract(),
@@ -89,6 +143,12 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                            debugOptions);
 	}
 
+	/**
+	 * With credentials function handle.
+	 *
+	 * @param credentials the credentials
+	 * @return the function handle
+	 */
 	public FunctionHandle<RETURN> withCredentials(Credentials credentials) {
 		return new FunctionHandle<>(clazz(),
 		                            new AbstractContract(contract().contextId(),
@@ -100,23 +160,55 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                            functionHeader());
 	}
 
+	/**
+	 * With function inputs function handle.
+	 *
+	 * @param functionInputs the function inputs
+	 * @return the function handle
+	 */
 	public FunctionHandle<RETURN> withFunctionInputs(Map<String, Object> functionInputs) {
 		return new FunctionHandle<>(clazz(), contract(), functionName(), functionInputs, functionHeader());
 	}
 
+	/**
+	 * With function header function handle.
+	 *
+	 * @param functionHeader the function header
+	 * @return the function handle
+	 */
 	public FunctionHandle<RETURN> withFunctionHeader(Abi.FunctionHeader functionHeader) {
 		return new FunctionHandle<>(clazz(), contract(), functionName(), functionInputs(), functionHeader);
 	}
 
+	/**
+	 * With return class function handle.
+	 *
+	 * @param <T>         the type parameter
+	 * @param returnClass the return class
+	 * @return the function handle
+	 */
 	public <T> FunctionHandle<T> withReturnClass(Class<T> returnClass) {
 		return new FunctionHandle<>(returnClass, contract(), functionName(), functionInputs(), functionHeader());
 	}
 
+	/**
+	 * To call set abi . call set.
+	 *
+	 * @return the abi . call set
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public Abi.CallSet toCallSet() throws EverSdkException {
 		Map<String, Object> converted = contract().abi().convertFunctionInputs(functionName(), functionInputs());
 		return new Abi.CallSet(functionName(), functionHeader(), JsonContext.ABI_JSON_MAPPER().valueToTree(converted));
 	}
 
+	/**
+	 * To output return.
+	 *
+	 * @param outputMap the output map
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public RETURN toOutput(JsonNode outputMap) throws EverSdkException {
 		Map<String, Object> converted = new HashMap<>();
 		try {
@@ -143,19 +235,24 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * to pass function calls and inputs with transfer.
 	 *
 	 * @return TvmCell of the internal call payload
-	 * @throws EverSdkException
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return new TvmCell(Abi.encodeMessageBody(contract().contextId(),
+		return new TvmCell(EverSdk.await(Abi.encodeMessageBody(contract().contextId(),
 		                                         contract().abi().functionCallABI(functionName()),
 		                                         toCallSet(),
 		                                         true,
 		                                         toSigner(),
 		                                         null,
 		                                         contract().address().makeAddrStd(),
-		                                         null).body());
+		                                         null)).body());
 	}
 
+	/**
+	 * To signer abi . signer.
+	 *
+	 * @return the abi . signer
+	 */
 	public Abi.Signer toSigner() {
 		return Objs.notNullElse(contract().credentials(), Credentials.NONE).signer();
 	}
@@ -166,34 +263,35 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * If you need to cache boc and run multiple getters cheaply, you need to get
 	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
 	 *
-	 * @throws EverSdkException
+	 * @return the as map
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public JsonNode getAsMap() throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address().makeAddrStd()}));
-		Net.ResultOfQueryCollection result = Net.queryCollection(contract().contextId(),
+		Net.ResultOfQueryCollection result = EverSdk.await(Net.queryCollection(contract().contextId(),
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id boc",
 		                                                         null,
-		                                                         null);
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
+		                                                         null));
+		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
 		                                                  null,
-		                                                  null);
+		                                                  null));
 		for (var map : result.result()) {
 			String boc = map.get("boc").asText();
-			return Optional.ofNullable(Tvm.runTvm(contract().contextId(),
+			return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
 			                                      msg.message(),
 			                                      boc,
 			                                      null,
 			                                      contract().abi().ABI(),
 			                                      null,
-			                                      false).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+			                                      false)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
 		}
 		return JsonContext.EMPTY_NODE();
 	}
@@ -204,7 +302,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * If you need to cache boc and run multiple getters cheaply, you need to get
 	 * Account object via OwnedContract.account() method and then run Account.runGetter() method.
 	 *
-	 * @throws EverSdkException
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public RETURN get() throws EverSdkException {
 		return toOutput(getAsMap());
@@ -215,7 +314,9 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * Important! This method uses provided boc!
 	 * There's no guarantee that it corresponds to current blockchain state.
 	 *
-	 * @throws EverSdkException
+	 * @param boc the boc
+	 * @return the local
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public RETURN getLocal(String boc) throws EverSdkException {
 		return toOutput(getLocalAsMap(boc));
@@ -225,56 +326,70 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * Encodes inputs and runs getter method on account's boc then decodes answer.
 	 * Important! When you run getter locally, directly on Account boc,
 	 * there's no guarantee that it corresponds to current blockchain state.
+	 *
+	 * @param boc the boc
+	 * @return the local as map
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public JsonNode getLocalAsMap(String boc) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
+		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
 		                                                  null,
-		                                                  null);
-		return Optional.ofNullable(Tvm.runTvm(contract().contextId(),
+		                                                  null));
+		return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
 		                                      msg.message(),
 		                                      boc,
 		                                      null,
 		                                      contract().abi().ABI(),
 		                                      null,
-		                                      false).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+		                                      false)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
 	}
 
 	/**
 	 * Encodes inputs and runs external call method on account's boc then decodes answer.
 	 * Important! When you run external call locally, directly on Account boc,
 	 * your blockchain real info remains unchanged.
+	 *
+	 * @param boc              the boc
+	 * @param options          the options
+	 * @param unlimitedBalance the unlimited balance
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public JsonNode callLocalAsMap(String boc,
 	                               Tvm.ExecutionOptions options,
 	                               boolean unlimitedBalance) throws EverSdkException {
-		Abi.ResultOfEncodeMessage msg = Abi.encodeMessage(contract().contextId(),
+		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
 		                                                  contract().abi().functionCallABI(functionName()),
 		                                                  contract().address().makeAddrStd(),
 		                                                  null,
 		                                                  toCallSet(),
 		                                                  toSigner(),
 		                                                  null,
-		                                                  null);
-		return Optional.ofNullable(Tvm.runExecutor(contract().contextId(),
+		                                                  null));
+		return Optional.ofNullable(EverSdk.await(Tvm.runExecutor(contract().contextId(),
 		                                           msg.message(),
 		                                           new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
 		                                           options,
 		                                           contract().abi().ABI(),
 		                                           false,
 		                                           null,
-		                                           true).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+		                                           true)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
 	}
 
 	/**
 	 * Calls smart contract with external message using credentials provided
 	 * on initialization.
 	 *
-	 * @throws EverSdkException
+	 * @param boc              the boc
+	 * @param options          the options
+	 * @param unlimitedBalance the unlimited balance
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public RETURN callLocal(String boc,
 	                        Tvm.ExecutionOptions options,
@@ -282,6 +397,12 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return toOutput(callLocalAsMap(boc, options, unlimitedBalance));
 	}
 
+	/**
+	 * Call as map json node.
+	 *
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode callAsMap() throws EverSdkException {
 		var resultOfProcess = processExternalCall();
 		var balanceDeltaStr = Numbers.hexStringToBigDec(resultOfProcess.transaction().get("balance_delta").asText(), 9);
@@ -313,7 +434,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * Calls smart contract with external message using credentials provided
 	 * on initialization.
 	 *
-	 * @throws EverSdkException
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public RETURN call() throws EverSdkException {
 		return toOutput(callAsMap());
@@ -327,8 +449,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 *
 	 * @param throwOnTreeError   If 'true' method will throw on any internal non-0 exit_code encountered in tree.
 	 * @param otherAbisForDecode Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
-	 * @return
-	 * @throws EverSdkException
+	 * @return result of tree
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public ResultOfTree<JsonNode> callTreeAsMap(boolean throwOnTreeError,
 	                                            ContractAbi... otherAbisForDecode) throws EverSdkException {
@@ -337,11 +459,11 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                .toArray(Abi.ABI[]::new);
 		var resultOfProcess = processExternalCall();
 		var msgId = resultOfProcess.transaction().get("in_msg").asText();
-		var debugOutResult = Net.queryTransactionTree(contract().contextId(),
+		var debugOutResult = EverSdk.await(Net.queryTransactionTree(contract().contextId(),
 		                                              msgId,
 		                                              finalABIArray,
 		                                              debugOptions().timeout(),
-		                                              debugOptions().transactionMaxCount());
+		                                              debugOptions().transactionMaxCount()));
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
@@ -391,8 +513,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 *
 	 * @param throwOnTreeError   If 'true' method will throw on any internal non-0 exit_code encountered in tree.
 	 * @param otherAbisForDecode Method will try to decode each message against ABIs in this list. ABI of entering contract already included.
-	 * @return
-	 * @throws EverSdkException
+	 * @return result of tree
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public ResultOfTree<RETURN> callTree(boolean throwOnTreeError,
 	                                     ContractAbi... otherAbisForDecode) throws EverSdkException {
@@ -400,6 +522,33 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return new ResultOfTree<>(result.queryTree(), toOutput(result.decodedOutput()));
 	}
 
+	/**
+	 * Send from as map json node.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @param bounce the bounce
+	 * @param flag   the flag
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
+	public JsonNode sendFromAsMap(MultisigContract2 sender,
+	                              BigInteger value,
+	                              boolean bounce,
+	                              MessageFlag flag) throws EverSdkException {
+		return sender.sendTransaction(contract().address(), value, bounce, flag.flag(), toPayload()).callAsMap();
+	}
+
+	/**
+	 * Send from as map json node.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @param bounce the bounce
+	 * @param flag   the flag
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode sendFromAsMap(MultisigContract sender,
 	                              BigInteger value,
 	                              boolean bounce,
@@ -407,10 +556,28 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return sender.sendTransaction(contract().address(), value, bounce, flag.flag(), toPayload()).callAsMap();
 	}
 
+	/**
+	 * Send from as map json node.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode sendFromAsMap(MultisigContract sender, BigInteger value) throws EverSdkException {
 		return sendFromAsMap(sender, value, true, MessageFlag.EXACT_VALUE_GAS);
 	}
 
+	/**
+	 * Send from return.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @param bounce the bounce
+	 * @param flag   the flag
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public RETURN sendFrom(MultisigContract sender,
 	                       BigInteger value,
 	                       boolean bounce,
@@ -418,10 +585,47 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return toOutput(sendFromAsMap(sender, value, bounce, flag));
 	}
 
+	/**
+	 * Send from return.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @param bounce the bounce
+	 * @param flag   the flag
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
+	public RETURN sendFrom(MultisigContract2 sender,
+	                       BigInteger value,
+	                       boolean bounce,
+	                       MessageFlag flag) throws EverSdkException {
+		return toOutput(sendFromAsMap(sender, value, bounce, flag));
+	}
+
+	/**
+	 * Send from return.
+	 *
+	 * @param sender the sender
+	 * @param value  the value
+	 * @return the return
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public RETURN sendFrom(MultisigContract sender, BigInteger value) throws EverSdkException {
 		return toOutput(sendFromAsMap(sender, value));
 	}
 
+	/**
+	 * Send from tree as map result of tree.
+	 *
+	 * @param sender             the sender
+	 * @param value              the value
+	 * @param bounce             the bounce
+	 * @param flag               the flag
+	 * @param throwOnTreeError   the throw on tree error
+	 * @param otherAbisForDecode the other abis for decode
+	 * @return the result of tree
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public ResultOfTree<JsonNode> sendFromTreeAsMap(MultisigContract sender,
 	                                                BigInteger value,
 	                                                boolean bounce,
@@ -439,6 +643,18 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		}
 	}
 
+	/**
+	 * Send from tree result of tree.
+	 *
+	 * @param sender             the sender
+	 * @param value              the value
+	 * @param bounce             the bounce
+	 * @param flag               the flag
+	 * @param throwOnTreeError   the throw on tree error
+	 * @param otherAbisForDecode the other abis for decode
+	 * @return the result of tree
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public ResultOfTree<RETURN> sendFromTree(MultisigContract sender,
 	                                         BigInteger value,
 	                                         boolean bounce,
@@ -461,7 +677,7 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	}
 
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
-		return Processing.processMessage(contract().contextId(),
+		return EverSdk.await(Processing.processMessage(contract().contextId(),
 		                                 contract().abi().functionCallABI(functionName()),
 		                                 contract().address().makeAddrStd(),
 		                                 null,
@@ -469,9 +685,14 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                 toSigner(),
 		                                 null,
 		                                 null,
-		                                 false);
+		                                 false));
 	}
 
+	/**
+	 * To builder builder.
+	 *
+	 * @return the builder
+	 */
 	public Builder toBuilder() {
 		var builder = new Builder(clazz());
 		builder.clazz = clazz();
@@ -483,49 +704,116 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return builder;
 	}
 
+	/**
+	 * The type Builder.
+	 */
 	public static class Builder {
 
+		/**
+		 * The Clazz.
+		 */
 		public Class clazz;
+		/**
+		 * The Contract.
+		 */
 		public Contract contract;
+		/**
+		 * The Function name.
+		 */
 		public String functionName;
+		/**
+		 * The Function inputs.
+		 */
 		public Map<String, Object> functionInputs;
+		/**
+		 * The Function header.
+		 */
 		public Abi.FunctionHeader functionHeader;
+		/**
+		 * The Debug options.
+		 */
 		public DebugOptions debugOptions;
 
+		/**
+		 * Instantiates a new Builder.
+		 *
+		 * @param clazz the clazz
+		 */
 		public Builder(Class clazz) {
 			this.clazz = clazz;
 		}
 
+		/**
+		 * Sets return class.
+		 *
+		 * @param clazz the clazz
+		 * @return the return class
+		 */
 		public Builder setReturnClass(Class clazz) {
 			this.clazz = clazz;
 			return this;
 		}
 
+		/**
+		 * Sets contract.
+		 *
+		 * @param contract the contract
+		 * @return the contract
+		 */
 		public Builder setContract(Contract contract) {
 			this.contract = contract;
 			return this;
 		}
 
+		/**
+		 * Sets function name.
+		 *
+		 * @param functionName the function name
+		 * @return the function name
+		 */
 		public Builder setFunctionName(String functionName) {
 			this.functionName = functionName;
 			return this;
 		}
 
+		/**
+		 * Sets function inputs.
+		 *
+		 * @param functionInputs the function inputs
+		 * @return the function inputs
+		 */
 		public Builder setFunctionInputs(Map<String, Object> functionInputs) {
 			this.functionInputs = functionInputs;
 			return this;
 		}
 
+		/**
+		 * Sets function header.
+		 *
+		 * @param functionHeader the function header
+		 * @return the function header
+		 */
 		public Builder setFunctionHeader(Abi.FunctionHeader functionHeader) {
 			this.functionHeader = functionHeader;
 			return this;
 		}
 
+		/**
+		 * Sets debug options.
+		 *
+		 * @param debugOptions the debug options
+		 * @return the debug options
+		 */
 		public Builder setDebugOptions(DebugOptions debugOptions) {
 			this.debugOptions = debugOptions;
 			return this;
 		}
 
+		/**
+		 * Build function handle.
+		 *
+		 * @return the function handle
+		 */
 		public FunctionHandle build() {
 			return new FunctionHandle(this.clazz,
 			                          this.contract,

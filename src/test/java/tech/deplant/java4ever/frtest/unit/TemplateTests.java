@@ -43,7 +43,7 @@ public class TemplateTests {
 		var keys = new Credentials("a828a9533949a4eba661d54674fb5d5aaa1e968ac0cdab88d1d71f91996bed48", "");
 		assertEquals("0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
 		             new SurfMultisigWalletTemplate()
-				             .prepareDeploy(SDK_EMPTY, 0,keys, new BigInteger[]{keys.publicBigInt()}, 1)
+				             .prepareDeploy(SDK_EMPTY, 0, keys, new BigInteger[]{keys.publicKeyBigInt()}, 1)
 				             .toAddress().makeAddrStd());
 	}
 
@@ -68,8 +68,8 @@ public class TemplateTests {
 		}
 		var keys = RNG_KEYS();
 		safeTemplate.prepareDeploy(
-				sdk,0,
-				RNG_KEYS(), new BigInteger[]{keys.publicBigInt()}, 1
+				sdk, 0,
+				RNG_KEYS(), new BigInteger[]{keys.publicKeyBigInt()}, 1
 		).deployWithGiver(giver,
 		                  CurrencyUnit.VALUE(EVER, "1"));
 	}

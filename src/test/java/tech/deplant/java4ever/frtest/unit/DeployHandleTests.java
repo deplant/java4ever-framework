@@ -28,7 +28,7 @@ public class DeployHandleTests {
 		var keys = Env.RNG_KEYS();
 		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,0,
 		                                                                     keys,
-		                                                                     new BigInteger[]{keys.publicBigInt()},
+		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
 		                                                                     1);
 		var contract1 = deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);
 		assertTrue(contract1.account().isActive());
@@ -51,7 +51,7 @@ public class DeployHandleTests {
 
 		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,0,
 		                                                                     keys,
-		                                                                     new BigInteger[]{keys.publicBigInt()},
+		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
 		                                                                     1);
 		deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE); // first try
 		try {

@@ -17,10 +17,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static tech.deplant.java4ever.framework.LogUtils.warn;
 
+/**
+ * The type Onchain config.
+ */
 public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info) {
 
 	private static System.Logger logger = System.getLogger(OnchainConfig.class.getName());
 
+	/**
+	 * Load if exists onchain config.
+	 *
+	 * @param serializationPath the serialization path
+	 * @return the onchain config
+	 * @throws IOException the io exception
+	 */
 	public static OnchainConfig LOAD_IF_EXISTS(String serializationPath) throws IOException {
 		OnchainConfig conf = null;
 		try {
@@ -32,6 +42,13 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return conf;
 	}
 
+	/**
+	 * Empty onchain config.
+	 *
+	 * @param serializationPath the serialization path
+	 * @return the onchain config
+	 * @throws IOException the io exception
+	 */
 	public static OnchainConfig EMPTY(String serializationPath) throws IOException {
 		var path = Paths.get(serializationPath);
 		Artifact<String, String> jsonArtifact = null;
@@ -45,6 +62,13 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return config;
 	}
 
+	/**
+	 * Load onchain config.
+	 *
+	 * @param serializationPath the serialization path
+	 * @return the onchain config
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public static OnchainConfig LOAD(String serializationPath) throws JsonProcessingException {
 		var mapper = JsonContext.ABI_JSON_MAPPER();
 		//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
@@ -56,6 +80,12 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return new OnchainConfig(jsonArtifact, mapper.readValue(jsonArtifact.get(), OnchainInfo.class));
 	}
 
+	/**
+	 * Keys credentials.
+	 *
+	 * @param keysName the keys name
+	 * @return the credentials
+	 */
 	public Credentials keys(String keysName) {
 		return info().credentials().get(keysName);
 	}
@@ -71,6 +101,17 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return Contract.instantiate(clazz, contextId, contr.address(), ContractAbi.ofString(contr.abiJson()), credentials);
 	}
 
+	/**
+	 * Contract t.
+	 *
+	 * @param <T>          the type parameter
+	 * @param clazz        the clazz
+	 * @param contextId    the context id
+	 * @param contractName the contract name
+	 * @param keysName     the keys name
+	 * @return the t
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public <T extends AbstractContract> T contract(Class<T> clazz,
 	                      int contextId,
 	                      String contractName,
@@ -78,6 +119,16 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return instatiateContract(clazz, contextId, contractName, keys(keysName));
 	}
 
+	/**
+	 * Contract t.
+	 *
+	 * @param <T>          the type parameter
+	 * @param clazz        the clazz
+	 * @param contextId    the context id
+	 * @param contractName the contract name
+	 * @return the t
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public <T extends AbstractContract> T contract(Class<T> clazz,
 	                      int contextId,
 	                      String contractName) throws JsonProcessingException {
@@ -100,6 +151,14 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		return contract;
 	}
 
+	/**
+	 * Add keys credentials.
+	 *
+	 * @param name the name
+	 * @param keys the keys
+	 * @return the credentials
+	 * @throws IOException the io exception
+	 */
 	public Credentials addKeys(String name, Credentials keys) throws IOException {
 		info().credentials().put(name, keys);
 		sync();
@@ -119,9 +178,15 @@ public record OnchainConfig(Artifact<String, String> artifact, OnchainInfo info)
 		artifact().accept(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(info()));
 	}
 
+	/**
+	 * The type Onchain info.
+	 */
 	public record OnchainInfo(Map<String, SavedContract> contracts, Map<String, Credentials> credentials) {
 	}
 
+	/**
+	 * The type Saved contract.
+	 */
 	public record SavedContract(@JsonProperty("abi_json") String abiJson, String address) {
 	}
 }

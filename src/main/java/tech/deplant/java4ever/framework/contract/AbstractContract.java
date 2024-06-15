@@ -27,6 +27,14 @@ public class AbstractContract implements Contract {
 	private final ContractAbi abi;
 	private Credentials credentials;
 
+	/**
+	 * Instantiates a new Abstract contract.
+	 *
+	 * @param contextId   the context id
+	 * @param address     the address
+	 * @param abi         the abi
+	 * @param credentials the credentials
+	 */
 	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
 	public AbstractContract(@JsonProperty(value = "contextId") int contextId,
 	                        @JsonProperty(value = "address") Address address,
@@ -38,6 +46,14 @@ public class AbstractContract implements Contract {
 		this.credentials = credentials;
 	}
 
+	/**
+	 * Instantiates a new Abstract contract.
+	 *
+	 * @param contextId   the context id
+	 * @param address     the address
+	 * @param abi         the abi
+	 * @param credentials the credentials
+	 */
 	public AbstractContract(@JsonProperty(value = "contextId") int contextId,
 	                        @JsonProperty(value = "address") String address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
@@ -48,6 +64,16 @@ public class AbstractContract implements Contract {
 		this.credentials = credentials;
 	}
 
+	/**
+	 * Wait for transaction.
+	 *
+	 * @param from           the from
+	 * @param onlySuccessful the only successful
+	 * @param startEvent     the start event
+	 * @throws EverSdkException     the ever sdk exception
+	 * @throws InterruptedException the interrupted exception
+	 * @throws TimeoutException     the timeout exception
+	 */
 	public void waitForTransaction(Address from,
 	                               boolean onlySuccessful,
 	                               Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
@@ -84,6 +110,14 @@ public class AbstractContract implements Contract {
 //			}
 	}
 
+	/**
+	 * Subscribe on incoming messages subscribe handle.
+	 *
+	 * @param resultFields           the result fields
+	 * @param subscribeEventConsumer the subscribe event consumer
+	 * @return the subscribe handle
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public SubscribeHandle subscribeOnIncomingMessages(String resultFields,
 	                                                   Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
@@ -102,6 +136,14 @@ public class AbstractContract implements Contract {
 				.subscribe();
 	}
 
+	/**
+	 * Subscribe on outgoing messages subscribe handle.
+	 *
+	 * @param resultFields           the result fields
+	 * @param subscribeEventConsumer the subscribe event consumer
+	 * @return the subscribe handle
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
 	                                                   Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
@@ -118,6 +160,14 @@ public class AbstractContract implements Contract {
 		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
+	/**
+	 * Subscribe on account subscribe handle.
+	 *
+	 * @param resultFields           the result fields
+	 * @param subscribeEventConsumer the subscribe event consumer
+	 * @return the subscribe handle
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public SubscribeHandle subscribeOnAccount(String resultFields,
 	                                          Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
@@ -134,6 +184,14 @@ public class AbstractContract implements Contract {
 		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
+	/**
+	 * Subscribe on transactions subscribe handle.
+	 *
+	 * @param resultFields           the result fields
+	 * @param subscribeEventConsumer the subscribe event consumer
+	 * @return the subscribe handle
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public SubscribeHandle subscribeOnTransactions(String resultFields,
 	                                               Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
 		final String queryText = """
@@ -150,6 +208,11 @@ public class AbstractContract implements Contract {
 		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
 	}
 
+	/**
+	 * Function call builder function handle . builder.
+	 *
+	 * @return the function handle . builder
+	 */
 	public FunctionHandle.Builder functionCallBuilder() {
 		return new FunctionHandle.Builder(JsonNode.class).setContract(this);
 	}

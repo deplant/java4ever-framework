@@ -1,7 +1,7 @@
 # Java4Ever
 
-[![JDK version](https://img.shields.io/badge/Java-20-green.svg)](https://shields.io/)
-[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.44.3-orange)](https://github.com/tonlabs/ever-sdk)
+[![JDK version](https://img.shields.io/badge/Java-22-green.svg)](https://shields.io/)
+[![SDK version](https://img.shields.io/badge/EVER%20SDK-v1.45.0-orange)](https://github.com/tonlabs/ever-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brown.svg)](https://shields.io/)
 [![Channel on Telegram](https://img.shields.io/badge/chat-on%20telegram-9cf.svg)](https://t.me/deplant\_chat\_en)
 [![javadoc](https://javadoc.io/badge2/tech.deplant.java4ever/java4ever-framework/javadoc.svg)](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework)
@@ -71,7 +71,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ### Prerequisites
 
-* Install **JDK 20** ([link](https://adoptium.net/temurin/releases?version=20))
+* Install **JDK 22** ([link](https://adoptium.net/temurin/releases?version=20))
 
 ### Add java4ever to your Maven or Gradle setup:
 
@@ -79,7 +79,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:2.5.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:3.0.0'
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>2.5.0</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
@@ -191,7 +191,7 @@ firectly as all **EVER-SDK** API is available from **Java4Ever**.
 #### Creating a random keypair
 
 ```java
-var keys = Credentials.RANDOM(sdk);
+var keys = Credentials.ofRandom(sdk);
 String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
@@ -199,10 +199,14 @@ String pk = keys.publicKey();
 #### Creating a random seed
 
 ```java
-var seed = Seed.RANDOM(sdk);
+var seed = Seed.ofRandom(sdk);
 String wordsPhrase = seed.phrase();
 int wordsCount = seed.words();
+```
 
+#### Deriving keys from seed
+
+```java
 var keys = Credentials.ofSeed(sdk,seed);
 String sk = keys.secretKey();
 String pk = keys.publicKey();

@@ -19,8 +19,8 @@ public class TypeParserTests {
 	@ParameterizedTest
 	@ValueSource(ints = {8, 32, 64, 256})
 	public void string_abi_type_parsing_uints(int size) throws EverSdkException {
-		assertEquals(new AbiType(AbiTypePrefix.UINT, size, false), AbiType.of(STR."uint\{size}"));
-		assertEquals(new AbiType(AbiTypePrefix.UINT, size, true), AbiType.of(STR."uint\{size}[]"));
+		assertEquals(new AbiType(AbiTypePrefix.UINT, size, false), AbiType.of("uint%d".formatted(size)));
+		assertEquals(new AbiType(AbiTypePrefix.UINT, size, true), AbiType.of("uint%d[]".formatted(size)));
 	}
 
 }

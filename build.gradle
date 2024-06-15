@@ -132,31 +132,27 @@ task generateEverscaleContracts(type: JavaExec) {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
     javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(22)
     }
-    options.compilerArgs += "--enable-preview"
 }
 
 tasks.withType(JavaExec).configureEach {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(22)
     }
-    jvmArgs += "--enable-preview"
-    jvmArgs += "--enable-native-access=java4ever.binding"
 }
 
 tasks.withType(Javadoc).configureEach {
     javadocTool = javaToolchains.javadocToolFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(22)
     }
     failOnError false
     options.addBooleanOption('html5', true)
     options.addStringOption('encoding', 'UTF-8')
     options.addStringOption('charSet', 'UTF-8')
-    options.addBooleanOption('-enable-preview', true)
     options.addStringOption('-release', '21')
     options.addBooleanOption('-ignore-source-errors', true)
     options.addStringOption('Xdoclint:none', '-quiet')
@@ -164,9 +160,7 @@ tasks.withType(Javadoc).configureEach {
 
 tasks.withType(Test) {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(22)
     }
     useJUnitPlatform()
-    jvmArgs += "--enable-preview"
-    jvmArgs += "--enable-native-access=java4ever.binding"
 }

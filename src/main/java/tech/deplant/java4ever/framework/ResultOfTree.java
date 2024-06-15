@@ -5,6 +5,11 @@ import tech.deplant.commons.Objs;
 
 import java.util.Arrays;
 
+/**
+ * The type Result of tree.
+ *
+ * @param <RETURN> the type parameter
+ */
 public record ResultOfTree<RETURN>(Net.ResultOfQueryTransactionTree queryTree,
                                    RETURN decodedOutput) {
 

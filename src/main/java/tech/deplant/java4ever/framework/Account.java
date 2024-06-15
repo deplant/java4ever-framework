@@ -9,6 +9,9 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNullElse;
 
+/**
+ * The type Account.
+ */
 public record Account(String id,
                       int accType,
                       String balance,
@@ -28,20 +31,20 @@ public record Account(String id,
 	 * constructs Account object from the result. If query doesn't find account,
 	 * method will construct empty Account object with accType=0 (not deployed).
 	 *
-	 * @param sdk     that will be used for query
+	 * @param sdk           that will be used for query
 	 * @param addressString address of account
 	 * @return GraphQL result with fields (id acc_type balance boc data data_hash code code_hash init_code_hash last_paid) as Account object
-	 * @throws EverSdkException
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public static Account ofAddress(int sdk, String addressString) throws EverSdkException {
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new GraphQLFilter.In(new String[]{addressString}));
-		Net.ResultOfQueryCollection result = Net.queryCollection(sdk,
+		Net.ResultOfQueryCollection result = EverSdk.await(Net.queryCollection(sdk,
 		                                                         "accounts",
 		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 		                                                         "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
 		                                                         null,
-		                                                         null);
+		                                                         null));
 		if (result.result().length > 0) {
 			try {
 				return JsonContext.SDK_JSON_MAPPER().readValue(result.result()[0].traverse(),Account.class);
@@ -54,14 +57,34 @@ public record Account(String id,
 		}
 	}
 
+	/**
+	 * Of address account.
+	 *
+	 * @param sdk     the sdk
+	 * @param address the address
+	 * @return the account
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static Account ofAddress(int sdk, Address address) throws EverSdkException {
 		return ofAddress(sdk, address.makeAddrStd());
 	}
 
+	/**
+	 * Of uninit account.
+	 *
+	 * @param address the address
+	 * @return the account
+	 */
 	public static Account ofUninit(Address address) {
 		return ofUninit(address.makeAddrStd());
 	}
 
+	/**
+	 * Of uninit account.
+	 *
+	 * @param addressString the address string
+	 * @return the account
+	 */
 	public static Account ofUninit(String addressString) {
 		return new Account(addressString, 0, "0x00", TvmCell.EMPTY.cellBoc(), TvmCell.EMPTY.cellBoc(), "0x00", TvmCell.EMPTY.cellBoc(), "0x00", "0x00", "0x00");
 	}
@@ -72,7 +95,7 @@ public record Account(String id,
 	 * @param sdk       that will be used for query
 	 * @param addresses vararg/array of account addresses to check
 	 * @return list of created Account objects
-	 * @throws EverSdkException
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	public static List<Account> ofAddressList(int sdk,
 	                                          String... addresses) throws EverSdkException {
@@ -80,12 +103,12 @@ public record Account(String id,
 		filter.put("id",
 		           new GraphQLFilter.In(addresses));
 		return Arrays
-				.stream(Net.queryCollection(sdk,
+				.stream(EverSdk.await(Net.queryCollection(sdk,
 				                            "accounts",
 				                            JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
 				                            "id acc_type balance boc data data_hash code code_hash init_code_hash last_trans_lt",
 				                            null,
-				                            null).result())
+				                            null)).result())
 				.map(obj -> JsonContext.SDK_JSON_MAPPER().convertValue(obj, Account.class))
 				.toList();
 	}
@@ -114,16 +137,31 @@ public record Account(String id,
 //		};
 //	}
 
+	/**
+	 * The interface Graph ql filter.
+	 */
 	public interface GraphQLFilter {
+		/**
+		 * The type In.
+		 */
 		record In(String[] in) implements GraphQLFilter {
 		}
 
+		/**
+		 * The type Eq.
+		 */
 		record Eq(Integer eq) implements GraphQLFilter {
 		}
 
+		/**
+		 * The type Gt.
+		 */
 		record Gt(String gt) implements GraphQLFilter {
 		}
 
+		/**
+		 * The type Lt.
+		 */
 		record Lt(String lt) implements GraphQLFilter {
 		}
 	}

@@ -7,10 +7,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * The type Tvm linker.
+ */
 public record TvmLinker(String linkerPath, String stdlibSolPath) {
 
 	private static System.Logger logger = System.getLogger(TvmLinker.class.getName());
 
+	/**
+	 * Instantiates a new Tvm linker.
+	 *
+	 * @param linkerPath    the linker path
+	 * @param stdlibSolPath the stdlib sol path
+	 */
 	public TvmLinker {
 		if (
 				(Files.exists(Path.of(linkerPath)) || Files.exists(Path.of(linkerPath + ".exe")))
@@ -23,6 +32,13 @@ public record TvmLinker(String linkerPath, String stdlibSolPath) {
 		}
 	}
 
+	/**
+	 * Assembly contract int.
+	 *
+	 * @param contractName the contract name
+	 * @param buildFolder  the build folder
+	 * @return the int
+	 */
 	public int assemblyContract(String contractName, String buildFolder) {
 		return assemblyContract(
 				buildFolder + "/" + contractName + ".code",
@@ -31,6 +47,14 @@ public record TvmLinker(String linkerPath, String stdlibSolPath) {
 		);
 	}
 
+	/**
+	 * Assembly contract int.
+	 *
+	 * @param codePath   the code path
+	 * @param abiPath    the abi path
+	 * @param outputPath the output path
+	 * @return the int
+	 */
 	public int assemblyContract(String codePath, String abiPath, String outputPath) {
 		try {
 			logger.log(System.Logger.Level.INFO, () -> "Begging assembly of TVM Assembly source...");

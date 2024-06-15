@@ -3,21 +3,49 @@ package tech.deplant.java4ever.framework.datatype;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 
 
+/**
+ * The type Tvm cell.
+ */
 public record TvmCell(String cellBoc) implements AbiValue<String> {
 
+	/**
+	 * The constant EMPTY.
+	 */
 	public static final TvmCell EMPTY = new TvmCell("te6ccgEBAQEAAgAAAA==");
 
+	/**
+	 * Builder tvm builder.
+	 *
+	 * @return the tvm builder
+	 */
 	public static TvmBuilder builder() {
 		return new TvmBuilder();
 	}
 
+	/**
+	 * Decode json node.
+	 *
+	 * @param contextId the context id
+	 * @param types     the types
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode decode(int contextId, Abi.AbiParam[] types) throws EverSdkException {
-		return Abi.decodeBoc(contextId, types, cellBoc(), true).data();
+		return EverSdk.await(Abi.decodeBoc(contextId, types, cellBoc(), true)).data();
 	}
 
+	/**
+	 * Decode json node.
+	 *
+	 * @param contextId the context id
+	 * @param types     the types
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode decode(int contextId, String[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
@@ -26,6 +54,14 @@ public record TvmCell(String cellBoc) implements AbiValue<String> {
 		return decode(contextId, params);
 	}
 
+	/**
+	 * Decode json node.
+	 *
+	 * @param contextId the context id
+	 * @param types     the types
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode decode(int contextId, AbiType[] types) throws EverSdkException {
 		Abi.AbiParam[] params = new Abi.AbiParam[types.length];
 		for (int i = 0; i < types.length; i++) {
@@ -34,6 +70,15 @@ public record TvmCell(String cellBoc) implements AbiValue<String> {
 		return decode(contextId, params);
 	}
 
+	/**
+	 * Decode and get json node.
+	 *
+	 * @param contextId the context id
+	 * @param types     the types
+	 * @param index     the index
+	 * @return the json node
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public JsonNode decodeAndGet(int contextId, String[] types, int index) throws EverSdkException {
 		var result = decode(contextId, types);
 		return result.get(String.valueOf(index));

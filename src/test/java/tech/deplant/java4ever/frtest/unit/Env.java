@@ -185,10 +185,10 @@ public class Env {
 	}
 
 	public static Credentials RNG_KEYS() throws EverSdkException {
-		return Credentials.RANDOM(SDK_EMPTY);
+		return Credentials.ofRandom(SDK_EMPTY);
 	}
 
 	public static Seed RNG_SEED() throws EverSdkException {
-		return Seed.RANDOM(Env.SDK_EMPTY);
+		return Seed.ofRandom(Env.SDK_EMPTY);
 	}
 }

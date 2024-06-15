@@ -8,6 +8,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents JSON-organized artifacts on Java resource path
+ */
 public record JsonResource(String resourceName) implements Artifact<String,String> {
 	@Override
 	public String get() {

@@ -5,6 +5,9 @@ import tech.deplant.java4ever.binding.Abi;
 
 import java.nio.charset.StandardCharsets;
 
+/**
+ * The type Sol string.
+ */
 public record SolString(String value) implements AbiValue<String> {
 
 	@Override

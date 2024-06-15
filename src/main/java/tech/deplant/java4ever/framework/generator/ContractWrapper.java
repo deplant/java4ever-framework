@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * The type Contract wrapper.
+ */
 public class ContractWrapper {
 
 	private static System.Logger logger = System.getLogger(ContractWrapper.class.getName());
@@ -98,6 +101,13 @@ public class ContractWrapper {
 		}
 	}
 
+	/**
+	 * Generate from config.
+	 *
+	 * @param resourcePath the resource path
+	 * @throws IOException      the io exception
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static void generateFromConfig(String resourcePath) throws IOException, EverSdkException {
 
 		var mapper = JsonContext.ABI_JSON_MAPPER();
@@ -123,6 +133,22 @@ public class ContractWrapper {
 		}
 	}
 
+	/**
+	 * Generate.
+	 *
+	 * @param abi              the abi
+	 * @param tvc              the tvc
+	 * @param targetDirectory  the target directory
+	 * @param contractName     the contract name
+	 * @param contractNameMask the contract name mask
+	 * @param templateNameMask the template name mask
+	 * @param wrapperPackage   the wrapper package
+	 * @param templatePackage  the template package
+	 * @param externalOutputs  the external outputs
+	 * @param superInterfaces  the super interfaces
+	 * @throws IOException      the io exception
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static void generate(Abi.AbiContract abi,
 	                            Tvc tvc,
 	                            Path targetDirectory,

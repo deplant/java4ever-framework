@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.contract;
 
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.*;
 import tech.deplant.java4ever.framework.datatype.Address;
@@ -13,10 +14,27 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Map;
 
+/**
+ * The interface Contract.
+ */
 public interface Contract {
 
+	/**
+	 * The constant logger.
+	 */
 	static System.Logger logger = System.getLogger(Contract.class.getName());
 
+	/**
+	 * Instantiate .
+	 *
+	 * @param <IMPL>      the type parameter
+	 * @param clazz       the clazz
+	 * @param sdk         the sdk
+	 * @param address     the address
+	 * @param abi         the abi
+	 * @param credentials the credentials
+	 * @return the
+	 */
 	static <IMPL extends AbstractContract> IMPL instantiate(Class<IMPL> clazz,
 	                                                        int sdk,
 	                                                        String address,
@@ -49,8 +67,8 @@ public interface Contract {
 	/**
 	 * Check actual EVER balance on contract's account.
 	 *
-	 * @return
-	 * @throws EverSdkException
+	 * @return big integer
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	default BigInteger accountBalance() throws EverSdkException {
 		return Uint.of(128, account().balance()).toJava();
@@ -60,21 +78,36 @@ public interface Contract {
 	 * Downloads actual account info, including boc.
 	 * Use account().boc() to get it.
 	 *
-	 * @return
-	 * @throws EverSdkException
+	 * @return account
+	 * @throws EverSdkException the ever sdk exception
 	 */
 	default Account account() throws EverSdkException {
 		return Account.ofAddress(contextId(), address());
 	}
 
+	/**
+	 * Context id int.
+	 *
+	 * @return the int
+	 */
 	int contextId();
 
+	/**
+	 * Address address.
+	 *
+	 * @return the address
+	 */
 	Address address();
 
 //	default String addressString() {
 //		return address().makeAddrStd();
 //	}
 
+	/**
+	 * Abi contract abi.
+	 *
+	 * @return the contract abi
+	 */
 	ContractAbi abi();
 
 	/**
@@ -82,7 +115,7 @@ public interface Contract {
 	 * inside contract's inside contract's initialData. To check real pubkey in account, use
 	 * tvmPubkey() method.
 	 *
-	 * @return
+	 * @return credentials
 	 */
 	Credentials credentials();
 
@@ -97,6 +130,14 @@ public interface Contract {
 //		return account().tvmPubkey(contextId(), abi());
 //	}
 
+	/**
+	 * Prepare call function handle.
+	 *
+	 * @param functionName   the function name
+	 * @param functionInputs the function inputs
+	 * @param functionHeader the function header
+	 * @return the function handle
+	 */
 	default FunctionHandle<Map<String, Object>> prepareCall(String functionName,
 	                                                        Map<String, Object> functionInputs,
 	                                                        Abi.FunctionHeader functionHeader) {
@@ -109,8 +150,15 @@ public interface Contract {
 		                            functionHeader);
 	}
 
+	/**
+	 * Decode message boc abi . decoded message body.
+	 *
+	 * @param messageBoc the message boc
+	 * @return the abi . decoded message body
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	default Abi.DecodedMessageBody decodeMessageBoc(TvmCell messageBoc) throws EverSdkException {
-		return Abi.decodeMessage(contextId(), abi().ABI(), messageBoc.cellBoc(), false, null, null);
+		return EverSdk.await(Abi.decodeMessage(contextId(), abi().ABI(), messageBoc.cellBoc(), false, null, null));
 	}
 
 }

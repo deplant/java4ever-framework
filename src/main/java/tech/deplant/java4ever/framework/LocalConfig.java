@@ -15,11 +15,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static tech.deplant.java4ever.framework.LogUtils.error;
 
+/**
+ * The type Local config.
+ */
 public record LocalConfig(Artifact<String, String> artifact,
                           LocalInfo info) {
 
 	private static System.Logger logger = System.getLogger(LocalConfig.class.getName());
 
+	/**
+	 * Empty local config.
+	 *
+	 * @param serializationPath the serialization path
+	 * @param solcPath          the solc path
+	 * @param linkerPath        the linker path
+	 * @param stdLibPath        the std lib path
+	 * @param sourcePath        the source path
+	 * @param buildPath         the build path
+	 * @return the local config
+	 * @throws IOException the io exception
+	 */
 	public static LocalConfig EMPTY(
 			String serializationPath,
 			String solcPath,
@@ -45,6 +60,13 @@ public record LocalConfig(Artifact<String, String> artifact,
 		return config;
 	}
 
+	/**
+	 * Load local config.
+	 *
+	 * @param serializationPath the serialization path
+	 * @return the local config
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public static LocalConfig LOAD(String serializationPath) throws JsonProcessingException {
 		var mapper = JsonContext.ABI_JSON_MAPPER();
 		//.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
@@ -57,6 +79,15 @@ public record LocalConfig(Artifact<String, String> artifact,
 		                                                      LocalInfo.class));
 	}
 
+	/**
+	 * Compile template template.
+	 *
+	 * @param filename     the filename
+	 * @param contractName the contract name
+	 * @return the template
+	 * @throws JsonProcessingException the json processing exception
+	 * @throws EverSdkException        the ever sdk exception
+	 */
 	public Template compileTemplate(String filename,
 	                                String contractName) throws JsonProcessingException, EverSdkException {
 		return compileTemplate(info().sourcePath(),
@@ -66,6 +97,18 @@ public record LocalConfig(Artifact<String, String> artifact,
 		                       info().sourcePath());
 	}
 
+	/**
+	 * Compile template template.
+	 *
+	 * @param sourcePath   the source path
+	 * @param buildPath    the build path
+	 * @param filename     the filename
+	 * @param contractName the contract name
+	 * @param libsPath     the libs path
+	 * @return the template
+	 * @throws JsonProcessingException the json processing exception
+	 * @throws EverSdkException        the ever sdk exception
+	 */
 	public Template compileTemplate(String sourcePath,
 	                                String buildPath,
 	                                String filename,
@@ -97,39 +140,88 @@ public record LocalConfig(Artifact<String, String> artifact,
 		}
 	}
 
+	/**
+	 * Abi contract abi.
+	 *
+	 * @param name the name
+	 * @return the contract abi
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public ContractAbi abi(String name) throws JsonProcessingException {
 		return ContractAbi.ofFile(info().abis().get(name));
 	}
 
+	/**
+	 * Credentials credentials.
+	 *
+	 * @param name the name
+	 * @return the credentials
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public Credentials credentials(String name) throws JsonProcessingException {
 		return Credentials.ofFile(info().keys().get(name));
 	}
 
+	/**
+	 * Tvc tvc.
+	 *
+	 * @param name the name
+	 * @return the tvc
+	 */
 	public Tvc tvc(String name) {
 		return Tvc.ofFile(info().tvcs().get(name));
 	}
 
+	/**
+	 * Add abi path.
+	 *
+	 * @param name    the name
+	 * @param pathStr the path str
+	 * @throws IOException the io exception
+	 */
 	public void addAbiPath(String name, String pathStr) throws IOException {
 		info().abis().put(name, pathStr);
 		sync();
 	}
 
+	/**
+	 * Add tvc path.
+	 *
+	 * @param name    the name
+	 * @param pathStr the path str
+	 * @throws IOException the io exception
+	 */
 	public void addTvcPath(String name, String pathStr) throws IOException {
 		info().tvcs().put(name, pathStr);
 		sync();
 	}
 
+	/**
+	 * Add keypair path.
+	 *
+	 * @param name    the name
+	 * @param pathStr the path str
+	 * @throws IOException the io exception
+	 */
 	public void addKeypairPath(String name, String pathStr) throws IOException {
 		info().keys().put(name, pathStr);
 		sync();
 	}
 
+	/**
+	 * Sync.
+	 *
+	 * @throws IOException the io exception
+	 */
 	public void sync() throws IOException {
 		var mapper = JsonContext.ABI_JSON_MAPPER();
 		artifact().accept(mapper.writerWithDefaultPrettyPrinter()
 		                        .writeValueAsString(info()));
 	}
 
+	/**
+	 * The type Local info.
+	 */
 	public record LocalInfo(Solc compiler,
 	                        TvmLinker linker,
 	                        @JsonProperty("source_path") String sourcePath,

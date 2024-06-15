@@ -1,7 +1,7 @@
 ### 3.0.0
 
-- Updated baseline JDK -> 21
-- Updated Gradle -> 8.4
+- Updated baseline JDK -> 22
+- Updated Gradle -> 8.8
 - Custom names in contract classes generation
 - Rename of generated contracts (now all default contracts have *Contract* suffix)
 - Improved subscriptions stability

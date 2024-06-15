@@ -8,11 +8,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Wrapper class around solc compiler library (for compiling TMV-Solidity files)
+ */
 public record Solc(String compilerPath) {
 
 	private static final String DEFAULT_SOL_EXTENSION = ".sol";
 	private static System.Logger logger = System.getLogger(Solc.class.getName());
 
+	/**
+	 * Instantiates a new Solc compiler.
+	 *
+	 * @param compilerPath path to the compiler solc (or solc.exe) file
+	 */
 	public Solc {
 		if (Files.exists(Path.of(compilerPath)) || Files.exists(Path.of(compilerPath + ".exe"))) {
 		} else {
@@ -22,6 +30,16 @@ public record Solc(String compilerPath) {
 	}
 
 
+	/**
+	 * Compile contract int.
+	 *
+	 * @param contractName   the contract name
+	 * @param sourceFileName the source file name
+	 * @param sourceFolder   the source folder
+	 * @param outputFolder   the output folder
+	 * @param libsFolder     the libs folder
+	 * @return the int
+	 */
 	public int compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder, String libsFolder) {
 
 		File sourceFolderFile = null;
@@ -70,6 +88,15 @@ public record Solc(String compilerPath) {
 		}
 	}
 
+	/**
+	 * Compile contract int.
+	 *
+	 * @param contractName   the contract name
+	 * @param sourceFileName the source file name
+	 * @param sourceFolder   the source folder
+	 * @param outputFolder   the output folder
+	 * @return the int
+	 */
 	public int compileContract(String contractName, String sourceFileName, String sourceFolder, String outputFolder) {
 
 		File sourceFolderFile = null;

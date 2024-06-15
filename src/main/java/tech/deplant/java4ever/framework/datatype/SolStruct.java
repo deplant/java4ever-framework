@@ -11,19 +11,43 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * The type Sol struct.
+ */
 public record SolStruct(Abi.AbiParam[] abiParams,
                         Map<String, Object> values) implements AbiValue<Map<String, Object>> {
 
 	private final static System.Logger logger = System.getLogger(SolStruct.class.getName());
 
+	/**
+	 * Has param boolean.
+	 *
+	 * @param params    the params
+	 * @param paramName the param name
+	 * @return the boolean
+	 */
 	public static boolean hasParam(Abi.AbiParam[] params, String paramName) {
 		return Arrays.stream(params).anyMatch(param -> paramName.equals(param.name()));
 	}
 
+	/**
+	 * Gets param.
+	 *
+	 * @param params    the params
+	 * @param paramName the param name
+	 * @return the param
+	 */
 	public static Abi.AbiParam getParam(Abi.AbiParam[] params, String paramName) {
 		return Arrays.stream(params).filter(param -> paramName.equals(param.name())).findFirst().orElseThrow();
 	}
 
+	/**
+	 * From java sol struct.
+	 *
+	 * @param params the params
+	 * @param inputs the inputs
+	 * @return the sol struct
+	 */
 	public static SolStruct fromJava(Abi.AbiParam[] params, Map<String, Object> inputs) {
 		if (inputs != null) {
 			Map<String, Object> converted = new HashMap<>();
@@ -48,6 +72,13 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		}
 	}
 
+	/**
+	 * From abi sol struct.
+	 *
+	 * @param params  the params
+	 * @param outputs the outputs
+	 * @return the sol struct
+	 */
 	public static SolStruct fromABI(Abi.AbiParam[] params, Map<String, Object> outputs) {
 		if (outputs != null) {
 			Map<String, Object> converted = new HashMap<>();
@@ -72,6 +103,12 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		}
 	}
 
+	/**
+	 * Array matcher boolean.
+	 *
+	 * @param typeString the type string
+	 * @return the boolean
+	 */
 	public static boolean arrayMatcher(String typeString) {
 		var arrayPattern = new Then(new GroupOf(new Then(new Occurences(new AnyOf(new Word("a-zA-Z")), 1),
 		                                                 new Occurences(Special.DIGIT, 0, 3))),
@@ -83,6 +120,14 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		return false;
 	}
 
+	/**
+	 * Serialize input tree object.
+	 *
+	 * @param param      the param
+	 * @param inputValue the input value
+	 * @return the object
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static Object serializeInputTree(Abi.AbiParam param, Object inputValue) throws EverSdkException {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";
@@ -93,9 +138,6 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		String keyTypeString = null;
 		String valueTypeString = null;
 
-		logger.log(System.Logger.Level.TRACE,
-		           () -> "param: " + param.name() + " ( " + param.type() + " -> " + rootTypeString + " ): " +
-		                 inputValue);
 		var matcher = mapPattern.matcher(rootTypeString);
 		while (matcher.find()) {
 			rootIsMap = true;
@@ -164,6 +206,14 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		}
 	}
 
+	/**
+	 * Serialize output tree object.
+	 *
+	 * @param param       the param
+	 * @param outputValue the output value
+	 * @return the object
+	 * @throws EverSdkException the ever sdk exception
+	 */
 	public static Object serializeOutputTree(Abi.AbiParam param, Object outputValue) throws EverSdkException {
 
 		String typeStringPattern = "([a-zA-Z]+\\d{0,3}\\[?\\]?)";

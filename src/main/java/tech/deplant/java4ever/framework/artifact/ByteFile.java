@@ -10,8 +10,16 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents byte-organized external artifacts with absolute and relative disk paths to file
+ */
 public record ByteFile(Path filePath) implements Artifact<byte[],byte[]> {
 
+	/**
+	 * Instantiates a new ByteFile artifact.
+	 *
+	 * @param filePathString path to external file
+	 */
 	public ByteFile(String filePathString) {
 		this(Paths.get(filePathString));
 	}

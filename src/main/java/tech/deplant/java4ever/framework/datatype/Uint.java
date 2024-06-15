@@ -9,8 +9,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 
+/**
+ * The type Uint.
+ */
 public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 
+	/**
+	 * Instantiates a new Uint.
+	 *
+	 * @param value the value
+	 */
 	@JsonCreator
 	public Uint(Object value) {
 		this(switch (value) {
@@ -27,10 +35,22 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 		});
 	}
 
+	/**
+	 * Instantiates a new Uint.
+	 *
+	 * @param value the value
+	 */
 	public Uint(BigInteger value) {
 		this(0, value);
 	}
 
+	/**
+	 * Of uint.
+	 *
+	 * @param size        the size
+	 * @param objectValue the object value
+	 * @return the uint
+	 */
 	public static Uint of(int size, Object objectValue) {
 		return switch (objectValue) {
 			case Integer i -> new Uint(size, BigInteger.valueOf(i).abs());
@@ -47,6 +67,11 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 		};
 	}
 
+	/**
+	 * To big integer big integer.
+	 *
+	 * @return the big integer
+	 */
 	public BigInteger toBigInteger() {
 		return value();
 	}

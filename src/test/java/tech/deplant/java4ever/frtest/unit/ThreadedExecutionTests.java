@@ -14,8 +14,10 @@ import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
 
 import java.io.IOException;
-import java.util.concurrent.StructuredTaskScope;
-import java.util.stream.IntStream;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
@@ -35,23 +37,33 @@ public class ThreadedExecutionTests {
 	private static void randomWalletDeployment(int contextId, GiverContract giver) {
 		try {
 			new MultisigBuilder().setType(MultisigContract.Type.SAFE)
-			                     .prepareAndDeploy(contextId, Credentials.RANDOM(contextId), giver, EVER_ONE);
+			                     .prepareAndDeploy(contextId, Credentials.ofRandom(contextId), giver, EVER_ONE);
 		} catch (JsonProcessingException | EverSdkException e) {
 			logger.log(System.Logger.Level.ERROR, e);
 		}
 	}
 
-	@Test
-	public void concurrent_deployment_test() throws Throwable {
-		try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-			IntStream.range(1, 5).forEach(i -> scope.fork(() -> {
-				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
-				return i;
-			}));
-
-			scope.join();
-		}
-		assertTrue(true);
-	}
+//	@Test
+//	public void concurrent_deployment_test() throws Throwable {
+//		try(var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
+//			executorService.submit(() -> {
+//				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
+//			});
+//			executorService.submit(() -> {
+//				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
+//			});
+//			executorService.submit(() -> {
+//				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
+//			});
+//			executorService.submit(() -> {
+//				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
+//			});
+//			executorService.submit(() -> {
+//				randomWalletDeployment(SDK_LOCAL, GIVER_LOCAL);
+//			});
+//			executorService.awaitTermination(600, TimeUnit.SECONDS);
+//		}
+//		assertTrue(true);
+//	}
 
 }

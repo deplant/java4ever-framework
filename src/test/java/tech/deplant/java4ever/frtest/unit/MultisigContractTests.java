@@ -37,7 +37,7 @@ public class MultisigContractTests {
 
 		var addressTemplate = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,0,
 		                                                                     keys,
-		                                                                     new BigInteger[]{keys.publicBigInt()},
+		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
 		                                                                     1).toAddress();
 		var addressBuilder = new MultisigBuilder().setType(MultisigContract.Type.SAFE).prepare(SDK_LOCAL, keys).toAddress();
 

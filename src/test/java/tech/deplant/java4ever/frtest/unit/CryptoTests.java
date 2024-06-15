@@ -60,7 +60,7 @@ public class CryptoTests {
 
 	@Test
 	public void make_seed_and_keys() throws Throwable {
-		var seed = Seed.RANDOM(Env.SDK_EMPTY);
+		var seed = Seed.ofRandom(Env.SDK_EMPTY);
 		Env.LOG.log(System.Logger.Level.DEBUG, seed.toString());
 		assertNotNull(seed);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
@@ -70,7 +70,7 @@ public class CryptoTests {
 
 	@Test
 	public void make_seed_and_keys_old() throws Throwable {
-		Seed.RANDOM(Env.SDK_EMPTY);
+		Seed.ofRandom(Env.SDK_EMPTY);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          new Seed(
 				                                                          "object burger primary dish harbor luxury morning mystery sausage wide this time",
@@ -79,7 +79,7 @@ public class CryptoTests {
 
 	@Test
 	public void all_keys_from_one_seed_should_be_equal() throws Throwable {
-		var seed = Seed.RANDOM(Env.SDK_EMPTY);
+		var seed = Seed.ofRandom(Env.SDK_EMPTY);
 		var keys1 = Credentials.ofSeed(Env.SDK_EMPTY, seed);
 		var keys2 = Credentials.ofSeed(Env.SDK_EMPTY, seed);
 		assertEquals(keys1.toString(), keys2.toString());

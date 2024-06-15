@@ -1,5 +1,8 @@
 package tech.deplant.java4ever.framework;
 
+/**
+ * The enum Message flag.
+ */
 public enum MessageFlag {
 
 	/**
@@ -43,6 +46,11 @@ public enum MessageFlag {
 		this.flag = flag;
 	}
 
+	/**
+	 * Flag int.
+	 *
+	 * @return the int
+	 */
 	public int flag() {
 		return this.flag;
 	}

@@ -7,6 +7,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents byte-organized artifacts on Java resource path
+ */
 public record ByteResource(String resourceName) implements Artifact<byte[],byte[]> {
     @Override
     public byte[] get() {

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Arrays;
 
+/**
+ * The type Sol array.
+ */
 public record SolArray(AbiValue[] values) implements AbiValue {
 
 	@Override

@@ -30,8 +30,7 @@ public class DevTests {
 		CTX = EverSdk.builder()
 		             .networkEndpoints("https://venom-mainnet.tvmlabs.dev/graphql")
 		             .networkQueryTimeout(300000L)
-		             .build()
-		             .orElseThrow();
+		             .build();
 		var keys = Credentials.ofFile("c:/Users/Laugan/.deplant/venomKeys.json");
 		var myEverWallet = new SafeMultisigWallet2Contract(CTX, "0:b8fb645ea683d242bf4586d1f678e175a1bd19816acd0cbb8abb68c309572585",keys);
 		var myUsdtWallet = new TIP3TokenWalletContract(CTX,

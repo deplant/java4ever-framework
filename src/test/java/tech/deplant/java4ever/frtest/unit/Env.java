@@ -82,8 +82,7 @@ public class Env {
 			CTX = EverSdk.builder()
 			             .networkEndpoints(ENDPOINT)
 			             .networkQueryTimeout(TIMEOUT)
-			             .build()
-			             .orElseThrow();
+			             .build();
 
 			GIVER = switch (networkName) {
 				case "local" -> EverOSGiver.V2(CTX);
@@ -108,18 +107,16 @@ public class Env {
 			EverSdk.load(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
 
 			// should be first
-			SDK_EMPTY = EverSdk.createDefault().orElseThrow();
-			SDK_LOCAL = EverSdk.createWithEndpoint(LOCAL_ENDPOINT).orElseThrow();
+			SDK_EMPTY = EverSdk.createDefault();
+			SDK_LOCAL = EverSdk.createWithEndpoint(LOCAL_ENDPOINT);
 			SDK_DEV = EverSdk.builder()
 			                 .networkEndpoints(DEV_ENDPOINT)
 			                 .networkQueryTimeout(300_000L)
-			                 .build()
-			                 .orElseThrow();
+			                 .build();
 			SDK_MAIN = EverSdk.builder()
 			                  .networkEndpoints(MAIN_ENDPOINT)
 			                  .networkQueryTimeout(300_000L)
-			                  .build()
-			                  .orElseThrow();
+			                  .build();
 
 			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
 

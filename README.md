@@ -227,7 +227,7 @@ firectly as all **EVER-SDK** API is available from **Java4Ever**.
 #### Creating a random keypair
 
 ```java
-var keys = Credentials.ofRandom(sdk);
+var keys = Credentials.ofRandom(contextId);
 String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
@@ -235,7 +235,7 @@ String pk = keys.publicKey();
 #### Creating a random seed
 
 ```java
-var seed = Seed.ofRandom(sdk);
+var seed = Seed.ofRandom(contextId);
 String wordsPhrase = seed.phrase();
 int wordsCount = seed.words();
 ```
@@ -243,7 +243,7 @@ int wordsCount = seed.words();
 #### Deriving keys from seed
 
 ```java
-var keys = Credentials.ofSeed(sdk,seed);
+var keys = Credentials.ofSeed(contextId,seed);
 String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
@@ -271,7 +271,7 @@ To access contract account, create instance of your contract class by
 passing SDK Provider and address of deployed contract.
 
 ```java
-MyContract contr = new MyContract(sdk, "0:your_contract_address");
+MyContract contr = new MyContract(contextId, "0:your_contract_address");
 
 contr.accountBalance(); // currency balance on account
 contr.account().isActive(); // contract status
@@ -280,7 +280,7 @@ contr.account().isActive(); // contract status
 or with additional `Credentials` param for signing external calls:
 
 ```java
-MyContract contr = new MyContract(sdk, "0:your_contract_address", keys);
+MyContract contr = new MyContract(contextId, "0:your_contract_address", keys);
 ```
 
 #### Accessing Function
@@ -322,7 +322,7 @@ All the described functions, handles and return types are auto-generated when yo
 #### Sending Internal Message from Multisig Wallet
 
 ```java
-var walletContract = new SafeMultisigWallet(sdk,"", walletKeys);
+var walletContract = new SafeMultisigWallet(contextId,"", walletKeys);
 getCustodiansFunctionHandle.sendFrom(walletContract, CurrencyUnit.VALUE(EVER,"1.25"), true, MessageFlag.FEE_EXTRA);
 ```
 **sendFrom()** method also has **sendFromAsMap()** variant.
@@ -369,7 +369,7 @@ As with function handles, `Template::prepareDeploy` params may vary depending on
 your static variables and constructor params.
 
 ```java
-DeployHandle deployHandle = myTemplate.prepareDeploy(sdk, Credentials.NONE,"hello_world");
+DeployHandle deployHandle = myTemplate.prepareDeploy(contextId, Credentials.NONE,"hello_world");
 ```
 
 #### Variations of running deploy
@@ -379,7 +379,7 @@ MyContract myContract = deployHandle.deploy();
 
 MyContract myContract = deployHandle.deployWithGiver(walletContract, CurrencyUnit.VALUE(EVER,"1.25"));
 
-MyContract myContract = deployHandle.deployWithGiver(EverOSGiver.V2(sdk), CurrencyUnit.VALUE(EVER,"1.25"));
+MyContract myContract = deployHandle.deployWithGiver(EverOSGiver.V2(contextId), CurrencyUnit.VALUE(EVER,"1.25"));
 ```
 
 Each deployment creates a ready contract object after deploy is done. 
@@ -394,9 +394,9 @@ between **evernode-se** giver & **msig wallet** without any additional code:
 Giver giver = null;
 
 if (isEverOsNet()) {
-  giver = EverOSGiver.V2(sdk);
+  giver = EverOSGiver.V2(contextId);
 } else {
-  giver = new SafeMultisigWallet(sdk,"0:your_address");
+  giver = new SafeMultisigWallet(contextId,"0:your_address");
 }
 
 deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));

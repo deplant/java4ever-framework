@@ -56,7 +56,7 @@ public class MultisigContractTests {
 		// initialize EVER-SDK library
 		EverSdk.load();
 		// create config context, save its id
-		int contextId = EverSdk.createWithEndpoint("http://localhost/graphql").orElseThrow();
+		int contextId = EverSdk.createWithEndpoint("https://nodese.truequery.tech/graphql");
 		// creates random pair of keys
 		var keys = Credentials.ofRandom(contextId);
 		// use it to deploy a new contract

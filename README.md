@@ -174,8 +174,7 @@ Thus you can easily configure only needed parts of library.
 int contextId3 = EverSdk.builder()
                        .networkEndpoints("http://localhost/graphql")
                        .networkQueryTimeout(300_000L)
-                       .build()
-                       .orElseThrow();
+                       .build();
 ```
 
 ### Adding ABI, TVC & other artifacts
@@ -187,7 +186,7 @@ Here are simple examples of getting contract ABIs and TVCs artifacts:
 * `ContractAbi.ofFile("/path/to/your.abi.json")` - reads abi from file (can be relative)
 * `ContractAbi.ofResource("yourresource.abi.json")` - reads abi from resources of your project
 * `ContractAbi.ofString("")` -reads abi from JSON string
-* `ContractAbi.ofJsonNode(node)` - reads abi from JSON node
+* `ContractAbi.ofJsonNode(node)` - reads abi from Jackson framework's JsonNode object
 
 * `Tvc.ofFile("/path/to/your.tvc")` - reads tvc from file (can be relative)
 * `Tvc.ofResource("yourresource.tvc")` - reads tvc from resources of your project
@@ -196,32 +195,11 @@ Here are simple examples of getting contract ABIs and TVCs artifacts:
 
 Also, you can check `JsonFile`, `JsonResource`, `ByteFile`, `ByteResource` helpers for custom artifacts.
 
-### Contract Generation
-
-`ContractWrapper` class is a generator that will create java wrapper 
-classes for all your contracts. You need only `abi.json` and `.tvc` 
-artifacts of your contracts as a source for code generation. 
-
-Run the following, specifying your artifacts and where to place 
-generated classes in params:
-
-```java
-ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
-                         Tvc.ofResource("mycontract.tvc"),
-                         Path.of("src/gen/java"),
-                         "MyContract",
-                         "org.example.contract",
-                         "org.example.template",
-                         new String[]{});
-```
-
-Contract and template wrappers will appear in packages that you specified.
-
 ### Crypto
 
-**Java4Ever** includes basic helpers to 
-create your seeds, key pairs and signatures. If 
-you want some specific **EVER-SDK** functions, just use them 
+**Java4Ever** includes basic helpers to
+create your seeds, key pairs and signatures. If
+you want some specific **EVER-SDK** functions, just use them
 firectly as all **EVER-SDK** API is available from **Java4Ever**.
 
 #### Creating a random keypair
@@ -255,35 +233,92 @@ var seed = new Seed("your seed phrase with 12 words or 24 with second constructo
 var keys = new Credentials("publickey_string","secretkey_string");
 ```
 
-### Working with deployed contracts
+### Smart-contracts
 
-If you generated your contract wrappers via [generator](#generating-classes-for-your-contracts) 
-(`MyContract` in this example), 
-all its methods are now available from `MyContract.class`.
-If you're working with standard contracts, all wrappers are 
-already generated (for **Multisig Wallets**, **Givers**, **TIP3** and **TIP4** 
-contracts and so on - 
+#### Using already deployed contract
+
+```java
+// to use already deployed contract, you should know its ABI and its address
+var deployedContractAbi = ContractAbi.ofResource("artifacts/giver/GiverV2.abi.json");
+var deployedContractAddress = new Address("0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415");
+// if you don't know contract credentials, use Credentials.NONE
+var deployedContractCredentials = new Credentials("2ada2e65ab8eeab09490e3521415f45b6e42df9c760a639bcf53957550b25a16",
+                                                  "172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3");
+// instantiate your contract
+var giverContract = new AbstractContract(contextId,
+                                         deployedContractAddress,
+                                         deployedContractAbi,
+                                         deployedContractCredentials);
+// make a call by function name
+var functionCallPrepare = giverContract.functionCallBuilder()
+        .setFunctionName("getMessages")
+        .setFunctionInputs(Map.of()) // provide a map of params
+        .setReturnClass(Map.class)
+        .build();
+// if you didn't provide return class, use callAsMap() and getAsMap() to receive plain JSON
+System.out.println(functionCallPrepare.getAsMap().toPrettyString());
+```
+
+If you don't want to write function calls by hand, 
+use [Contract Generation](#contract-generation) tips below to generate your own Contract classes.
+
+#### Accessing contract account metadata
+
+To access account metadata of certain smart-contract, get Account object from any type of Contract
+```java
+Account acc = contract.account();
+```
+Alternatively, you can create Account object from any address
+```java
+Account acc = Account ofAddress(contextId, "0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415");
+```
+Then, get all needed info from account
+```java
+acc.boc();
+acc.code();
+acc.codeHash();
+acc.balance();
+acc.accType();
+```
+
+### Contract Generation
+
+#### Calling generator for your artifacts
+
+`ContractWrapper` class is a generator that will create java wrapper
+classes for all your contracts. You need only `abi.json` and `.tvc`
+artifacts of your contracts as a source for code generation.
+
+Run the following, specifying your artifacts and where to place
+generated classes in params:
+
+```java
+ContractWrapper.generate(ContractAbi.ofResource("mycontract.abi.json").abiContract(),
+                         Tvc.ofResource("mycontract.tvc"),
+                         Path.of("src/gen/java"),
+                         "MyContract",
+                         "org.example.contract",
+                         "org.example.template",
+                         new String[]{});
+```
+
+Contract and template wrappers will appear in packages that you specified.
+
+If you're working with standard contracts, all wrappers are
+already generated (for **Multisig Wallets**, **Givers**, **TIP3** and **TIP4**
+contracts and so on -
 check [javadoc](https://javadoc.io/doc/tech.deplant.java4ever/java4ever-framework/latest/java4ever.framework/tech/deplant/java4ever/framework/contract/package-summary.html))
 
-#### Accessing Contract
+#### Accessing your newly generated contract wrapper
 
-To access contract account, create instance of your contract class by 
+To access contract account, create instance of your contract class by
 passing SDK Provider and address of deployed contract.
 
 ```java
 MyContract contr = new MyContract(contextId, "0:your_contract_address");
-
-contr.accountBalance(); // currency balance on account
-contr.account().isActive(); // contract status
 ```
 
-or with additional `Credentials` param for signing external calls:
-
-```java
-MyContract contr = new MyContract(contextId, "0:your_contract_address", keys);
-```
-
-#### Accessing Function
+#### Accessing generated function wrappers
 
 Now, when your contract object is created, just get handle of one 
 of functions by calling one of the contract methods.
@@ -317,7 +352,14 @@ All the described functions, handles and return types are auto-generated when yo
 * **get()** - runs getter method and returns auto-generated type
 * **call()** - makes external call (make sure you added credentials to contract object if contract checks signatures)
 * **getLocal()** - runs getter against provided boc
-* **...AsMap()** - each method have AsMap variant that returns Map<String, Object> insted of type
+* **...AsMap()** - each method have AsMap variant that returns Jackson framework's JsonNode object instead of static type result
+
+#### Deploying new contracts
+
+Second class created by contract generator is `MyContractTemplate.class`.
+It's a companion class that stores ABI and TVC info for deployment.
+
+### Using wallets and other standard contract wrappers
 
 #### Sending Internal Message from Multisig Wallet
 
@@ -338,10 +380,7 @@ You can encode `FunctionHandle` as a payload for internal call like this:
 var payload = getCustodiansFunctionHandle.toPayload();
 ```
 
-### Deploying new contracts
-
-Second class created by contract generator is `MyContractTemplate.class`. 
-It's a companion class that stores ABI and TVC info for deployment.
+### Deploying smart-contracts
 
 #### Accessing Template
 
@@ -362,9 +401,9 @@ myTemplate.tvc().codeHash() // getting code hash
 There are much more methods for TVC and ABI, including decoding and encoding 
 initial data, various helpers for all sort of interactions.
 
-#### Accessing Deployment Set
+#### Prepared deployment set
 
-`DeployHandle` is a handle of prepared deployment with all needed params. 
+`DeployHandle` is a handle of prepared deployment set with all needed params. 
 As with function handles, `Template::prepareDeploy` params may vary depending on your contract -
 your static variables and constructor params.
 
@@ -375,18 +414,21 @@ DeployHandle deployHandle = myTemplate.prepareDeploy(contextId, Credentials.NONE
 #### Variations of running deploy
 
 ```java
+// Deploys prepared contract deployment. Will work only when deploy target account address is already paid
+// You can check target account address by using deployHandle.toAddress() call
 MyContract myContract = deployHandle.deploy();
-
+// deploys prepared contract deployment by using funds from specified wallet
 MyContract myContract = deployHandle.deployWithGiver(walletContract, CurrencyUnit.VALUE(EVER,"1.25"));
-
+// deploys prepared contract deployment by using funds from EverNode-SE giver
 MyContract myContract = deployHandle.deployWithGiver(EverOSGiver.V2(contextId), CurrencyUnit.VALUE(EVER,"1.25"));
 ```
 
-Each deployment creates a ready contract object after deploy is done. 
+Each deployment returns a contract object after deploy is done. 
 Also, you can use `deployHandle.toAddress()` if you need only address calculation.
 
 #### Switching Givers
 
+Deployment usually requires giving funds to target address of deployment. 
 Here's the example of universal deployment that switches 
 between **evernode-se** giver & **msig wallet** without any additional code:
 
@@ -402,7 +444,8 @@ if (isEverOsNet()) {
 deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 ```
 
-This is possible as all Java4Ever wallet classes are implementing Giver interface.
+This is possible as all Java4Ever wallet classes are implementing Giver interface. 
+You can also generate wrappers that implements Giver interface.
 
 ### Logging
 

@@ -11,7 +11,9 @@ import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.binding.loader.AbsolutePathLoader;
 import tech.deplant.java4ever.binding.loader.JavaLibraryPathLoader;
+import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
@@ -21,6 +23,7 @@ import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
@@ -32,6 +35,25 @@ public class MultisigContractTests {
 	@BeforeAll
 	public static void init_sdk_and_other_vars() throws IOException, EverSdkException {
 		Env.INIT();
+	}
+
+	@Test
+	public void use_giver_as_abstract_contract() throws JsonProcessingException, EverSdkException {
+		var deployedContractAbi = ContractAbi.ofResource("artifacts/giver/GiverV2.abi.json");
+		var deployedContractAddress = new Address("0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415");
+		var deployedContractCredentials = new Credentials("2ada2e65ab8eeab09490e3521415f45b6e42df9c760a639bcf53957550b25a16",
+		                                                  "172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3");
+		var contextId = Env.SDK_LOCAL;
+		var giverContract = new AbstractContract(contextId,
+		                                         deployedContractAddress,
+		                                         deployedContractAbi,
+		                                         deployedContractCredentials);
+		var functionCallPrepare = giverContract.functionCallBuilder()
+		             .setFunctionName("getMessages")
+				.setFunctionInputs(Map.of())
+				.setReturnClass(Map.class)
+				.build();
+		System.out.println(functionCallPrepare.getAsMap().toPrettyString());
 	}
 
 	/**

@@ -76,6 +76,12 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 * Install **JDK 22** ([downloaded here](https://adoptium.net/temurin/releases/?version=22))
 * Install **EverNode-SE** ([installation guide here](https://github.com/everx-labs/evernode-se))
 
+### Prerequisites for Kotlin
+
+* Install **Kotlin 2.0.0**
+* Install **Gradle 8.8**
+* Make sure to setup use of Gradle 8.8 and JDK 22 for compilation and runtime
+
 **Note:** EverNode-SE needed only for quick start example, it's not a requirement
 
 ### Add java4ever to your Maven/Gradle setup:

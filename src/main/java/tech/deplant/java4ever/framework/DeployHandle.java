@@ -1,11 +1,15 @@
 package tech.deplant.java4ever.framework;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.commons.Objs;
-import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.EverSdk;
+import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.JsonContext;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.GiverContract;
@@ -15,8 +19,11 @@ import tech.deplant.java4ever.framework.template.Template;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNullElse;
 import static tech.deplant.java4ever.binding.Processing.processMessage;
@@ -306,34 +313,27 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	public RETURN deployWithGiver(GiverContract giver, BigInteger value) throws EverSdkException {
 		var address = toAddress();
 		try {
-			new AbstractContract(sdk(), address, template().abi(), Credentials.NONE).waitForTransaction(giver.address(),
-			                                                                                            false,
-			                                                                                            () -> {
-				                                                                                            try {
-					                                                                                            giver.give(
-							                                                                                                 address,
-							                                                                                                 value)
-					                                                                                                 .call();
-				                                                                                            } catch (
-						                                                                                            EverSdkException e) {
-					                                                                                            logger.log(
-							                                                                                            System.Logger.Level.ERROR,
-							                                                                                            () -> "Error! Message: " +
-							                                                                                                  e.getMessage());
-					                                                                                            throw new RuntimeException(
-							                                                                                            e);
-				                                                                                            }
-			                                                                                            });
+			var uninitContract = new AbstractContract(sdk(), address, template().abi(), Credentials.NONE);
+			final CompletableFuture<JsonNode> waiter = new CompletableFuture<>();
+			Consumer<JsonNode> eventConsumer = waiter::complete;
+			uninitContract.subscribeOnTransactions(eventConsumer,
+			                                                          "in_message",
+			                                                          "{ src }",
+			                                                          "aborted",
+			                                                          "status").subscribeUntilFirst(sdk());
+			giver.give(address, value).call();
+			waiter.get(10, TimeUnit.MINUTES);
 			return deploy(address);
 		} catch (InterruptedException e) {
 			logger.log(System.Logger.Level.ERROR, () -> "Wait for giver funds interrupted! Message: " + e.getMessage());
 			throw new EverSdkException(new EverSdkException.ErrorResult(-400, "EVER-SDK call interrupted!"), e);
 		} catch (TimeoutException e) {
-			logger.log(System.Logger.Level.ERROR,
-			           () -> "Wait for giver funds timeout! Message: " +
-			                 e.getMessage());
-			throw new EverSdkException(new EverSdkException.ErrorResult(-402,
-			                                                            "EVER-SDK Execution expired on Timeout!"), e);
+			logger.log(System.Logger.Level.ERROR, () -> "Wait for giver funds timeout! Message: " + e.getMessage());
+			throw new EverSdkException(new EverSdkException.ErrorResult(-402, "EVER-SDK Execution expired on Timeout!"),
+			                           e);
+		} catch (ExecutionException e) {
+			logger.log(System.Logger.Level.ERROR, () -> "Wait for giver funds failed! Message: " + e.getMessage());
+			throw new EverSdkException(new EverSdkException.ErrorResult(-400, "EVER-SDK call failed!"), e);
 		}
 
 	}
@@ -368,7 +368,9 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                                         "credentials",
 		                                         credentials());
 		var contract = Contract.instantiate(clazz(), sdk(), address.makeAddrStd(), template().abi(), credentials());
-		logger.log(System.Logger.Level.TRACE, () -> "Contract deployed and instantiated: %s".formatted(contract == null ? "" : contract.toString()));
+		logger.log(System.Logger.Level.TRACE,
+		           () -> "Contract deployed and instantiated: %s".formatted(
+				           contract == null ? "" : contract.toString()));
 		return contract;
 	}
 

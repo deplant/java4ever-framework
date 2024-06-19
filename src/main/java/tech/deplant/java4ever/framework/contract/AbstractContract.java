@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.framework.*;
+import tech.deplant.java4ever.framework.ContractAbi;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.datatype.Address;
+import tech.deplant.java4ever.framework.subscription.Subscriptions;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -64,51 +64,51 @@ public class AbstractContract implements Contract {
 		this.credentials = credentials;
 	}
 
-	/**
-	 * Wait for transaction.
-	 *
-	 * @param from           the from
-	 * @param onlySuccessful the only successful
-	 * @param startEvent     the start event
-	 * @throws EverSdkException     the ever sdk exception
-	 * @throws InterruptedException the interrupted exception
-	 * @throws TimeoutException     the timeout exception
-	 */
-	public void waitForTransaction(Address from,
-	                               boolean onlySuccessful,
-	                               Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
-
-		CompletableFuture<JsonNode> futureSubscriptionResult = new CompletableFuture<>();
-
-		new SubscribeHandle(contextId(),
-		                    SubscribeHandle.TRANSACTIONS_SUB.formatted(address(),
-		                                                               "in_message { src } aborted status"))
-				//.addConsumeFilter(SubscribeHandle.TR_SUCCESSFUL)
-				.addEventConsumer(futureSubscriptionResult::complete)
-				.subscribe();
-
-		startEvent.run();
-		try {
-			futureSubscriptionResult.get();
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-//				var transaction = subscribeEvent.result().get("result").get("transactions");
-//				if (Objs.isNotNull(transaction.get("in_message")) &&
-//				    Objs.isNotNull(transaction.get("in_message").get("src")) &&
-//				    transaction.get("in_message").get("src").asText().equals(from.toString())) {
-//					if (!onlySuccessful ||
-//					    (Objs.isNotNull(transaction.get("aborted")) &&
-//					     Objs.isNotNull(transaction.get("status")) &&
-//					     !transaction.get("aborted").asBoolean() &&
-//					     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
-//						logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
-//						awaitDone.set(true);
-//						logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
-//					}
-//				}
-//			}
-	}
+//	/**
+//	 * Wait for transaction.
+//	 *
+//	 * @param from           the from
+//	 * @param onlySuccessful the only successful
+//	 * @param startEvent     the start event
+//	 * @throws EverSdkException     the ever sdk exception
+//	 * @throws InterruptedException the interrupted exception
+//	 * @throws TimeoutException     the timeout exception
+//	 */
+//	public void waitForTransaction(Address from,
+//	                               boolean onlySuccessful,
+//	                               Runnable startEvent) throws EverSdkException, InterruptedException, TimeoutException {
+//
+//		CompletableFuture<JsonNode> futureSubscriptionResult = new CompletableFuture<>();
+//
+//		new SubscribeHandle(contextId(),
+//		                    SubscribeHandle.TRANSACTIONS_SUB.formatted(address(),
+//		                                                               "in_message { src } aborted status"))
+//				//.addConsumeFilter(SubscribeHandle.TR_SUCCESSFUL)
+//				.addCallbackConsumer(futureSubscriptionResult::complete)
+//				.subscribe();
+//
+//		startEvent.run();
+//		try {
+//			futureSubscriptionResult.get();
+//		} catch (ExecutionException e) {
+//			throw new RuntimeException(e);
+//		}
+////				var transaction = subscribeEvent.result().get("result").get("transactions");
+////				if (Objs.isNotNull(transaction.get("in_message")) &&
+////				    Objs.isNotNull(transaction.get("in_message").get("src")) &&
+////				    transaction.get("in_message").get("src").asText().equals(from.toString())) {
+////					if (!onlySuccessful ||
+////					    (Objs.isNotNull(transaction.get("aborted")) &&
+////					     Objs.isNotNull(transaction.get("status")) &&
+////					     !transaction.get("aborted").asBoolean() &&
+////					     transaction.get("status").asInt() == TransactionStatus.FINALIZED.value())) {
+////						logger.log(System.Logger.Level.TRACE, () -> "Await change!!!");
+////						awaitDone.set(true);
+////						logger.log(System.Logger.Level.TRACE, () -> "Await Done!!!");
+////					}
+////				}
+////			}
+//	}
 
 	/**
 	 * Subscribe on incoming messages subscribe handle.
@@ -118,22 +118,11 @@ public class AbstractContract implements Contract {
 	 * @return the subscribe handle
 	 * @throws EverSdkException the ever sdk exception
 	 */
-	public SubscribeHandle subscribeOnIncomingMessages(String resultFields,
-	                                                   Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							messages(
-									filter: {
-										dst: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText)
-				.addEventConsumer(subscribeEventConsumer)
-				.subscribe();
+	public Subscriptions.Builder subscribeOnIncomingMessages(String resultFields,
+	                                                         Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
+		return Subscriptions.onMessages(resultFields)
+		                    .addFilterOnSubscription("dst: { eq: \"%s\" }".formatted(address().toString()))
+		                    .addCallbackConsumer(subscribeEventConsumer);
 	}
 
 	/**
@@ -144,20 +133,11 @@ public class AbstractContract implements Contract {
 	 * @return the subscribe handle
 	 * @throws EverSdkException the ever sdk exception
 	 */
-	public SubscribeHandle subscribeOnOutgoingMessages(String resultFields,
-	                                                   Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							messages(
-									filter: {
-										src: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
+	public Subscriptions.Builder subscribeOnOutgoingMessages(String resultFields,
+	                                                         Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
+		return Subscriptions.onMessages(resultFields)
+		                    .addFilterOnSubscription("src: { eq: \"%s\" }".formatted(address().toString()))
+		                    .addCallbackConsumer(subscribeEventConsumer);
 	}
 
 	/**
@@ -168,20 +148,11 @@ public class AbstractContract implements Contract {
 	 * @return the subscribe handle
 	 * @throws EverSdkException the ever sdk exception
 	 */
-	public SubscribeHandle subscribeOnAccount(String resultFields,
-	                                          Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							accounts(
-									filter: {
-										id: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
+	public Subscriptions.Builder subscribeOnAccount(String resultFields,
+	                                                Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
+		return Subscriptions.onAccounts(resultFields)
+		                    .addFilterOnSubscription("id: { eq: \"%s\" }".formatted(address().toString()))
+		                    .addCallbackConsumer(subscribeEventConsumer);
 	}
 
 	/**
@@ -192,20 +163,10 @@ public class AbstractContract implements Contract {
 	 * @return the subscribe handle
 	 * @throws EverSdkException the ever sdk exception
 	 */
-	public SubscribeHandle subscribeOnTransactions(String resultFields,
-	                                               Consumer<JsonNode> subscribeEventConsumer) throws EverSdkException {
-		final String queryText = """
-				subscription {
-							transactions(
-									filter: {
-										account_addr: { eq: "%s" }
-									}
-				                ) {
-								%s
-							}
-						}
-				""".formatted(address(), resultFields);
-		return new SubscribeHandle(contextId(), queryText).addEventConsumer(subscribeEventConsumer).subscribe();
+	public Subscriptions.Builder subscribeOnTransactions(Consumer<JsonNode> subscribeEventConsumer, String... resultFields) throws EverSdkException {
+		return Subscriptions.onAccounts(resultFields)
+		                    .addFilterOnSubscription("id: { eq: \"%s\" }".formatted(address().toString()))
+		                    .addCallbackConsumer(subscribeEventConsumer);
 	}
 
 	/**

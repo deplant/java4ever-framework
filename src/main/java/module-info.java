@@ -12,12 +12,14 @@ module java4ever.framework {
 	exports tech.deplant.java4ever.framework.template;
 	exports tech.deplant.java4ever.framework.datatype;
 	exports tech.deplant.java4ever.framework.generator;
+	exports tech.deplant.java4ever.framework.subscription;
 	opens tech.deplant.java4ever.framework to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.contract to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.template to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.generator to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.datatype to com.fasterxml.jackson.databind;
 	opens tech.deplant.java4ever.framework.artifact to com.fasterxml.jackson.databind;
+	opens tech.deplant.java4ever.framework.subscription to com.fasterxml.jackson.databind;
 	exports tech.deplant.java4ever.framework.contract.multisig;
 	opens tech.deplant.java4ever.framework.contract.multisig to com.fasterxml.jackson.databind;
 	exports tech.deplant.java4ever.framework.contract.tip3;

@@ -1,3 +1,9 @@
+### 3.0.4
+
+- Fixes for multi-threading in binding module
+- Some optimizations
+- Rework of subscriptions
+
 ### 3.0.0
 
 - Updated baseline JDK -> 22

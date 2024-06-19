@@ -40,31 +40,39 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
   * [Contents](#contents)
   * [Quick start](#quick-start)
     * [Prerequisites](#prerequisites)
-    * [Add java4ever to your Maven or Gradle setup:](#add-java4ever-to-your-maven-or-gradle-setup)
-  * [Quick Start](#quick-start-1)
-  * [Examples](#examples)
-    * [SDK Provider](#sdk-provider)
-      * [Initiali](#initiali)
+    * [Prerequisites for Kotlin](#prerequisites-for-kotlin)
+    * [Add java4ever to your Maven/Gradle setup:](#add-java4ever-to-your-mavengradle-setup)
+    * [Deploy your first contract](#deploy-your-first-contract)
+  * [Examples and Guides](#examples-and-guides)
+    * [Setting up SDK](#setting-up-sdk)
+      * [Loading EVER-SDK library](#loading-ever-sdk-library)
+      * [Creating config context and specifying endpoints](#creating-config-context-and-specifying-endpoints)
       * [Configuring SDK with Builder](#configuring-sdk-with-builder)
-      * [Custom EVER-SDK Library loading variants](#custom-ever-sdk-library-loading-variants)
-    * [ABI, TVC & other artifacts](#abi-tvc--other-artifacts)
-    * [Contract Generation](#contract-generation)
+    * [Adding ABI, TVC & other artifacts](#adding-abi-tvc--other-artifacts)
     * [Crypto](#crypto)
       * [Creating a random keypair](#creating-a-random-keypair)
       * [Creating a random seed](#creating-a-random-seed)
       * [Deriving keys from seed](#deriving-keys-from-seed)
       * [Using existing keys & seeds](#using-existing-keys--seeds)
-    * [Working with deployed contracts](#working-with-deployed-contracts)
-      * [Accessing Contract](#accessing-contract)
-      * [Accessing Function](#accessing-function)
+    * [Smart-contracts](#smart-contracts)
+      * [Using already deployed contract](#using-already-deployed-contract)
+      * [Accessing contract account metadata](#accessing-contract-account-metadata)
+    * [Contract Generation](#contract-generation)
+      * [Calling generator for your artifacts](#calling-generator-for-your-artifacts)
+      * [Accessing your newly generated contract wrapper](#accessing-your-newly-generated-contract-wrapper)
+      * [Accessing generated function wrappers](#accessing-generated-function-wrappers)
       * [Calling Functions in various ways](#calling-functions-in-various-ways)
+      * [Deploying new contracts](#deploying-new-contracts)
+    * [Using wallets and other standard contract wrappers](#using-wallets-and-other-standard-contract-wrappers)
       * [Sending Internal Message from Multisig Wallet](#sending-internal-message-from-multisig-wallet)
       * [Encoding as Payload](#encoding-as-payload)
-    * [Deploying new contracts](#deploying-new-contracts)
+    * [Deploying smart-contracts](#deploying-smart-contracts)
       * [Accessing Template](#accessing-template)
-      * [Accessing Deployment Set](#accessing-deployment-set)
+      * [Prepared deployment set](#prepared-deployment-set)
       * [Variations of running deploy](#variations-of-running-deploy)
       * [Switching Givers](#switching-givers)
+    * [Subsriptions](#subsriptions)
+    * [Currency](#currency)
     * [Logging](#logging)
   * [Getting Help](#getting-help)
 <!-- TOC -->
@@ -90,7 +98,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:3.0.0'
+    implementation 'tech.deplant.java4ever:java4ever-framework:3.0.4'
 }
 ```
 
@@ -101,7 +109,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.4</version>
 </dependency>
 ```
 
@@ -454,6 +462,55 @@ deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 
 This is possible as all Java4Ever wallet classes are implementing Giver interface. 
 You can also generate wrappers that implements Giver interface.
+
+### Subsriptions
+
+**Unstable** - Subscriptions were heavily changed in the last release, so there can be dragons.
+
+Subscriptions consist of Subscription.Builder class where you describe your 
+subscription details. After that, run the subscription with subscribe..() methods. 
+Subscription supports sprcifying multiple GQL filters, multiple consumers, 
+saving to queue, manual and auto-unsubscribing on condition.
+
+```java
+// let's specify what will consume our event:
+Consumer<JsonNode> eventConsumer = jsonNode -> System.out.println(jsonNode.toPrettyString());
+// describe our subscription in builder style
+var subscriptionBuilder = Subscriptions
+        .onAccounts("acc_type", "id")
+        .addFilterOnSubscription("id: { eq: \"<your_address>\" }")
+        .addFilterOnSubscription("code_hash: { eq: \"<your_hash>\" }")
+        .addCallbackConsumer(eventConsumer)
+        .setCallbackToQueue(true); // if you don't want to specify consumer, you can switch on adding to internal queue
+// let's subsribe
+var subscription1 = subscriptionBuilder.subscribeUntilCancel(1);
+// let's unsubscribe
+subscription1.unsubscribe();
+// perhaps some messages were pu in the queue?
+int size = subscription1.callbackQueue().size();
+// let's reuse builder, but subscribe until first event is fired
+var subscription2 = subscriptionBuilder.subscribeUntilFirst(1);
+// another one, subscribed until certain condition
+var subscription3 = subscriptionBuilder.subscribeUntilCondition(1, jsonNode -> !jsonNode.get("accounts").elements().hasNext());
+```
+
+### Currency
+
+All solidity currency constants are available from CurrencyUnit class. 
+You can retrieve final bigint about like this
+
+```java
+var everAmount = CurrencyUnit.VALUE(EVER, "2"); // 2_000_000_000 nanoevers
+var everAmount = CurrencyUnit.VALUE(MILLIEVER, "500.3"); // 500_300_000 nanoevers
+```
+
+If your token has custom decimals count, you can specify it like this
+
+```java
+var tokenUnit = new CurrencyUnit.CustomToken(12); // my token has 12 decimals
+// then use your own tokenunits in all your calls
+var nanoValue = CurrencyUnit.VALUE(tokenUnit, "2.2"); // 2_200_000_000_000 nanotokens
+```
 
 ### Logging
 

@@ -7,11 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.Seed;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.spec.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
@@ -65,8 +72,29 @@ public class CryptoTests {
 		assertNotNull(seed);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          seed).toString());
-
 	}
+
+//	@Test
+//	public void public_from_secret() throws Throwable {
+//		var seed = Seed.ofRandom(Env.SDK_EMPTY);
+//		var pair = seed.deriveCredentials(Env.SDK_EMPTY);
+//		var publicFromSecret = Crypto.hdkeyPublicFromXprv(Env.SDK_EMPTY, pair.secretKey()).get().publicKey();
+//		assertEquals(pair.publicKey(),publicFromSecret);
+//
+//			var params = NamedParameterSpec.ED25519;
+//
+//			EdECPrivateKeySpec privateKeySpec = new EdECPrivateKeySpec(NamedParameterSpec.ED25519, pair.secretKey().getBytes(
+//					StandardCharsets.UTF_8));
+//			EdECPoint edecPublicKeyPoint = privateKeySpec.(privateKey);
+//
+//		KeyPairGenerator.getInstance().generateKeyPair();
+//
+//			// Use KeyFactory to convert public point to public key
+//		KeyFactory kf = KeyFactory.getInstance("Ed25519");
+//			EdECPublicKeySpec pubSpec = new EdECPublicKeySpec(params, edecPublicKeyPoint);
+//			var publicKey = kf.generatePublic(pubSpec);
+//			var publicKeyString = publicKey.toString();
+//	}
 
 	@Test
 	public void make_seed_and_keys_old() throws Throwable {

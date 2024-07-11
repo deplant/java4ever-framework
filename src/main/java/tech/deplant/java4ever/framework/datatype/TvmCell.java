@@ -3,6 +3,7 @@ package tech.deplant.java4ever.framework.datatype;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
 
@@ -24,6 +25,10 @@ public record TvmCell(String cellBoc) implements AbiValue<String> {
 	 */
 	public static TvmBuilder builder() {
 		return new TvmBuilder();
+	}
+
+	public String bocHash(int contextId) throws EverSdkException {
+		return EverSdk.await(Boc.getBocHash(contextId, cellBoc())).hash();
 	}
 
 	/**

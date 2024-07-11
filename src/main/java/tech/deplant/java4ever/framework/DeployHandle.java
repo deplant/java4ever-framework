@@ -1,15 +1,8 @@
 package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import tech.deplant.commons.Objs;
-import tech.deplant.java4ever.binding.Abi;
-import tech.deplant.java4ever.binding.EverSdk;
-import tech.deplant.java4ever.binding.EverSdkException;
-import tech.deplant.java4ever.binding.JsonContext;
+import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.Contract;
 import tech.deplant.java4ever.framework.contract.GiverContract;
@@ -26,7 +19,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNullElse;
-import static tech.deplant.java4ever.binding.Processing.processMessage;
 
 /**
  * Representation of prepared deployment set. Usually this object is returned by template's prepareDeploy() method.
@@ -41,16 +33,12 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
                                                             Map<String, Object> initialDataFields,
                                                             Map<String, Object> constructorInputs,
                                                             Abi.FunctionHeader constructorHeader,
+                                                            String abiVersion,
                                                             DebugOptions debugOptions) {
 
 	private static System.Logger logger = System.getLogger(DeployHandle.class.getName());
 
 	//TODO Add DeployHandle.Builder and method toBuilder()
-	private static JsonMapper MAPPER = JsonMapper.builder()
-	                                             .addModules(new ParameterNamesModule(),
-	                                                         new Jdk8Module(),
-	                                                         new JavaTimeModule())
-	                                             .build();
 
 	/**
 	 * Instantiates a new Deploy handle.
@@ -112,7 +100,17 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		     initialDataFields,
 		     constructorInputs,
 		     constructorHeader,
+		     "2.2",
 		     new DebugOptions(false, 60000L, false, 50L));
+	}
+
+	public String encodeInitialDataBase64() throws EverSdkException {
+		var result = EverSdk.await(Abi.encodeInitialData(sdk(),
+		                                                 template().abi().ABI(),
+		                                                 JsonContext.convertAbiMap(initialDataFields(), JsonNode.class),
+		                                                 credentials().publicKey(),
+		                                                 null));
+		return result.data();
 	}
 
 	/**
@@ -138,6 +136,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          initialDataFields(),
 		                          constructorInputs(),
 		                          constructorHeader(),
+		                          abiVersion(),
 		                          new DebugOptions(enabled, timeout, throwErrors, maxTransactionCount, treeAbis));
 	}
 
@@ -156,6 +155,7 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 		                          initialDataFields(),
 		                          constructorInputs(),
 		                          constructorHeader(),
+		                          abiVersion(),
 		                          debugOptions);
 	}
 
@@ -316,11 +316,8 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 			var uninitContract = new AbstractContract(sdk(), address, template().abi(), Credentials.NONE);
 			final CompletableFuture<JsonNode> waiter = new CompletableFuture<>();
 			Consumer<JsonNode> eventConsumer = waiter::complete;
-			uninitContract.subscribeOnTransactions(eventConsumer,
-			                                                          "in_message",
-			                                                          "{ src }",
-			                                                          "aborted",
-			                                                          "status").subscribeUntilFirst(sdk());
+			uninitContract.subscribeOnTransactions(eventConsumer, "in_message", "{ src }", "aborted", "status")
+			              .subscribeUntilFirst(sdk());
 			giver.give(address, value).call();
 			waiter.get(10, TimeUnit.MINUTES);
 			return deploy(address);
@@ -350,15 +347,15 @@ public record DeployHandle<RETURN extends AbstractContract>(Class<RETURN> clazz,
 	}
 
 	private RETURN deploy(Address address) throws EverSdkException {
-		EverSdk.await(processMessage(sdk(),
-		                             template().abi().ABI(),
-		                             address.makeAddrStd(),
-		                             toDeploySet(),
-		                             toConstructorCallSet(),
-		                             toSigner(),
-		                             null,
-		                             null,
-		                             false));
+		EverSdk.await(Processing.processMessage(sdk(),
+		                                        template().abi().ABI(),
+		                                        address.makeAddrStd(),
+		                                        toDeploySet(),
+		                                        toConstructorCallSet(),
+		                                        toSigner(),
+		                                        null,
+		                                        null,
+		                                        false));
 		Map<String, Object> contractMap = Map.of("sdk",
 		                                         sdk(),
 		                                         "address",

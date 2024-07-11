@@ -1,10 +1,7 @@
 package tech.deplant.java4ever.frtest.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -20,8 +17,7 @@ import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static tech.deplant.java4ever.frtest.unit.Env.EVER_ONE;
-import static tech.deplant.java4ever.frtest.unit.Env.SDK_EMPTY;
+import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Execution(ExecutionMode.CONCURRENT)
@@ -33,7 +29,7 @@ public class ThreadedExecutionTests {
 	Runnable RUNNABLE = () -> {
 		try {
 			var walletTemplate = new SurfMultisigWalletTemplate();
-			for (int i = 0; i < 100_002; i++) {
+			for (int i = 0; i < 10_002; i++) {
 
 				var keys = Credentials.ofRandom(SDK_EMPTY);
 				var owners = new BigInteger[]{keys.publicKeyBigInt()};
@@ -43,6 +39,31 @@ public class ThreadedExecutionTests {
 				                       .toAddress()
 				                       .toString()
 				                       .split(":")[1];
+				if (i % 1_000 == 0) {
+					System.out.printf("Thread: %s Cycle num: %d Addr: %s%n",
+					                  Thread.currentThread().getName(), i, result);
+				}
+
+			}
+		} catch (EverSdkException | JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	};
+
+	Runnable RUNNABLE_DEPLOYS = () -> {
+		try {
+			var walletTemplate = new SurfMultisigWalletTemplate();
+			for (int i = 0; i < 100; i++) {
+
+				var keys = Credentials.ofRandom(SDK_LOCAL);
+				var owners = new BigInteger[]{keys.publicKeyBigInt()};
+				String result = null;
+				var prepared = walletTemplate.prepareDeploy(SDK_LOCAL, 0, keys, owners, 1);
+				result = walletTemplate.prepareDeploy(SDK_LOCAL, 0, keys, owners, 1)
+				                       .toAddress()
+				                       .toString()
+				                       .split(":")[1];
+				prepared.deployWithGiver(GIVER_LOCAL,EVER_ONE);
 				if (i % 50_000 == 0) {
 					System.out.printf("Thread: %s Cycle num: %d Addr: %s%n",
 					                  Thread.currentThread().getName(), i, result);
@@ -68,36 +89,38 @@ public class ThreadedExecutionTests {
 		}
 	}
 
-//	@Test
-//	public void repeatable_platform_threads() {
-//
-//		System.out.println("Start: " + Instant.now().toString());
-//		try (var executor = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory())) {
-//			for (int i = 0; i < 11; i++) {
-//				executor.submit(RUNNABLE);
-//			}
-//			executor.shutdown();
-//			executor.awaitTermination(30, TimeUnit.MINUTES);
-//		} catch (InterruptedException e) {
-//			throw new RuntimeException(e);
-//		}
-//		System.out.println("End: " + Instant.now().toString());
-//	}
-//
-//	@Test
-//	public void repeatable_virtual_threads() {
-//
-//		System.out.println("Start: " + Instant.now().toString());
-//		try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-//			for (int i = 0; i < 1001; i++) {
-//				executor.submit(RUNNABLE);
-//			}
-//			executor.shutdown();
-//			executor.awaitTermination(30, TimeUnit.MINUTES);
-//		} catch (InterruptedException e) {
-//			throw new RuntimeException(e);
-//		}
-//		System.out.println("End: " + Instant.now().toString());
-//	}
+	@Test
+	@Disabled
+	public void repeatable_platform_threads() {
+
+		System.out.println("Start: " + Instant.now().toString());
+		try (var executor = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory())) {
+			for (int i = 0; i < 8; i++) {
+				executor.submit(RUNNABLE_DEPLOYS);
+			}
+			executor.shutdown();
+			executor.awaitTermination(30, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println("End: " + Instant.now().toString());
+	}
+
+	@Test
+	@Disabled
+	public void repeatable_virtual_threads() {
+
+		System.out.println("Start: " + Instant.now().toString());
+		try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+			for (int i = 0; i < 10; i++) {
+				executor.submit(RUNNABLE);
+			}
+			executor.shutdown();
+			executor.awaitTermination(30, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println("End: " + Instant.now().toString());
+	}
 
 }

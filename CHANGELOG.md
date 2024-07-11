@@ -1,10 +1,12 @@
-### 3.0.4
+# Changelog
+
+## 3.0.4
 
 - Fixes for multi-threading in binding module
 - Some optimizations
 - Rework of subscriptions
 
-### 3.0.0
+## 3.0.0
 
 - Updated baseline JDK -> 22
 - Updated Gradle -> 8.8
@@ -13,7 +15,7 @@
 - Improved subscriptions stability
 - Added ability to stop subscriptions on custom conditions
 
-### 2.5.0
+## 2.5.0
 
 - Updated EVER-SDK -> 1.44.3
 - Fixes for contracts generation
@@ -21,7 +23,7 @@
 - Partial ABI now in all FunctionHandle calls
 - Better subscriptions
 
-### 2.4.0
+## 2.4.0
 
 - Updated EVER-SDK -> 1.44.2
 - Fixed Uint conversions
@@ -31,18 +33,18 @@
 - Lesser message size for function calls (now we send only ABI of needed function + version/header info, not full ABI)
 - Improved transaction tree debug
 
-### 2.3.0
+## 2.3.0
 
 - Updated EVER-SDK -> 1.44.1
 - Fixes for config serialization
 - Fixes for sendFrom() methods
 
-### 2.2.0
+## 2.2.0
 
 - Added contract methods for subscriptions
 - Removed Account methods
 
-### 2.1.0
+## 2.1.0
 
 - Updated EVER-SDK -> 1.43.3
 - Updated Gradle -> 8.2
@@ -57,7 +59,7 @@
 - Reworked DeployHandle for better decoupling
 - Added **generateEverscaleContracts** Gradle task for one-click contract wrappers re-generation
 
-### 1.8.0
+## 1.8.0
 
 - Added support of EVER-SDK 1.43.2 changes
 - Better exceptions for FunctionHandle::callTreeAsMap
@@ -66,7 +68,7 @@
 - Updated README examples
 - New builders for multisigs and TIP3 contracts
 
-### 1.7.0
+## 1.7.0
 
 - Added FunctionHandle::getLocal and FunctionHandle::getLocalAsMap for getters run locally on downloadad bocs
 - Added Contract::decodeMessageBoc to decode events and other messages produced by contract
@@ -75,14 +77,14 @@
 - Fixed getAsMap() NullPointerException
 - Improved type conversion
 
-### 1.6.2
+## 1.6.2
 
 - Fixed string ABI->Java decoding
 - Fixed string refs not incrementing counter in TvmCell encoding
 - Added helper methods for getting type names from AbiType objects
 - Added TvmCell::decode and TvmCell::decodeAndGet for decoding bocs
 
-### 1.6.1
+## 1.6.1
 
 - Updated code generation to fix method outputs problem
 - Added output type conversion
@@ -94,7 +96,7 @@
 - Added TIP3 tests
 - Fixed problem with TvmBuilder::store for strings
 
-### 1.6.0
+## 1.6.0
 
 - Updated EVER-SDK -> 1.42.1
 - Fixed logging in DeployHandle
@@ -106,7 +108,7 @@
 - Added deploy of CustomContract from CustomTemplate.
 - Added method DeployHandle::withCredentials to change credentials in chain style
 
-### 1.5.0
+## 1.5.0
 
 - Updated EVER-SDK -> 1.41
 - Updated dependency: Gradle -> 8.0.2
@@ -115,7 +117,7 @@
 - Reworked java4ever API to work with generated wrappers
 - Simplified writing custom wrappers
 
-### 1.4.0
+## 1.4.0
 
 - Updated EVER-SDK -> 1.40
 - Made large API rework
@@ -127,7 +129,7 @@
 - Updated dependency: Gradle -> 7.6
 - Added transaction tree logging and exception handling
 
-### 1.3.0
+## 1.3.0
 
 - Removed SLF4J facade
 - Added SLF4J 2.0 bridge to JDK Platform Logging
@@ -135,5 +137,3 @@
 - Added serialization/deserialization helpers to Sdk
 - Switched to "api" type dependencies to export binding & jackson to library users
 - Added parseStruct() method for faster struct parsing in ABI responses
-
-### 1.2.0

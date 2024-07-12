@@ -12,12 +12,12 @@ import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
-import tech.deplant.java4ever.framework.datatype.Address;
-import tech.deplant.java4ever.framework.datatype.TvmCell;
+import tech.deplant.java4ever.framework.datatype.*;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.math.BigInteger;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,18 +38,31 @@ public class DeployHandleTest {
 		// рандомные ключи
 		var keys = Env.RNG_KEYS();
 		// тащим код и аби EVER Wallet
+		var pubKey0x = "0x" + keys.publicKey();
 		var everWalletCode = Base64.getEncoder().encodeToString(new ByteResource("artifacts/everwallet/Wallet.code.boc").get());
-		Map<String, Object> initDataMap = Map.of("publicKey", "0x" + keys.publicKey(), "timestamp", 0);
+		Map<String, Object> initDataMap = Map.of("publicKey", pubKey0x, "timestamp", 0);
 		var everWalletAbi = ContractAbi.ofResource("artifacts/everwallet/Wallet.abi.json");
+
 		// кодируем начальное состояние
-		var initialData = EverSdk.await(Abi.encodeInitialData(Env.SDK_LOCAL,
-		                                               everWalletAbi.ABI(),
-		                                               (ObjectNode) JsonContext.convertAbiMap(initDataMap,
-		                                                                                      JsonNode.class),
-		                                                      "0x" + keys.publicKey(),
-		                                               null)).data();
-		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL, everWalletCode, initialData, null, null, null, null, null))
+
+		List<AbiValue> types = List.of(Uint.of(256, keys.publicKeyBigInt()),
+				                       Uint.of(64, "0"));
+
+		var builder = new TvmBuilder();
+		builder.store(types.toArray(AbiValue[]::new));
+
+		var initData = builder.toCell(SDK_EMPTY).cellBoc();
+
+//		var initialData = EverSdk.await(Abi.encodeInitialData(Env.SDK_LOCAL,
+//		                                               everWalletAbi.ABI(),
+//		                                               (ObjectNode) JsonContext.convertAbiMap(initDataMap,
+//		                                                                                      JsonNode.class),
+//														pubKey0x,
+//		                                               null)).data();
+
+		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL, everWalletCode, initData, null, null, null, null, null))
 		                       .stateInit();
+		System.out.println("State Init variable - " + stateInit);
 		// адрес получился
 		var everWalletAddress = "0:%s".formatted(new TvmCell(stateInit).bocHash(Env.SDK_LOCAL));
 		System.out.println(everWalletAddress);
@@ -59,14 +72,15 @@ public class DeployHandleTest {
 		Map<String, Object> inputMap = Map.of("dest",
 		                                      "0:856f54b9126755ce6ecb7c62b7ad8c94353f7797c03ab82eda63d11120ed3ab7",
 		                                      "value",
-		                                      EVER_ONE,
-		                                      // amount in nano EVER
+		                                      EVER_ONE, // amount in nano EVER
 		                                      "bounce",
 		                                      false,
 		                                      "flags",
 		                                      3,
 		                                      "payload",
-		                                      TvmCell.EMPTY.cellBoc());
+		                                      TvmCell.EMPTY.cellBoc()
+		);
+
 		var callHandle = new FunctionHandle<Map>(Map.class,
 		                                         SDK_LOCAL,
 		                                         new Address(everWalletAddress),
@@ -77,20 +91,36 @@ public class DeployHandleTest {
 		                                         null);
 		var body = EverSdk.await(Abi.encodeMessageBody(Env.SDK_LOCAL,
 		                                               everWalletAbi.ABI(),
-		                                               callHandle.toCallSet(),
+				                                       callHandle.toCallSet(),
 		                                               false,
 		                                               keys.signer(),
 		                                               null,
 		                                               everWalletAddress,
 		                                               null)).body();
 
-		var message = EverSdk.await(Boc.encodeExternalInMessage(Env.SDK_LOCAL,null,everWalletAddress,stateInit,body, null)).message();
+		var message = EverSdk.await(Boc.encodeExternalInMessage(
+				Env.SDK_LOCAL,
+				null,
+				everWalletAddress,
+				stateInit,
+				body,
+				null)).message();
 
 		// отправляем сообщение и ждем результат
 
 		var request = EverSdk.await(Processing.sendMessage(SDK_LOCAL,message,everWalletAbi.ABI(),false,null));
 
-		var transaction = EverSdk.await(Processing.waitForTransaction(SDK_LOCAL,everWalletAbi.ABI(), message,request.shardBlockId(),false,request.sendingEndpoints(),null)).transaction();
+		var transaction = EverSdk.await(
+				Processing.waitForTransaction(
+						SDK_LOCAL,
+						everWalletAbi.ABI(),
+						message,
+						request.shardBlockId(),
+						false,
+						request.sendingEndpoints(),
+						null))
+				.transaction();
+
 		System.out.println("Contract deployed");
 		System.out.println("Address: " + everWalletAddress);
 		System.out.println("Contract deployed. Transaction hash: " + transaction.get("id").asText());

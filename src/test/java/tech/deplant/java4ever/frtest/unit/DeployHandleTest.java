@@ -12,12 +12,12 @@ import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
-import tech.deplant.java4ever.framework.datatype.Address;
-import tech.deplant.java4ever.framework.datatype.TvmCell;
+import tech.deplant.java4ever.framework.datatype.*;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.math.BigInteger;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +32,29 @@ public class DeployHandleTest {
 	public static void init_sdk_and_other_vars() throws Throwable {
 		Env.INIT();
 	}
+
+//	@Test
+//	public void signature_id_deploy() throws Throwable {
+//		var boxHandle = EverSdk.await(Crypto.registerSigningBox(SDK_LOCAL, new AppSigningBox() {
+//			@Override
+//			public String getPublicKey() {
+//				return "";
+//			}
+//
+//			@Override
+//			public String sign(String unsigned) {
+//				return "";
+//			}
+//		})).handle();
+//		var signer = new Abi.Signer.SigningBox(keyPair())
+//		var keys = Env.RNG_KEYS();
+//		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL, 0,
+//		                                                                     keys,
+//		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
+//		                                                                     1);
+//		var contract1 = deployStatement.deployWithGiver(Env.GIVER_LOCAL, EVER_ONE);
+//		assertTrue(contract1.account().isActive());
+//	}
 
 	@Test
 	public void check_ever_wallet_send() throws Throwable {
@@ -48,7 +71,12 @@ public class DeployHandleTest {
 		                                                                                      JsonNode.class),
 		                                                      "0x" + keys.publicKey(),
 		                                               null)).data();
-		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL, everWalletCode, initialData, null, null, null, null, null))
+		List<AbiValue> types = List.of(Uint.of(256, keys.publicKeyBigInt()),
+		                               Uint.of(64, 0));
+		var builder = new TvmBuilder();
+		builder.store(types.toArray(AbiValue[]::new));
+		var cellData = builder.toCell(Env.SDK_LOCAL);
+		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL, everWalletCode, cellData.cellBoc(), null, null, null, null, null))
 		                       .stateInit();
 		// адрес получился
 		var everWalletAddress = "0:%s".formatted(new TvmCell(stateInit).bocHash(Env.SDK_LOCAL));

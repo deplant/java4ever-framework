@@ -26,6 +26,10 @@ public record Address(int wid, BigInteger value) implements AbiValue<String> {
 		this(Integer.parseInt(address.split(":")[0]), new BigInteger(address.split(":")[1], 16));
 	}
 
+	public Address(int wid, String hash) {
+		this(wid, Uint.of(256,hash).toBigInteger());
+	}
+
 	/**
 	 * Instantiates a new Address.
 	 *

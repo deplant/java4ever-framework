@@ -61,6 +61,7 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 			case String str when str.length() >= 3 &&
 			                     ("-0x".equals(str.substring(0, 3)) || "0x".equals(str.substring(0, 2))) ->
 					new Uint(size, Numbers.hexStringToBigInt(str));
+			case String str when !str.matches("[0-9]+") -> new Uint(size, Numbers.hexStringToBigInt(str));
 			case String str -> new Uint(size, new BigInteger(str));
 			default -> throw new IllegalStateException(
 					"Unexpected value: " + objectValue + " class: " + objectValue.getClass().getName());

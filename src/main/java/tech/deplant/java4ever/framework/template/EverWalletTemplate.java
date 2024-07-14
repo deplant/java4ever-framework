@@ -1,16 +1,23 @@
 package tech.deplant.java4ever.framework.template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import tech.deplant.java4ever.binding.Boc;
-import tech.deplant.java4ever.binding.EverSdk;
-import tech.deplant.java4ever.binding.EverSdkException;
+import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.ContractAbi;
+import tech.deplant.java4ever.framework.Credentials;
+import tech.deplant.java4ever.framework.contract.EverWalletContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmBuilder;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.datatype.Uint;
 
-public class EverWalletTemplate {
+import java.math.BigInteger;
+
+public record EverWalletTemplate(TvmCell code, ContractAbi abi) {
+
+	public EverWalletTemplate() throws JsonProcessingException {
+		this(CODE(),DEFAULT_ABI());
+	}
+
 	public static TvmCell CODE() {
 		return new TvmCell(
 				"te6cckEBBgEA/AABFP8A9KQT9LzyyAsBAgEgAgMABNIwAubycdcBAcAA8nqDCNcY7UTQgwfXAdcLP8j4KM8WI88WyfkAA3HXAQHDAJqDB9cBURO68uBk3oBA1wGAINcBgCDXAVQWdfkQ8qj4I7vyeWa++COBBwiggQPoqFIgvLHydAIgghBM7mRsuuMPAcjL/8s/ye1UBAUAmDAC10zQ+kCDBtcBcdcBeNcB10z4AHCAEASqAhSxyMsFUAXPFlAD+gLLaSLQIc8xIddJoIQJuZgzcAHLAFjPFpcwcQHLABLM4skB+wAAPoIQFp4+EbqOEfgAApMg10qXeNcB1AL7AOjRkzLyPOI+zYS/");
@@ -37,16 +44,49 @@ public class EverWalletTemplate {
 				"    }\n" + "  ]\n" + "}");
 	}
 
-	public TvmCell getInitialData(int contextId, String publicKey, long timestamp) throws EverSdkException {
-		return new TvmBuilder().store(Uint.of(256, publicKey), Uint.of(64, 0)).toCell(contextId);
+	public TvmCell getInitialData(int contextId, String publicKey, BigInteger timestamp) throws EverSdkException {
+		return new TvmBuilder().store(Uint.of(256, publicKey), Uint.of(64, timestamp)).toCell(contextId);
 	}
 
-	public TvmCell getStateInit(int contextId, String publicKey, long timestamp) throws EverSdkException {
+	public TvmCell getStateInit(int contextId, String publicKey, BigInteger timestamp) throws EverSdkException {
 		return new TvmCell(EverSdk.await(Boc.encodeStateInit(contextId, CODE().cellBoc(), getInitialData(contextId, publicKey, timestamp).cellBoc(), null, null, null, null, null))
 		                          .stateInit());
 	}
 
-	public Address getAddress(int contextId, int wid, String publicKey, long timestamp) throws EverSdkException {
-		return new Address(0,getStateInit(contextId, publicKey, timestamp).bocHash(contextId));
+	public Address getAddress(int contextId, int wid, String publicKey, BigInteger timestamp) throws EverSdkException {
+		return new Address(wid,getStateInit(contextId, publicKey, timestamp).bocHash(contextId));
+	}
+
+	public EverWalletContract deployAndSend(int contextId, int wid, Credentials keys, BigInteger timestamp, Address to, BigInteger value) throws EverSdkException, JsonProcessingException {
+		var stateInit = getStateInit(contextId, keys.publicKey(), timestamp);
+		var targetAddress = new Address(wid,stateInit.bocHash(contextId));
+		//var deploySet = new Abi.DeploySet(null, null, stateInit.cellBoc(), 0L, null, null);
+		var futureContract = new EverWalletContract(contextId, targetAddress, keys);
+		var functionCall = futureContract.sendTransaction(to, value, true);
+		var body = EverSdk.await(Abi.encodeMessageBody(contextId,
+		                                               abi().ABI(),
+		                                               functionCall.toCallSet(),
+		                                               false,
+		                                               keys.signer(),
+		                                               null,
+		                                               targetAddress.makeAddrStd(),
+		                                               null)).body();
+
+		var message = EverSdk.await(Boc.encodeExternalInMessage(contextId,
+		                                                        null,
+		                                                        targetAddress.makeAddrStd(),
+		                                                        stateInit.cellBoc(),
+		                                                        body,
+		                                                        null)).message();
+		var request = EverSdk.await(Processing.sendMessage(contextId, message, abi().ABI(), false, null));
+
+		var transaction = EverSdk.await(Processing.waitForTransaction(contextId,
+		                                                              abi().ABI(),
+		                                                              message,
+		                                                              request.shardBlockId(),
+		                                                              false,
+		                                                              request.sendingEndpoints(),
+		                                                              null)).transaction();
+		return futureContract;
 	}
 }

@@ -10,9 +10,11 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.ContractAbi;
+import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.FunctionHandle;
 import tech.deplant.java4ever.framework.artifact.ByteResource;
 import tech.deplant.java4ever.framework.datatype.*;
+import tech.deplant.java4ever.framework.template.EverWalletTemplate;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.math.BigInteger;
@@ -57,27 +59,55 @@ public class DeployHandleTest {
 //	}
 
 	@Test
+	public void check_ever_wallet_send_short() throws Throwable {
+		int i = 0;
+		var template = new EverWalletTemplate();
+		while(i < 5) {
+			var seed = Env.RNG_SEED(); // creates new seed
+			var keys = seed.deriveCredentials(SDK_EMPTY); // derives keys from seed
+			// let's calculate future EVER Wallet address
+			var address = template.getAddress(SDK_LOCAL,0,keys.publicKey(),BigInteger.ZERO);
+			// specify our conditions when we want to deploy contract
+			if (address.makeAddrStd().contains("7777")) {
+				// let's transfer needed funds for 1st transaction
+				GIVER_LOCAL.give(address, EVER_TWO).call();
+				// deploy EVER Wallet
+				var contract = template.deployAndSend(Env.SDK_LOCAL, 0, keys, BigInteger.ZERO, Address.ZERO, EVER_ONE);
+				System.out.printf("Deployed contract: %s%n", contract.address());
+				System.out.printf("Seed: %s, public: %s%n", seed.phrase(), keys.publicKey());
+				i++;
+			}
+		}
+	}
+
+	@Test
 	public void check_ever_wallet_send() throws Throwable {
 		// рандомные ключи
 		var keys = Env.RNG_KEYS();
 		// тащим код и аби EVER Wallet
-		var everWalletCode = Base64.getEncoder().encodeToString(new ByteResource("artifacts/everwallet/Wallet.code.boc").get());
+		var everWalletCode = Base64.getEncoder()
+		                           .encodeToString(new ByteResource("artifacts/everwallet/Wallet.code.boc").get());
 		Map<String, Object> initDataMap = Map.of("publicKey", "0x" + keys.publicKey(), "timestamp", 0);
 		var everWalletAbi = ContractAbi.ofResource("artifacts/everwallet/Wallet.abi.json");
 		// кодируем начальное состояние
 		var initialData = EverSdk.await(Abi.encodeInitialData(Env.SDK_LOCAL,
-		                                               everWalletAbi.ABI(),
-		                                               (ObjectNode) JsonContext.convertAbiMap(initDataMap,
-		                                                                                      JsonNode.class),
+		                                                      everWalletAbi.ABI(),
+		                                                      (ObjectNode) JsonContext.convertAbiMap(initDataMap,
+		                                                                                             JsonNode.class),
 		                                                      "0x" + keys.publicKey(),
-		                                               null)).data();
-		List<AbiValue> types = List.of(Uint.of(256, keys.publicKeyBigInt()),
-		                               Uint.of(64, 0));
+		                                                      null)).data();
+		List<AbiValue> types = List.of(Uint.of(256, keys.publicKeyBigInt()), Uint.of(64, 0));
 		var builder = new TvmBuilder();
 		builder.store(types.toArray(AbiValue[]::new));
 		var cellData = builder.toCell(Env.SDK_LOCAL);
-		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL, everWalletCode, cellData.cellBoc(), null, null, null, null, null))
-		                       .stateInit();
+		var stateInit = EverSdk.await(Boc.encodeStateInit(Env.SDK_LOCAL,
+		                                                  everWalletCode,
+		                                                  cellData.cellBoc(),
+		                                                  null,
+		                                                  null,
+		                                                  null,
+		                                                  null,
+		                                                  null)).stateInit();
 		// адрес получился
 		var everWalletAddress = "0:%s".formatted(new TvmCell(stateInit).bocHash(Env.SDK_LOCAL));
 		System.out.println(everWalletAddress);
@@ -112,13 +142,35 @@ public class DeployHandleTest {
 		                                               everWalletAddress,
 		                                               null)).body();
 
-		var message = EverSdk.await(Boc.encodeExternalInMessage(Env.SDK_LOCAL,null,everWalletAddress,stateInit,body, null)).message();
+		var message = EverSdk.await(Boc.encodeExternalInMessage(Env.SDK_LOCAL,
+		                                                        null,
+		                                                        everWalletAddress,
+		                                                        stateInit,
+		                                                        body,
+		                                                        null)).message();
 
 		// отправляем сообщение и ждем результат
 
-		var request = EverSdk.await(Processing.sendMessage(SDK_LOCAL,message,everWalletAbi.ABI(),false,null));
+		var request = EverSdk.await(Processing.sendMessage(SDK_LOCAL, message, everWalletAbi.ABI(), false, null));
 
-		var transaction = EverSdk.await(Processing.waitForTransaction(SDK_LOCAL,everWalletAbi.ABI(), message,request.shardBlockId(),false,request.sendingEndpoints(),null)).transaction();
+		var transaction = EverSdk.await(Processing.waitForTransaction(SDK_LOCAL,
+		                                                              everWalletAbi.ABI(),
+		                                                              message,
+		                                                              request.shardBlockId(),
+		                                                              false,
+		                                                              request.sendingEndpoints(),
+		                                                              null)).transaction();
+
+//		EverSdk.await(Processing.processMessage(Env.SDK_LOCAL,
+//		                                        everWalletAbi.ABI(),
+//		                                        everWalletAddress,
+//		                                        new Abi.DeploySet(null, null, stateInit, 0L, null, null),
+//		                                        callHandle.toCallSet(),
+//		                                        keys.signer(),
+//		                                        null,
+//		                                        null,
+//		                                        false));
+
 		System.out.println("Contract deployed");
 		System.out.println("Address: " + everWalletAddress);
 		System.out.println("Contract deployed. Transaction hash: " + transaction.get("id").asText());
@@ -128,7 +180,8 @@ public class DeployHandleTest {
 	@Test
 	public void contract_is_active_after_deploy() throws Throwable {
 		var keys = Env.RNG_KEYS();
-		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL, 0,
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,
+		                                                                     0,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
 		                                                                     1);
@@ -151,7 +204,8 @@ public class DeployHandleTest {
 	public void first_deployment_passes_second_throws_with_414() throws Throwable {
 		var keys = Env.RNG_KEYS();
 
-		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL, 0,
+		var deployStatement = new SafeMultisigWalletTemplate().prepareDeploy(Env.SDK_LOCAL,
+		                                                                     0,
 		                                                                     keys,
 		                                                                     new BigInteger[]{keys.publicKeyBigInt()},
 		                                                                     1);

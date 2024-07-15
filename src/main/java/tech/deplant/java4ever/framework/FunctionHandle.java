@@ -242,23 +242,25 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * @throws EverSdkException the ever sdk exception
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return new TvmCell(EverSdk.await(Abi.encodeMessageBody(contract().contextId(),
-		                                                       contract().abi().functionCallABI(functionName()),
-		                                                       toCallSet(),
-		                                                       true,
-		                                                       toSigner(),
-		                                                       null,
-		                                                       contract().address().makeAddrStd(),
-		                                                       null)).body());
+		return toPayload(true);
 	}
 
 	/**
-	 * To signer abi . signer.
+	 * Encodes internal message string. Result of this method can be used as a payload for internal transactions
+	 * to pass function calls and inputs with transfer.
 	 *
-	 * @return the abi . signer
+	 * @return TvmCell of the internal call payload
+	 * @throws EverSdkException the ever sdk exception
 	 */
-	public Abi.Signer toSigner() {
-		return Objs.notNullElse(contract().credentials(), Credentials.NONE).signer();
+	public TvmCell toPayload(boolean isInternal) throws EverSdkException {
+		return new TvmCell(EverSdk.await(Abi.encodeMessageBody(contract().contextId(),
+		                                                       contract().abi().functionCallABI(functionName()),
+		                                                       toCallSet(),
+		                                                       isInternal,
+		                                                       contract().signer(),
+		                                                       null,
+		                                                       contract().address().makeAddrStd(),
+		                                                       getSignature())).body());
 	}
 
 	/**
@@ -286,9 +288,9 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                                contract().address().makeAddrStd(),
 		                                                                null,
 		                                                                toCallSet(),
-		                                                                toSigner(),
+		                                                                contract().signer(),
 		                                                                null,
-		                                                                null));
+		                                                                getSignature()));
 		for (var map : result.result()) {
 			String boc = map.get("boc").asText();
 			return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
@@ -345,9 +347,9 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                                contract().address().makeAddrStd(),
 		                                                                null,
 		                                                                toCallSet(),
-		                                                                toSigner(),
+		                                                                contract().signer(),
 		                                                                null,
-		                                                                null));
+		                                                                getSignature()));
 		return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
 		                                                    msg.message(),
 		                                                    boc,
@@ -378,9 +380,9 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                                                                contract().address().makeAddrStd(),
 		                                                                null,
 		                                                                toCallSet(),
-		                                                                toSigner(),
+		                                                                contract().signer(),
 		                                                                null,
-		                                                                null));
+		                                                                getSignature()));
 		return Optional.ofNullable(EverSdk.await(Tvm.runExecutor(contract().contextId(),
 		                                                         msg.message(),
 		                                                         new Tvm.AccountForExecutor.Account(boc,
@@ -688,15 +690,25 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return abiSet.toArray(ContractAbi[]::new);
 	}
 
+	private Long getSignature() {
+		return switch (EverSdk.contextConfig(contract().contextId())) {
+			case null -> null;
+			case Client.ClientConfig conf -> switch (conf.network()) {
+				case null -> null;
+				case Client.NetworkConfig ntwrk -> ntwrk.signatureId();
+			};
+		};
+	}
+
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
 		return EverSdk.await(Processing.processMessage(contract().contextId(),
 		                                               contract().abi().functionCallABI(functionName()),
 		                                               contract().address().makeAddrStd(),
 		                                               null,
 		                                               toCallSet(),
-		                                               toSigner(),
+		                                               contract().signer(),
 		                                               null,
-		                                               null,
+		                                               getSignature(),
 		                                               false));
 	}
 

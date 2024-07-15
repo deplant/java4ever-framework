@@ -98,7 +98,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
 
 ```groovy
 dependencies {
-    implementation 'tech.deplant.java4ever:java4ever-framework:3.0.4'
+    implementation 'tech.deplant.java4ever:java4ever-framework:3.1.2'
 }
 ```
 
@@ -109,7 +109,7 @@ dependencies {
 <dependency>
     <groupId>tech.deplant.java4ever</groupId>
     <artifactId>java4ever-framework</artifactId>
-    <version>3.0.4</version>
+    <version>3.1.2</version>
 </dependency>
 ```
 
@@ -247,6 +247,31 @@ String pk = keys.publicKey();
 ```java
 var seed = new Seed("your seed phrase with 12 words or 24 with second constructor param");
 var keys = new Credentials("publickey_string","secretkey_string");
+```
+
+#### Using Signing Box
+
+```java
+int context = EverSdk.createDefault();
+var keys = Env.RNG_KEYS();
+// create implementation of your handle
+var boxHandle = EverSdk.await(Crypto.registerSigningBox(context, new AppSigningBox() {
+    @Override
+    public String getPublicKey() {
+        return "";
+    }
+
+    @Override
+    public String sign(String unsigned) {
+        return "";
+    }
+})).handle();
+// use this handle when creating contract object
+var contract = new EverWalletContract(context, 
+                                      new Address("0:9400ec4b8629b5293bb6798bbcf3dd25d72e4f114226b5547777d0fc98fe53fa"), 
+                                      new Abi.Signer.SigningBox(boxHandle));
+// now contract calls will use your signing box
+contract.sendTransaction(dest, value, bounce).call();
 ```
 
 ### Smart-contracts
@@ -462,6 +487,52 @@ deployHandle.deployWithGiver(giver, CurrencyUnit.VALUE(EVER,"1.25"));
 
 This is possible as all Java4Ever wallet classes are implementing Giver interface. 
 You can also generate wrappers that implements Giver interface.
+
+
+#### Offline deployment
+
+Example of creation and signing offline messages for later sending. 
+
+```java
+int offlineContext = EverSdk.builder()
+                     .networkSignatureId(1L)
+                     .networkQueryTimeout(300_000L)
+                     .build();
+int i = 0;
+var template = new EverWalletTemplate();
+// let's generate 5 addresses that match certain condition and send them 1 ever
+Predicate<Address> addressCondition = address -> address.makeAddrStd().contains("7777");
+while (i < 5) {
+    var seed = Env.RNG_SEED(); // creates new seed
+    var keys = seed.deriveCredentials(offlineContext); // derives keys from seed
+    // let's calculate future EVER Wallet address
+    var stateInit = template.getStateInit(offlineContext, keys.publicKey(), BigInteger.ZERO);
+    var address = template.getAddress(offlineContext, 0, stateInit);
+    
+    // check conditions if we want to deploy contract
+    if (addressCondition.test(address)) {
+        // let's create message bodies offline
+        // here we send sendTransaction to ourselves
+        var body = new EverWalletContract(offlineContext, address, keys).sendTransaction(address, EVER_ONE, false)
+                                                                     .toPayload(false);
+
+        System.out.printf("Address: %s%n", address);
+        System.out.printf("Seed: %s, public: %s%n", seed.phrase(), keys.publicKey());
+        System.out.printf("Message body: %s%n", body);
+        System.out.printf("State Init: %s%n", stateInit);
+
+        int onlineContext = EverSdk.createWithEndpoint("https://gql.venom.foundation/graphql");
+        // let's send messages when we're online
+        EverSdk.sendExternalMessage(onlineContext,
+                                    address.makeAddrStd(),
+                                    EverWalletTemplate.DEFAULT_ABI().ABI(),
+                                    stateInit.cellBoc(),
+                                    body.cellBoc(),
+                                    null);
+        i++;
+    }
+}
+```
 
 ### Subsriptions
 

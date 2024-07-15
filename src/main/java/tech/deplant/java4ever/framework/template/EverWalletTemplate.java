@@ -53,40 +53,44 @@ public record EverWalletTemplate(TvmCell code, ContractAbi abi) {
 		                          .stateInit());
 	}
 
+	public Address getAddress(int contextId, int wid, TvmCell stateInit) throws EverSdkException {
+		return new Address(wid,stateInit.bocHash(contextId));
+	}
+
 	public Address getAddress(int contextId, int wid, String publicKey, BigInteger timestamp) throws EverSdkException {
 		return new Address(wid,getStateInit(contextId, publicKey, timestamp).bocHash(contextId));
 	}
 
-	public EverWalletContract deployAndSend(int contextId, int wid, Credentials keys, BigInteger timestamp, Address to, BigInteger value) throws EverSdkException, JsonProcessingException {
+	public String getMessageBody(int contextId, int wid, Credentials keys, BigInteger timestamp, Address to, BigInteger value) throws EverSdkException, JsonProcessingException {
 		var stateInit = getStateInit(contextId, keys.publicKey(), timestamp);
-		var targetAddress = new Address(wid,stateInit.bocHash(contextId));
-		//var deploySet = new Abi.DeploySet(null, null, stateInit.cellBoc(), 0L, null, null);
-		var futureContract = new EverWalletContract(contextId, targetAddress, keys);
-		var functionCall = futureContract.sendTransaction(to, value, true);
-		var body = EverSdk.await(Abi.encodeMessageBody(contextId,
-		                                               abi().ABI(),
-		                                               functionCall.toCallSet(),
-		                                               false,
-		                                               keys.signer(),
-		                                               null,
-		                                               targetAddress.makeAddrStd(),
-		                                               null)).body();
-
-		var message = EverSdk.await(Boc.encodeExternalInMessage(contextId,
+		var targetAddress = getAddress(contextId, wid, stateInit);
+		var body =  new EverWalletContract(contextId, targetAddress, keys).sendTransaction(to, value, true).toPayload();
+		return EverSdk.await(Boc.encodeExternalInMessage(contextId,
 		                                                        null,
 		                                                        targetAddress.makeAddrStd(),
 		                                                        stateInit.cellBoc(),
-		                                                        body,
+		                                                        body.cellBoc(),
 		                                                        null)).message();
-		var request = EverSdk.await(Processing.sendMessage(contextId, message, abi().ABI(), false, null));
-
-		var transaction = EverSdk.await(Processing.waitForTransaction(contextId,
-		                                                              abi().ABI(),
-		                                                              message,
-		                                                              request.shardBlockId(),
-		                                                              false,
-		                                                              request.sendingEndpoints(),
-		                                                              null)).transaction();
-		return futureContract;
 	}
+
+//	public EverWalletContract deployAndSend(int contextId, int wid, Credentials keys, BigInteger timestamp, Address to, BigInteger value) throws EverSdkException, JsonProcessingException {
+//		EverSdk.await(Boc.encodeExternalInMessage(contextId,
+//		                                          null,
+//		                                          targetAddress.makeAddrStd(),
+//		                                          stateInit.cellBoc(),
+//		                                          body.cellBoc(),
+//		                                          null)).message();
+//		var body =  getMessageBody(contextId, wid, keys, timestamp, to, value);
+//
+//		var request = EverSdk.await(Processing.sendMessage(contextId, message, abi().ABI(), false, null));
+//
+//		var transaction = EverSdk.await(Processing.waitForTransaction(contextId,
+//		                                                              abi().ABI(),
+//		                                                              message,
+//		                                                              request.shardBlockId(),
+//		                                                              false,
+//		                                                              request.sendingEndpoints(),
+//		                                                              null)).transaction();
+//		return futureContract;
+//	}
 }

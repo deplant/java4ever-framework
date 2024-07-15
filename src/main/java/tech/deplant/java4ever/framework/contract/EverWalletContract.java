@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.FunctionHandle;
@@ -44,6 +45,17 @@ public class EverWalletContract extends GiverContract {
 		super(sdk, String.valueOf(address), DEFAULT_ABI(), credentials);
 	}
 
+	/**
+	 * Instantiates a new EVER WAllet contract.
+	 *
+	 * @param sdk         the sdk
+	 * @param address     the address
+	 * @param signer the credentials
+	 */
+	public EverWalletContract(int sdk, Address address, Abi.Signer signer) throws JsonProcessingException {
+		super(sdk, String.valueOf(address), DEFAULT_ABI(), signer);
+	}
+
 	@Override
 	public FunctionHandle<Void> sendTransaction(Address dest, BigInteger value, Boolean bounce) {
 		Map<String, Object> inputMap = Map.of("dest",
@@ -58,10 +70,7 @@ public class EverWalletContract extends GiverContract {
 		                                      "payload",
 		                                      TvmCell.EMPTY.cellBoc());
 		return new FunctionHandle<Void>(Void.class,
-		                                contextId(),
-		                                address(),
-		                                abi(),
-		                                credentials(),
+		                                this,
 		                                "sendTransaction",
 		                                inputMap,
 		                                null);

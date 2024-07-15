@@ -119,6 +119,8 @@ public interface Contract {
 	 */
 	Credentials credentials();
 
+	Abi.Signer signer();
+
 //	/**
 //	 * Returns actual tvm.pubkey() of smart contract. If you want to get Credentials specified at
 //	 * OwnedContract constructor - use credentials() method.

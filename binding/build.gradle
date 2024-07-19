@@ -1,0 +1,197 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+    id "signing"
+}
+
+group v_groupId
+version v_version
+
+repositories {
+    mavenLocal()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
+        credentials {
+            username = githubUsername
+            password = githubUploadToken
+        }
+    }
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/gen/java']
+        }
+    }
+}
+
+dependencies {
+
+    // RUNTIME **************************
+    api "tech.deplant.commons:commons-core:$commonsVersion" // Deplant Java Commons
+    api "tech.deplant.javapoet:javapoet-core:$javapoetVersion" // Javapoet
+
+    // JSON
+    api platform("com.fasterxml.jackson:jackson-bom:$jacksonVersion")
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.fasterxml.jackson.module:jackson-module-parameter-names"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+
+    // TESTS **************************
+
+    // SLF4J (Tests part)
+    testImplementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion"     // SLF4J Implementation of System.Logger (JEP 264: Platform Logging API and Service)
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
+    // JUnit 5
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+    testImplementation "com.yegor256:jping:$jpingVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
+            credentials {
+                username = githubUsername
+                password = githubUploadToken
+            }
+        }
+        maven {
+            name = "Sonatype"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from components.java
+
+            groupId = v_groupId
+            artifactId = v_artifactId
+            version = v_version
+
+            pom {
+                name = v_artifactId
+                description = "Binding library for Everscale DApp development"
+                url = "https://github.com/" + v_repository
+//                properties = [
+//                        myProp          : "value",
+//                        "prop.with.dots": "anotherValue"
+//                ]
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = v_developerId
+                        name = v_developerName
+                        email = v_developerEmail
+                        organization = v_org
+                        organizationUrl = v_url
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/" + v_repository + ".git"
+                    developerConnection = "scm:git:ssh://github.com/" + v_repository + ".git"
+                    url = "http://github.com/" + v_repository
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.gpr
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Enable-Native-Access': 'java4ever.binding',
+        )
+    }
+}
+
+// Task for JavaPoet generation of EVER-SDK API
+task generateEverSdkApi(type: JavaExec) {
+    group = "other"
+    description = "Generates Java Bindings for EVER-SDK"
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = "tech.deplant.java4ever.gen.EverSdkGenerator"
+}
+
+// Task for JavaPoet generation of EVER-SDK API
+task generateGraphQLApi(type: JavaExec) {
+    group = "other"
+    description = "Generates GraphQL Objects for Everscale/Venom GQL"
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = "tech.deplant.java4ever.gen.GqlGenerator"
+}
+
+// Task for Jextract gerneration of FFM Bridge
+tasks.register('generateFfmApiBridge') {
+    group = "other"
+    description = "Generates FFM API Bridge to ton_client lib with jextract utility. Make sure to specify path to jextract executable with `jextractPath` property in your personal gradle.properties file"
+    def stdout = new ByteArrayOutputStream()
+    println "FFM API generation starting..."
+    println "jextract path: ${jextractPath}"
+    exec {
+        workingDir "${projectDir}"
+        executable jextractPath
+        standardOutput = stdout
+        args "--output", "${projectDir}/src/gen/java", "--target-package", "tech.deplant.java4ever.binding.ffi", "--header-class-name", "ton_client", "${projectDir}/jextract/ton_client.h"
+    }
+    stdout.toString().trim()
+    println "FFM API generation ended."
+}
+
+tasks.withType(Javadoc).configureEach {
+    javadocTool = javaToolchains.javadocToolFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+    options.addBooleanOption('html5', true)
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+    options.addStringOption('-release', "$jdkVersion")
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = JavaLanguageVersion.of(jdkVersion)
+    targetCompatibility = JavaLanguageVersion.of(jdkVersion)
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+}
+
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+}
+
+tasks.withType(Test) {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+    useJUnitPlatform()
+}

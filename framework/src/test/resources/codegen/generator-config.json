@@ -1,0 +1,116 @@
+{
+  "targetDir": "src/gen/java",
+  "contractPkg": "tech.deplant.java4ever.framework.contract",
+  "templatePkg": "tech.deplant.java4ever.framework.template",
+  "contractList": [
+    {
+      "name": "GiverV2",
+      "abi": "artifacts/giver/GiverV2.abi.json",
+      "interfaces": [
+        "GiverContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "SafeMultisigWallet",
+      "abi": "artifacts/multisig/SafeMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SafeMultisigWallet.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "SetcodeMultisigWallet",
+      "abi": "artifacts/multisig/SetcodeMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SetcodeMultisigWallet.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "SurfMultisigWallet",
+      "abi": "artifacts/multisig/SurfMultisigWallet.abi.json",
+      "tvc": "artifacts/multisig/SurfMultisigWallet.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig2",
+      "name": "SafeMultisigWallet2",
+      "abi": "artifacts/multisig2/SafeMultisig.abi.json",
+      "tvc": "artifacts/multisig2/SafeMultisig.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract2"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig2",
+      "name": "SetcodeMultisigWallet2",
+      "abi": "artifacts/multisig2/SetcodeMultisig.abi.json",
+      "tvc": "artifacts/multisig2/SetcodeMultisig.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract2"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig2",
+      "name": "UpdateMultisigWallet2",
+      "abi": "artifacts/multisig2/UpdateMultisig.abi.json",
+      "tvc": "artifacts/multisig2/UpdateMultisig.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract2"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip3",
+      "name": "TIP3TokenRoot",
+      "abi": "artifacts/tip31/TokenRoot.abi.json",
+      "tvc": "artifacts/tip31/TokenRoot.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip3",
+      "name": "TIP3TokenWallet",
+      "abi": "artifacts/tip31/TokenWallet.abi.json",
+      "tvc": "artifacts/tip31/TokenWallet.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip4",
+      "name": "TIP4Collection",
+      "abi": "artifacts/tip4/Collection.abi.json",
+      "tvc": "artifacts/tip4/Collection.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip4",
+      "name": "TIP4Index",
+      "abi": "artifacts/tip4/Index.abi.json",
+      "tvc": "artifacts/tip4/Index.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip4",
+      "name": "TIP4IndexBasis",
+      "abi": "artifacts/tip4/IndexBasis.abi.json",
+      "tvc": "artifacts/tip4/IndexBasis.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip4",
+      "name": "TIP4Nft",
+      "abi": "artifacts/tip4/Nft.abi.json",
+      "tvc": "artifacts/tip4/Nft.tvc"
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.tip4",
+      "name": "TIP4Wallet",
+      "abi": "artifacts/tip4/Wallet.abi.json",
+      "tvc": "artifacts/tip4/Wallet.tvc"
+    }
+  ]
+}

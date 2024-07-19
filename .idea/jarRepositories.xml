@@ -24,11 +24,6 @@
     <remote-repository>
       <option name="id" value="GitHubPackages" />
       <option name="name" value="GitHubPackages" />
-      <option name="url" value="https://maven.pkg.github.com/deplant/java4ever-binding" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="GitHubPackages" />
-      <option name="name" value="GitHubPackages" />
       <option name="url" value="https://maven.pkg.github.com/deplant/maven-artifactory" />
     </remote-repository>
   </component>

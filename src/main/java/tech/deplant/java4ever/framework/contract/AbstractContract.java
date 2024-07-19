@@ -3,6 +3,8 @@ package tech.deplant.java4ever.framework.contract;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import tech.deplant.commons.Objs;
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
@@ -25,7 +27,7 @@ public class AbstractContract implements Contract {
 	private final int contextId;
 	private final Address address;
 	private final ContractAbi abi;
-	private Credentials credentials;
+	private Abi.Signer signer;
 
 	/**
 	 * Instantiates a new Abstract contract.
@@ -40,10 +42,7 @@ public class AbstractContract implements Contract {
 	                        @JsonProperty(value = "address") Address address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
 	                        @JsonProperty(value = "credentials") Credentials credentials) {
-		this.contextId = contextId;
-		this.address = address;
-		this.abi = abi;
-		this.credentials = credentials;
+		this(contextId, address, abi, Objs.notNullReplaceElse(credentials,credentials.signer(),new Abi.Signer.None()));
 	}
 
 	/**
@@ -58,10 +57,25 @@ public class AbstractContract implements Contract {
 	                        @JsonProperty(value = "address") String address,
 	                        @JsonProperty(value = "abi") ContractAbi abi,
 	                        @JsonProperty(value = "credentials") Credentials credentials) {
+		this(contextId, new Address(address), abi, credentials);
+	}
+
+	/**
+	 * Instantiates a new Abstract contract.
+	 *
+	 * @param contextId   the context id
+	 * @param address     the address
+	 * @param abi         the abi
+	 * @param signer the signer
+	 */
+	public AbstractContract(int contextId,
+	                        Address address,
+	                        ContractAbi abi,
+	                        Abi.Signer signer) {
 		this.contextId = contextId;
-		this.address = new Address(address);
+		this.address = address;
 		this.abi = abi;
-		this.credentials = credentials;
+		this.signer = signer;
 	}
 
 //	/**
@@ -195,7 +209,17 @@ public class AbstractContract implements Contract {
 
 	@Override
 	public Credentials credentials() {
-		return credentials;
+		return switch (signer()) {
+			case Abi.Signer.SigningBox _ -> throw new UnsupportedOperationException("You can't get credentials for contract that use signing_box as a signer.");
+			case Abi.Signer.Keys keys -> new Credentials(keys.keys().publicKey(),keys.keys().secretKey());
+			case Abi.Signer.External ext -> throw new UnsupportedOperationException("You can't get credentials for contract that use external signer.");
+			case Abi.Signer.None _ -> Credentials.NONE;
+		};
+	}
+
+	@Override
+	public Abi.Signer signer() {
+		return this.signer;
 	}
 
 	@Override

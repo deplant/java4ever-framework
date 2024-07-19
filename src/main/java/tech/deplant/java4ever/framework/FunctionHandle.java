@@ -31,7 +31,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
                                      String functionName,
                                      Map<String, Object> functionInputs,
                                      Abi.FunctionHeader functionHeader,
-                                     DebugOptions debugOptions) {
+                                     DebugOptions debugOptions,
+                                     Abi.DeploySet deploySet) {
 
 	private static System.Logger logger = System.getLogger(FunctionHandle.class.getName());
 
@@ -54,7 +55,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		     functionName,
 		     functionInputs,
 		     functionHeader,
-		     new DebugOptions(false, 60000L, false, 50L));
+		     new DebugOptions(false, 60000L, false, 50L),
+		     null);
 	}
 
 	/**
@@ -125,7 +127,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                            functionName(),
 		                            functionInputs(),
 		                            functionHeader(),
-		                            new DebugOptions(enabled, timeout, throwErrors, transactionMaxCount, treeAbis));
+		                            new DebugOptions(enabled, timeout, throwErrors, transactionMaxCount, treeAbis),
+		                            deploySet());
 	}
 
 	/**
@@ -140,7 +143,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		                            functionName(),
 		                            functionInputs(),
 		                            functionHeader(),
-		                            debugOptions);
+		                            debugOptions,
+		                            deploySet());
 	}
 
 	/**
@@ -238,23 +242,25 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 * @throws EverSdkException the ever sdk exception
 	 */
 	public TvmCell toPayload() throws EverSdkException {
-		return new TvmCell(EverSdk.await(Abi.encodeMessageBody(contract().contextId(),
-		                                         contract().abi().functionCallABI(functionName()),
-		                                         toCallSet(),
-		                                         true,
-		                                         toSigner(),
-		                                         null,
-		                                         contract().address().makeAddrStd(),
-		                                         null)).body());
+		return toPayload(true);
 	}
 
 	/**
-	 * To signer abi . signer.
+	 * Encodes internal message string. Result of this method can be used as a payload for internal transactions
+	 * to pass function calls and inputs with transfer.
 	 *
-	 * @return the abi . signer
+	 * @return TvmCell of the internal call payload
+	 * @throws EverSdkException the ever sdk exception
 	 */
-	public Abi.Signer toSigner() {
-		return Objs.notNullElse(contract().credentials(), Credentials.NONE).signer();
+	public TvmCell toPayload(boolean isInternal) throws EverSdkException {
+		return new TvmCell(EverSdk.await(Abi.encodeMessageBody(contract().contextId(),
+		                                                       contract().abi().functionCallABI(functionName()),
+		                                                       toCallSet(),
+		                                                       isInternal,
+		                                                       contract().signer(),
+		                                                       null,
+		                                                       contract().address().makeAddrStd(),
+		                                                       getSignature())).body());
 	}
 
 	/**
@@ -270,28 +276,31 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		Map<String, Object> filter = new HashMap<>();
 		filter.put("id", new Account.GraphQLFilter.In(new String[]{contract().address().makeAddrStd()}));
 		Net.ResultOfQueryCollection result = EverSdk.await(Net.queryCollection(contract().contextId(),
-		                                                         "accounts",
-		                                                         JsonContext.ABI_JSON_MAPPER().valueToTree(filter),
-		                                                         "id boc",
-		                                                         null,
-		                                                         null));
+		                                                                       "accounts",
+		                                                                       JsonContext.ABI_JSON_MAPPER()
+		                                                                                  .valueToTree(filter),
+		                                                                       "id boc",
+		                                                                       null,
+		                                                                       null));
 		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
-		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address().makeAddrStd(),
-		                                                  null,
-		                                                  toCallSet(),
-		                                                  toSigner(),
-		                                                  null,
-		                                                  null));
+		                                                                contract().abi()
+		                                                                          .functionCallABI(functionName()),
+		                                                                contract().address().makeAddrStd(),
+		                                                                null,
+		                                                                toCallSet(),
+		                                                                contract().signer(),
+		                                                                null,
+		                                                                getSignature()));
 		for (var map : result.result()) {
 			String boc = map.get("boc").asText();
 			return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
-			                                      msg.message(),
-			                                      boc,
-			                                      null,
-			                                      contract().abi().ABI(),
-			                                      null,
-			                                      false)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+			                                                    msg.message(),
+			                                                    boc,
+			                                                    null,
+			                                                    contract().abi().ABI(),
+			                                                    null,
+			                                                    false)).decoded().output())
+			               .orElse(JsonContext.EMPTY_NODE());
 		}
 		return JsonContext.EMPTY_NODE();
 	}
@@ -333,20 +342,22 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	 */
 	public JsonNode getLocalAsMap(String boc) throws EverSdkException {
 		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
-		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address().makeAddrStd(),
-		                                                  null,
-		                                                  toCallSet(),
-		                                                  toSigner(),
-		                                                  null,
-		                                                  null));
+		                                                                contract().abi()
+		                                                                          .functionCallABI(functionName()),
+		                                                                contract().address().makeAddrStd(),
+		                                                                null,
+		                                                                toCallSet(),
+		                                                                contract().signer(),
+		                                                                null,
+		                                                                getSignature()));
 		return Optional.ofNullable(EverSdk.await(Tvm.runTvm(contract().contextId(),
-		                                      msg.message(),
-		                                      boc,
-		                                      null,
-		                                      contract().abi().ABI(),
-		                                      null,
-		                                      false)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+		                                                    msg.message(),
+		                                                    boc,
+		                                                    null,
+		                                                    contract().abi().ABI(),
+		                                                    null,
+		                                                    false)).decoded().output())
+		               .orElse(JsonContext.EMPTY_NODE());
 	}
 
 	/**
@@ -364,21 +375,24 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 	                               Tvm.ExecutionOptions options,
 	                               boolean unlimitedBalance) throws EverSdkException {
 		Abi.ResultOfEncodeMessage msg = EverSdk.await(Abi.encodeMessage(contract().contextId(),
-		                                                  contract().abi().functionCallABI(functionName()),
-		                                                  contract().address().makeAddrStd(),
-		                                                  null,
-		                                                  toCallSet(),
-		                                                  toSigner(),
-		                                                  null,
-		                                                  null));
+		                                                                contract().abi()
+		                                                                          .functionCallABI(functionName()),
+		                                                                contract().address().makeAddrStd(),
+		                                                                null,
+		                                                                toCallSet(),
+		                                                                contract().signer(),
+		                                                                null,
+		                                                                getSignature()));
 		return Optional.ofNullable(EverSdk.await(Tvm.runExecutor(contract().contextId(),
-		                                           msg.message(),
-		                                           new Tvm.AccountForExecutor.Account(boc, unlimitedBalance),
-		                                           options,
-		                                           contract().abi().ABI(),
-		                                           false,
-		                                           null,
-		                                           true)).decoded().output()).orElse(JsonContext.EMPTY_NODE());
+		                                                         msg.message(),
+		                                                         new Tvm.AccountForExecutor.Account(boc,
+		                                                                                            unlimitedBalance),
+		                                                         options,
+		                                                         contract().abi().ABI(),
+		                                                         false,
+		                                                         null,
+		                                                         true)).decoded().output())
+		               .orElse(JsonContext.EMPTY_NODE());
 	}
 
 	/**
@@ -460,10 +474,10 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		var resultOfProcess = processExternalCall();
 		var msgId = resultOfProcess.transaction().get("in_msg").asText();
 		var debugOutResult = EverSdk.await(Net.queryTransactionTree(contract().contextId(),
-		                                              msgId,
-		                                              finalABIArray,
-		                                              debugOptions().timeout(),
-		                                              debugOptions().transactionMaxCount()));
+		                                                            msgId,
+		                                                            finalABIArray,
+		                                                            debugOptions().timeout(),
+		                                                            debugOptions().transactionMaxCount()));
 		for (Net.TransactionNode tr : debugOutResult.transactions()) {
 			var msg = Arrays.stream(debugOutResult.messages())
 			                .filter(msgElem -> msgElem.id().equals(tr.inMsg()))
@@ -676,16 +690,26 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		return abiSet.toArray(ContractAbi[]::new);
 	}
 
+	private Long getSignature() {
+		return switch (EverSdk.contextConfig(contract().contextId())) {
+			case null -> null;
+			case Client.ClientConfig conf -> switch (conf.network()) {
+				case null -> null;
+				case Client.NetworkConfig ntwrk -> ntwrk.signatureId();
+			};
+		};
+	}
+
 	private Processing.ResultOfProcessMessage processExternalCall() throws EverSdkException {
 		return EverSdk.await(Processing.processMessage(contract().contextId(),
-		                                 contract().abi().functionCallABI(functionName()),
-		                                 contract().address().makeAddrStd(),
-		                                 null,
-		                                 toCallSet(),
-		                                 toSigner(),
-		                                 null,
-		                                 null,
-		                                 false));
+		                                               contract().abi().functionCallABI(functionName()),
+		                                               contract().address().makeAddrStd(),
+		                                               null,
+		                                               toCallSet(),
+		                                               contract().signer(),
+		                                               null,
+		                                               getSignature(),
+		                                               false));
 	}
 
 	/**
@@ -733,6 +757,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		 * The Debug options.
 		 */
 		public DebugOptions debugOptions;
+
+		public Abi.DeploySet deploySet;
 
 		/**
 		 * Instantiates a new Builder.
@@ -810,6 +836,17 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 		}
 
 		/**
+		 * Sets deploy set to send with a call
+		 *
+		 * @param deploySet the deploy set to send with a call
+		 * @return the function inputs
+		 */
+		public Builder setDeploySet(Abi.DeploySet deploySet) {
+			this.deploySet = deploySet;
+			return this;
+		}
+
+		/**
 		 * Build function handle.
 		 *
 		 * @return the function handle
@@ -820,7 +857,8 @@ public record FunctionHandle<RETURN>(Class<RETURN> clazz,
 			                          this.functionName,
 			                          this.functionInputs,
 			                          this.functionHeader,
-			                          this.debugOptions);
+			                          this.debugOptions,
+			                          this.deploySet);
 		}
 
 	}

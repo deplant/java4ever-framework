@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.2
+
+- Better support for signature_id
+- Better support for EVER Wallet
+- Better support for AppObject signing
+
 ## 3.0.4
 
 - Fixes for multi-threading in binding module

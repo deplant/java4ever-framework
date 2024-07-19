@@ -1,6 +1,7 @@
 package tech.deplant.java4ever.framework.contract;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import tech.deplant.java4ever.binding.Abi;
 import tech.deplant.java4ever.framework.ContractAbi;
 import tech.deplant.java4ever.framework.Credentials;
 import tech.deplant.java4ever.framework.FunctionHandle;
@@ -29,6 +30,18 @@ public abstract class GiverContract extends AbstractContract {
 	@JsonCreator
 	public GiverContract(int sdk, String address, ContractAbi abi, Credentials credentials) {
 		super(sdk, address, abi, credentials);
+	}
+
+	/**
+	 * Instantiates a new Giver contract.
+	 *
+	 * @param sdk         the sdk
+	 * @param address     the address
+	 * @param abi         the abi
+	 * @param signer the signer
+	 */
+	public GiverContract(int sdk, String address, ContractAbi abi, Abi.Signer signer) {
+		super(sdk, new Address(address), abi, signer);
 	}
 
 	/**

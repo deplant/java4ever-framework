@@ -138,7 +138,7 @@ public record SdkFunction(String functionModule,
 				templateString = templateString.replace("%RETURN_KEY%", "return ");
 				templateString = templateString.replace("%CALL_TYPE%", "async");
 				templateString = templateString.replace("%RETURN_CLASS%", ", $T.class");
-				var typeName = resultReference.toTypeName();
+				var typeName = resultReference.toTypeName(typeLibrary());
 				// adds return class to method builder
 				methodBuilder.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), typeName));
 				// adds return class as a final arg to statementArgs array

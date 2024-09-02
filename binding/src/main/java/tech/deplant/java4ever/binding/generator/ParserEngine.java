@@ -16,6 +16,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -23,8 +24,8 @@ public class ParserEngine {
 
 	private final static System.Logger logger = System.getLogger(ParserEngine.class.getName());
 
-	public static ApiReference ofJsonResource(String resourceName) throws JsonProcessingException {
-		return JsonContext.SDK_JSON_MAPPER().readValue(new JsonResource(resourceName).get(),
+	public static ApiReference ofJsonString(String resourceName) throws JsonProcessingException {
+		return JsonContext.SDK_JSON_MAPPER().readValue(resourceName,
 		                                               ApiReference.class);
 	}
 

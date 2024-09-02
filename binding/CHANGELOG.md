@@ -1,3 +1,7 @@
+### 3.2.0
+
+- Moved to Gradle Multi-Project structure
+
 ### 3.1.2
 
 - Better support for AppObjects

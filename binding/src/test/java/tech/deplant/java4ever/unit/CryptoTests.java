@@ -15,7 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.deplant.java4ever.binding.*;
+import tech.deplant.java4ever.binding.io.JsonFile;
+import tech.deplant.java4ever.binding.io.JsonResource;
 
+import java.nio.file.Files;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +74,12 @@ public class CryptoTests {
 		})).handle();
 		String signingBoxPubkey = EverSdk.await(Crypto.signingBoxGetPublicKey(ctxId, new Crypto.RegisteredSigningBox(signingBoxHandle))).pubkey();
 		assertEquals(keys.publicKey(),signingBoxPubkey);
+	}
+
+	@Test
+	public void create_new_json_from_api_reference_request() throws EverSdkException {
+		int ctxId = TestEnv.newContext();
+		new JsonFile("~/api.json").accept(EverSdk.await(Client.getApiReference(ctxId)).api().toPrettyString());
 	}
 
 	@Test

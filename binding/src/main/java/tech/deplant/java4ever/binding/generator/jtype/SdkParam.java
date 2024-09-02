@@ -18,7 +18,8 @@ public record SdkParam(TypeName refClassName,
                        boolean hasReserved,
                        String summary,
                        String description,
-                       SdkObject libType) {
+                       SdkObject libType,
+                       Map<ParserEngine.SdkType, SdkObject> typeLibrary) {
 
 	public final static Map<String, String> RESERVED_FIELD_NAMES = Map.of("public", "public_key",
 	                                                                      "secret", "secret_key",
@@ -37,9 +38,9 @@ public record SdkParam(TypeName refClassName,
 		boolean hasReserved = false;
 
 		if (javaType instanceof SdkDummy dummy) {
-			className = TypeReference.fromApiType(dummy.type()).toTypeName();
+			className = TypeReference.fromApiType(dummy.type()).toTypeName(typeLibrary);
 		} else {
-			className = typeReference.toTypeName();
+			className = typeReference.toTypeName(typeLibrary);
 		}
 
 		if ("Context".equals(className.toString())) {
@@ -59,7 +60,8 @@ public record SdkParam(TypeName refClassName,
 		                    hasReserved,
 		                    paramType.summary(),
 		                    paramType.description(),
-		                    typeReference.toTypeDeclaration(typeLibrary));
+		                    typeReference.toTypeDeclaration(typeLibrary),
+		                    typeLibrary);
 	}
 
 	public static AnnotationSpec renamedFieldAnnotation(String originalName) {

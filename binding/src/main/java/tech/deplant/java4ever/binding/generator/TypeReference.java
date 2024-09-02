@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import tech.deplant.commons.Strings;
 import tech.deplant.java4ever.binding.SubscribeEvent;
 import tech.deplant.java4ever.binding.ffi.EverSdkContext;
-import tech.deplant.javapoet.*;
 import tech.deplant.java4ever.binding.generator.jtype.SdkObject;
 import tech.deplant.java4ever.binding.generator.reference.*;
+import tech.deplant.javapoet.ArrayTypeName;
+import tech.deplant.javapoet.ClassName;
+import tech.deplant.javapoet.TypeName;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record TypeReference(String module,
                             String name,
@@ -33,7 +36,7 @@ public record TypeReference(String module,
 			case GenericType gen -> {
 				if ("AppObject".equals(gen.generic_name())) {
 					logger.log(System.Logger.Level.WARNING, () ->
-					           "AppObject! : " + ref + " generic: " + gen);
+							"AppObject! : " + ref + " generic: " + gen);
 				}
 				yield referenceRecursion(ref.withIsGeneric(true), gen.generic_args()[0]);
 			}
@@ -69,10 +72,11 @@ public record TypeReference(String module,
 		    typeReference.isRef() &&
 		    !typeReference.name().isEmpty()) {
 			String[] splittedName = typeReference.name().split("\\.");
+
 			if (splittedName.length < 2) {
-				logger.log(System.Logger.Level.ERROR, () ->
+				logger.log(System.Logger.Level.WARNING, () ->
 						"Type reference without 'module.type' notation! " + typeReference);
-				return typeReference;
+				return typeReference.withName(typeReference.name());
 			}
 			// special case for Abi interface that messes with module name
 			String refName = "Abi".equals(splittedName[1]) ? "ABI" : splittedName[1];
@@ -112,16 +116,30 @@ public record TypeReference(String module,
 		return new TypeReference(module(), name(), isArray(), isOptional(), isGeneric(), isRef(), isVoid);
 	}
 
-	public TypeName toTypeName() {
+	public TypeName toTypeName(Map<ParserEngine.SdkType, SdkObject> typeLibrary) {
 		TypeName typeName;
 		if (isRef()) {
 			typeName = switch (name()) {
 				case "Request" -> {
-					logger.log(System.Logger.Level.WARNING,  () ->
+					logger.log(System.Logger.Level.WARNING, () ->
 							"Callback!");
 					yield ClassName.get(SubscribeEvent.class);
 				}
-				default -> ClassName.bestGuess(module() + "." + name());
+				default -> {
+					var module = module();
+					if (module == null) {
+						List<ParserEngine.SdkType> types = typeLibrary.keySet().stream().filter(typName -> typName.name().equals(name())).toList();
+						if (types.size() < 1) {
+							logger.log(System.Logger.Level.WARNING, "No types with such name found!");
+						} else if (types.size() > 1) {
+							logger.log(System.Logger.Level.WARNING, "Doubling types with such name found!");
+							module = types.get(0).module();
+						} else {
+							module = types.get(0).module();
+						}
+					}
+					yield ClassName.bestGuess(module + "." + name());
+				}
 			};
 		} else {
 			typeName = switch (name()) {
@@ -130,7 +148,8 @@ public record TypeReference(String module,
 				case "Boolean" -> ClassName.get(Boolean.class);
 				case "Long" -> ClassName.get(Long.class);
 				case "BigInteger" -> ClassName.get(BigInteger.class);
-				case "Value", "API" -> ClassName.get(JsonNode.class);//ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
+				case "Value", "API" ->
+						ClassName.get(JsonNode.class);//ParameterizedTypeName.get(TypeName.MAP, TypeName.STRING, TypeName.OBJECT);
 				case "ClientContext" -> ClassName.get(EverSdkContext.class);
 				default -> throw new IllegalStateException("Unexpected value: " + name());
 			};

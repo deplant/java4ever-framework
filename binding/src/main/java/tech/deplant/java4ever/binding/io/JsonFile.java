@@ -13,7 +13,7 @@ public record JsonFile(String filePath) implements Supplier<String>, Consumer<St
 	@Override
 	public String get() {
 		try {
-			return Files.readString(Paths.get(filePath()))
+			return Files.readString(Paths.get(filePath()).toAbsolutePath())
 			            .replaceAll("[\u0000-\u001f]", "");
 		} catch (IOException e) {
 			throw new RuntimeException(e);

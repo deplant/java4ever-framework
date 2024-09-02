@@ -15,27 +15,75 @@ public class EverWalletContract extends GiverContract {
 
 	public static ContractAbi DEFAULT_ABI() throws JsonProcessingException {
 		return ContractAbi.ofString(
-				"{\n" + "  \"ABI version\": 2,\n" + "  \"version\": \"2.3\",\n" + "  \"header\": [\n" +
-				"    \"pubkey\",\n" + "    \"time\",\n" + "    \"expire\"\n" + "  ],\n" + "  \"functions\": [\n" +
-				"    {\n" + "      \"name\": \"sendTransaction\",\n" + "      \"inputs\": [\n" + "        {\n" +
-				"          \"name\": \"dest\",\n" + "          \"type\": \"address\"\n" + "        },\n" +
-				"        {\n" + "          \"name\": \"value\",\n" + "          \"type\": \"uint128\"\n" +
-				"        },\n" + "        {\n" + "          \"name\": \"bounce\",\n" +
-				"          \"type\": \"bool\"\n" + "        },\n" + "        {\n" + "          \"name\": \"flags\",\n" +
-				"          \"type\": \"uint8\"\n" + "        },\n" + "        {\n" +
-				"          \"name\": \"payload\",\n" + "          \"type\": \"cell\"\n" + "        }\n" + "      ],\n" +
-				"      \"outputs\": []\n" + "    },\n" + "    {\n" + "      \"name\": \"sendTransactionRaw\",\n" +
-				"      \"inputs\": [\n" + "        {\n" + "          \"name\": \"flags\",\n" +
-				"          \"type\": \"uint8\"\n" + "        },\n" + "        {\n" +
-				"          \"name\": \"message\",\n" + "          \"type\": \"cell\"\n" + "        }\n" + "      ],\n" +
-				"      \"outputs\": []\n" + "    }\n" + "  ],\n" + "  \"data\": [],\n" + "  \"events\": [],\n" +
-				"  \"fields\": [\n" + "    {\n" + "      \"name\": \"_pubkey\",\n" + "      \"type\": \"uint256\"\n" +
-				"    },\n" + "    {\n" + "      \"name\": \"_timestamp\",\n" + "      \"type\": \"uint64\"\n" +
-				"    }\n" + "  ]\n" + "}");
+				"""
+						{
+						  "ABI version": 2,
+						  "version": "2.3",
+						  "header": [
+						    "pubkey",
+						    "time",
+						    "expire"
+						  ],
+						  "functions": [
+						    {
+						      "name": "sendTransaction",
+						      "inputs": [
+						        {
+						          "name": "dest",
+						          "type": "address"
+						        },
+						        {
+						          "name": "value",
+						          "type": "uint128"
+						        },
+						        {
+						          "name": "bounce",
+						          "type": "bool"
+						        },
+						        {
+						          "name": "flags",
+						          "type": "uint8"
+						        },
+						        {
+						          "name": "payload",
+						          "type": "cell"
+						        }
+						      ],
+						      "outputs": []
+						    },
+						    {
+						      "name": "sendTransactionRaw",
+						      "inputs": [
+						        {
+						          "name": "flags",
+						          "type": "uint8"
+						        },
+						        {
+						          "name": "message",
+						          "type": "cell"
+						        }
+						      ],
+						      "outputs": []
+						    }
+						  ],
+						  "data": [],
+						  "events": [],
+						  "fields": [
+						    {
+						      "name": "_pubkey",
+						      "type": "uint256"
+						    },
+						    {
+						      "name": "_timestamp",
+						      "type": "uint64"
+						    }
+						  ]
+						}
+						""");
 	}
 
 	/**
-	 * Instantiates a new EVER WAllet contract.
+	 * Instantiates a new EVER Wallet contract.
 	 *
 	 * @param sdk         the sdk
 	 * @param address     the address

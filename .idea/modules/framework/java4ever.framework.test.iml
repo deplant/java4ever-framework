@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":framework:test" external.linked.project.path="$MODULE_DIR$/../../../framework" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="tech.deplant.java4ever" external.system.module.type="sourceSet" external.system.module.version="3.2.0-SNAPSHOT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_22">
+    <output-test url="file://$MODULE_DIR$/../../../framework/build/classes/java/test" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../framework/src/test">
+      <sourceFolder url="file://$MODULE_DIR$/../../../framework/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../framework/src/test/resources" type="java-test-resource" />
+    </content>
+    <orderEntry type="jdk" jdkName="temurin-22" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="java4ever.framework.main" />
+    <orderEntry type="module" module-name="java4ever.binding.main" />
+    <orderEntry type="library" name="Gradle: org.slf4j:slf4j-jdk-platform-logging:2.0.9" level="project" />
+    <orderEntry type="library" name="Gradle: org.slf4j:slf4j-simple:2.0.9" level="project" />
+    <orderEntry type="library" name="Gradle: org.junit.jupiter:junit-jupiter-params:5.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.junit.jupiter:junit-jupiter-api:5.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: tech.deplant.commons:commons-core:0.7.0" level="project" />
+    <orderEntry type="library" name="Gradle: tech.deplant.javapoet:javapoet-core:2.0.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.module:jackson-module-parameter-names:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:2.0.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apiguardian:apiguardian-api:1.1.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.junit.platform:junit-platform-commons:1.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.opentest4j:opentest4j:1.3.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.16.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.junit.jupiter:junit-jupiter-engine:5.10.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.junit.platform:junit-platform-engine:1.10.1" level="project" />
+  </component>
+  <component name="TestModuleProperties" production-module="java4ever.framework.main" />
+</module>

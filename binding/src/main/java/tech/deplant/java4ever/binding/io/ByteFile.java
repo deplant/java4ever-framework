@@ -14,7 +14,7 @@ public record ByteFile(String filePath) implements Supplier<byte[]>, Consumer<by
 	@Override
 	public byte[] get() {
 		try {
-			return Files.readAllBytes(Paths.get(filePath()));
+			return Files.readAllBytes(Paths.get(filePath()).toAbsolutePath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

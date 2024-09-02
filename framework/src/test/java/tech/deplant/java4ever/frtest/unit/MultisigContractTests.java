@@ -17,12 +17,14 @@ import tech.deplant.java4ever.framework.contract.AbstractContract;
 import tech.deplant.java4ever.framework.contract.EverOSGiver;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigBuilder;
 import tech.deplant.java4ever.framework.contract.multisig.MultisigContract;
+import tech.deplant.java4ever.framework.contract.multisig.SafeMultisigWalletContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,6 +91,38 @@ public class MultisigContractTests {
 		System.out.println(contract.account().id() + " is active: " + contract.account().isActive());
 	}
 
+	@Test
+	public void getCustodian_get_custodians_test() throws EverSdkException, JsonProcessingException {
+		EverSdk.load(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
+		CTX = EverSdk.builder()
+				.networkEndpoints("https://devnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
+				.networkQueryTimeout(300000L)
+				.build();
+		var myEverWallet = new SafeMultisigWalletContract(CTX,
+				"0:b238570f9ebe536885b6060c7c9d74a20704e5efa844b17afcf814c7b9ddcfee",
+				new Credentials(
+						"a08ba000d026068f90541f111e2c700a796222d8ab4bb4ae8b4e680f64f875da",
+						"17011c9157f3cf9e3c75ce8778be6b1adc42cd7abc1aebc0d288d2c338d2d93b"));
+		var cust = myEverWallet.getCustodians().get().custodians();
+		System.out.println(Arrays.toString(cust));
 
+	}
+
+	@Test
+	public void getCustodian_as_map_test() throws EverSdkException, JsonProcessingException {
+		EverSdk.load(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
+		CTX = EverSdk.builder()
+				.networkEndpoints("https://devnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql")
+				.networkQueryTimeout(300000L)
+				.build();
+		var myEverWallet = new SafeMultisigWalletContract(CTX,
+				"0:b238570f9ebe536885b6060c7c9d74a20704e5efa844b17afcf814c7b9ddcfee",
+				new Credentials(
+						"a08ba000d026068f90541f111e2c700a796222d8ab4bb4ae8b4e680f64f875da",
+						"17011c9157f3cf9e3c75ce8778be6b1adc42cd7abc1aebc0d288d2c338d2d93b"));
+		var cust = myEverWallet.getCustodians().getAsMap();
+		System.out.println(cust);
+
+	}
 
 }

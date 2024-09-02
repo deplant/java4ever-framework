@@ -1,5 +1,6 @@
 package tech.deplant.java4ever.frtest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import tech.deplant.java4ever.binding.EverSdk;
 import tech.deplant.java4ever.binding.EverSdkException;
@@ -12,9 +13,11 @@ import tech.deplant.java4ever.framework.contract.tip3.TIP3TokenWalletContract;
 import tech.deplant.java4ever.framework.datatype.Address;
 import tech.deplant.java4ever.framework.datatype.TvmCell;
 import tech.deplant.java4ever.framework.template.SafeMultisigWallet2Template;
+import tech.deplant.java4ever.framework.template.SafeMultisigWalletTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import static tech.deplant.java4ever.frtest.unit.Env.EVER_ONE;
 import static tech.deplant.java4ever.frtest.unit.Env.MILLI_100;

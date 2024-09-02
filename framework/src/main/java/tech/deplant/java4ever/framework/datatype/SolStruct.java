@@ -253,21 +253,8 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 		} else {
 			// Normal (not map) root types
 			final var rootDetails = AbiType.of(rootTypeString);
-			// tuples
-			if (rootDetails.prefix().equals(AbiTypePrefix.TUPLE)) {
-				// tuple = Map<String,Object> from components
-				Map<String, Object> mapValue = (Map<String, Object>) outputValue;
-				return Arrays.stream(param.components())
-				             .collect(Collectors.toMap(component -> component.name(), component -> {
-					             try {
-						             return serializeOutputTree(component, mapValue.get(component.name()));
-					             } catch (EverSdkException e) {
-						             // in the complex cases, if we can't serialize, we can try to put object as is
-						             return mapValue.get(component.name());
-					             }
-				             }));
-				// arrays
-			} else if (rootDetails.isArray()) {
+			// arrays
+			if (rootDetails.isArray()) {
 				return switch (outputValue) {
 					case String s -> new Object[]{AbiValue.of(rootDetails, s)};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
@@ -275,6 +262,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 							return AbiValue.of(rootDetails, element).toJava();
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
+
 							return element;
 						}
 					}).toArray();
@@ -289,6 +277,19 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					default ->
 							new Object[]{AbiValue.of(rootDetails, outputValue).toJava()};
 				};
+				// tuples
+			} else if (rootDetails.prefix().equals(AbiTypePrefix.TUPLE)) {
+				// tuple = Map<String,Object> from components
+				Map<String, Object> mapValue = (Map<String, Object>) outputValue;
+				return Arrays.stream(param.components())
+						.collect(Collectors.toMap(component -> component.name(), component -> {
+							try {
+								return serializeOutputTree(component, mapValue.get(component.name()));
+							} catch (EverSdkException e) {
+								// in the complex cases, if we can't serialize, we can try to put object as is
+								return mapValue.get(component.name());
+							}
+						}));
 			} else {
 				// all others
 				return AbiValue.of(rootDetails, outputValue).toJava();

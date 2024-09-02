@@ -1,0 +1,164 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+    id "signing"
+}
+
+// Global variables for all modules
+//ext {
+    // dependencies
+
+//}
+
+group v_groupId
+version v_version
+
+repositories {
+    //mavenLocal()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
+        credentials {
+            username = githubUsername
+            password = githubUploadToken
+        }
+    }
+    mavenCentral()
+    mavenLocal()
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/gen/java']
+        }
+    }
+}
+
+dependencies {
+
+    // RUNTIME **************************
+    api project(":binding") // java4ever-binding
+
+    // TESTS **************************
+
+    // SLF4J (Simple provider for tests)
+    testImplementation "org.slf4j:slf4j-jdk-platform-logging:$slf4jVersion" // SLF4J Bridge to JDK9 System.Logger
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
+
+    // JUnit 5
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/deplant/maven-artifactory")
+            credentials {
+                username = githubUsername
+                password = githubUploadToken
+            }
+        }
+        maven {
+            name = "Sonatype"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+    publications {
+        framework(MavenPublication) {
+            groupId = v_groupId
+            artifactId = v_artifactId
+            version = v_version
+
+            from components.java
+
+            pom {
+                name = v_artifactId
+                description = 'Development framework for Everscale DApp development'
+                url = "https://github.com/" + v_repository
+//                properties = [
+//                        myProp          : "value",
+//                        "prop.with.dots": "anotherValue"
+//                ]
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = v_developerId
+                        name = v_developerName
+                        email = v_developerEmail
+                        organization = v_org
+                        organizationUrl = v_url
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/" + v_repository + ".git"
+                    developerConnection = "scm:git:ssh://github.com/" + v_repository + ".git"
+                    url = "http://github.com/" + v_repository
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.framework
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+// Task for JavaPoet generation of EVER-SDK API
+task generateEverscaleContracts(type: JavaExec) {
+    group = "other"
+    description = "Generates Java Wrappers for Everscale contracts: Wallets, TIP3, TIP4, Givers and so on"
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = "tech.deplant.java4ever.frtest.codegen.ContractGenerator"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = JavaLanguageVersion.of(jdkVersion)
+    targetCompatibility = JavaLanguageVersion.of(jdkVersion)
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+}
+
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+}
+
+tasks.withType(Javadoc).configureEach {
+    javadocTool = javaToolchains.javadocToolFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+    options.addBooleanOption('html5', true)
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+    options.addStringOption('-release', "$jdkVersion")
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+tasks.withType(Test) {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
+    useJUnitPlatform()
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java4ever.iml" filepath="$PROJECT_DIR$/.idea/modules/java4ever.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.main.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.test.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/java4ever.binding.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.iml" filepath="$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.main.iml" filepath="$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.test.iml" filepath="$PROJECT_DIR$/.idea/modules/framework/java4ever.framework.test.iml" />
+    </modules>
+  </component>
+</project>

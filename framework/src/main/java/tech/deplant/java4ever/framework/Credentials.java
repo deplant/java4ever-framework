@@ -2,12 +2,15 @@ package tech.deplant.java4ever.framework;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import tech.deplant.commons.Numbers;
 import tech.deplant.java4ever.binding.*;
 import tech.deplant.java4ever.framework.artifact.JsonFile;
 import tech.deplant.java4ever.framework.artifact.JsonResource;
 
 import java.math.BigInteger;
+import java.util.HexFormat;
 
 /**
  * Credentials is a pair of keys,
@@ -22,6 +25,12 @@ import java.math.BigInteger;
  * @param secretKey
  */
 public record Credentials(@JsonProperty("public") String publicKey, @JsonProperty("secret") String secretKey) {
+
+	public static Credentials ofSecret(String secretKey) {
+		Ed25519PrivateKeyParameters sk = new Ed25519PrivateKeyParameters(HexFormat.of().parseHex(secretKey), 0);
+		Ed25519PublicKeyParameters pk = sk.generatePublicKey();
+		return new Credentials(HexFormat.of().formatHex(pk.getEncoded()),secretKey);
+	}
 
 	/**
 	 * The constant NONE.

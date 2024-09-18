@@ -57,6 +57,24 @@ public class SubscribeHandleTests {
 //	}
 
 	@Test
+	public void subscribe_on_account() throws Throwable {
+
+// let's specify what will consume our event:
+		Consumer<JsonNode> eventConsumer = jsonNode -> System.out.println(jsonNode.toPrettyString());
+// describe our subscription in builder style
+		var subscriptionBuilder = Subscriptions
+				.onAccounts("acc_type", "id")
+				.addFilterOnSubscription("id: { eq: \"%s\" }".formatted(GIVER_LOCAL.address().makeAddrStd()))
+				.addCallbackConsumer(eventConsumer)
+				.setCallbackToQueue(true); // if you don't want to specify consumer, you can switch on adding to internal queue
+// let's subsribe
+		var subscription1 = subscriptionBuilder.subscribeUntilCancel(SDK_LOCAL);
+		GIVER_LOCAL.give(GIVER_LOCAL.address(), EVER_ONE).call();
+// let's unsubscribe
+		subscription1.unsubscribe();
+	}
+
+	@Test
 	public void try_account_subscription() throws Throwable {
 		String subscribedIdPre = String.valueOf(LOCAL_MSIG_ROOT.address());
 		BigInteger subscribedBalancePre = LOCAL_MSIG_ROOT.accountBalance();

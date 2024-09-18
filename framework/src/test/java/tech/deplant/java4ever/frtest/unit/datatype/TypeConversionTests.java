@@ -28,7 +28,7 @@ public class TypeConversionTests {
 				.DEFAULT_ABI()
 				.convertFunctionInputs("sendTransaction",
 				                       Map.of("value", new BigInteger("123")));
-		assertEquals("0x7b", converted.get("value"));
+		assertEquals("0x000000000000007b", converted.get("value"));
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class TypeConversionTests {
 				.DEFAULT_ABI()
 				.convertFunctionInputs("sendTransaction",
 				                       Map.of("value", new BigDecimal("123")));
-		assertEquals("0x7b", converted.get("value"));
+		assertEquals("0x000000000000007b", converted.get("value"));
 	}
 
 	@Test

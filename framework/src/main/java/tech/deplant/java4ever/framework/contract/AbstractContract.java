@@ -178,8 +178,8 @@ public class AbstractContract implements Contract {
 	 * @throws EverSdkException the ever sdk exception
 	 */
 	public Subscriptions.Builder subscribeOnTransactions(Consumer<JsonNode> subscribeEventConsumer, String... resultFields) throws EverSdkException {
-		return Subscriptions.onAccounts(resultFields)
-		                    .addFilterOnSubscription("id: { eq: \"%s\" }".formatted(address().toString()))
+		return Subscriptions.onTransactions(resultFields)
+		                    .addFilterOnSubscription("account_addr: { eq: \"%s\" }".formatted(address().toString()))
 		                    .addCallbackConsumer(subscribeEventConsumer);
 	}
 

@@ -6,6 +6,7 @@ module java4ever.framework {
 	requires com.fasterxml.jackson.datatype.jdk8;
 	requires com.fasterxml.jackson.module.paramnames;
 	requires com.fasterxml.jackson.datatype.jsr310;
+	requires org.bouncycastle.provider;
 	exports tech.deplant.java4ever.framework;
 	exports tech.deplant.java4ever.framework.artifact;
 	exports tech.deplant.java4ever.framework.contract;

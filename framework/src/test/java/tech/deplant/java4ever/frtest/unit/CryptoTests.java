@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.Abi;
+import tech.deplant.java4ever.binding.Boc;
 import tech.deplant.java4ever.binding.Crypto;
 import tech.deplant.java4ever.binding.EverSdkException;
 import tech.deplant.java4ever.framework.Credentials;
@@ -72,6 +73,19 @@ public class CryptoTests {
 		assertNotNull(seed);
 		Env.LOG.log(System.Logger.Level.DEBUG, Credentials.ofSeed(Env.SDK_EMPTY,
 		                                                          seed).toString());
+	}
+
+	@Test
+	public void get_boc_hash_test() throws Throwable {
+		var hash = Boc.getBocHash(SDK_EMPTY,"te6ccgECBgEAAUAAAUWIAIif381a0y7qb+HY7yzjAkJSdEkfBnh3EP3NbLKsVlK4DAEB4dFB/Z7BYn6Dl/pE/T69hqboiI2LYGJ7H3xmvXL8JMfW1d8/BB/tQGzq9YjA9Tn+Jp+F79MkIZ7F2HpcEPoj3oVlXlvc2+wVJrdRiEJ3vBpuPQDHw3kPMeuLHzJYXdDLX8AAAGRDlGf92armkBM7mRsgAgFlgBZ9qXKAUQOOxwrNaCG7QKpojPNgy7nDMA6S+MRAV1OcYAAAAAAAAAAAAAAAB3NZQBAIAwGLIL+zuAAAAAAAAAAAAAADhz6KmQuACIn9/NWtMu6m/h2O8s4wJCUnRJHwZ4dxD9zWyyrFZSuAAAAAAAAAAAAAAAACPDRgEAQBQ4AIif381a0y7qb+HY7yzjAkJSdEkfBnh3EP3NbLKsVlK5gFAAA=").get().hash();
+		System.out.printf("Hash: %s", hash);
+	}
+
+	@Test
+	public void get_public_from_secret() throws Throwable {
+		assertEquals("a08ba000d026068f90541f111e2c700a796222d8ab4bb4ae8b4e680f64f875da",Credentials
+				.ofSecret("17011c9157f3cf9e3c75ce8778be6b1adc42cd7abc1aebc0d288d2c338d2d93b")
+				.publicKey());
 	}
 
 //	@Test

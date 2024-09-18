@@ -53,6 +53,7 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
       * [Creating a random keypair](#creating-a-random-keypair)
       * [Creating a random seed](#creating-a-random-seed)
       * [Deriving keys from seed](#deriving-keys-from-seed)
+      * [Deriving keys from private](#deriving-keys-from-private)
       * [Using existing keys & seeds](#using-existing-keys--seeds)
       * [Using Signing Box](#using-signing-box)
     * [Smart-contracts](#smart-contracts)
@@ -67,6 +68,9 @@ Java4Ever only runtime dependencies are its own binding and utils libs and Jacks
     * [Using wallets and other standard contract wrappers](#using-wallets-and-other-standard-contract-wrappers)
       * [Sending Internal Message from Multisig Wallet](#sending-internal-message-from-multisig-wallet)
       * [Encoding as Payload](#encoding-as-payload)
+      * [Supported Multisig contracts](#supported-multisig-contracts)
+      * [Supported TIP-3 Token contracts](#supported-tip-3-token-contracts)
+      * [Supported TIP-4 Nft contracts](#supported-tip-4-nft-contracts)
     * [Deploying smart-contracts](#deploying-smart-contracts)
       * [Accessing Template](#accessing-template)
       * [Prepared deployment set](#prepared-deployment-set)
@@ -240,6 +244,14 @@ int wordsCount = seed.words();
 
 ```java
 var keys = Credentials.ofSeed(contextId,seed);
+String sk = keys.secretKey();
+String pk = keys.publicKey();
+```
+
+#### Deriving keys from private
+
+```java
+var keys = Credentials.ofSecret("17011c9157f3cf9e3c75ce8778be6b1adc42cd7abc1aebc0d288d2c338d2d93b");
 String sk = keys.secretKey();
 String pk = keys.publicKey();
 ```
@@ -422,6 +434,78 @@ You can encode `FunctionHandle` as a payload for internal call like this:
 ```java
 var payload = getCustodiansFunctionHandle.toPayload();
 ```
+
+#### Supported Multisig contracts
+
+java4ever supports all popular types of Multisig contracts. 
+You can check if it's your needed smart-contract by retrieving its code hash.
+
+```java
+		// multisig 1
+		assertEquals("80d6c47c4a25543c9b397b71716f3fae1e2c5d247174c52e2c19bd896442b105",
+		             SafeMultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		assertEquals("e2b60b6b602c10ced7ea8ede4bdf96342c97570a3798066f3fb50a4b2b27a208",
+		             SetcodeMultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		assertEquals("207dc560c5956de1a2c1479356f8f3ee70a59767db2bf4788b1d61ad42cdad82",
+		             SurfMultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		// multisig 1 with modern compiler
+		assertEquals("1974b06efa89ba22d1962d06efaef6d00751b7cdc3156c151bb0cc1c504e7e8c",
+		             SafeMultisigSolc064WalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		assertEquals("ad57a772ca0c56462e07a086e447abbb7605bd6ac1424cc4178dc9f4730093ff",
+		             SetcodeMultisigSolc063WalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		// multisig 2
+		assertEquals("7377910a1b5d0c8073ba02523e139c7f42f9772fe0076a4d0b211ccec071eb7a",
+		             SafeMultisigWallet2Template.DEFAULT_TVC().codeHash(contextId));
+		assertEquals("d66d198766abdbe1253f3415826c946c371f5112552408625aeb0b31e0ef2df3",
+		             SetcodeMultisigWallet2Template.DEFAULT_TVC().codeHash(contextId));
+		// multisig 24
+		assertEquals("7d0996943406f7d62a4ff291b1228bf06ebd3e048b58436c5b70fb77ff8b4bf2",
+		             Safe24MultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		assertEquals("a491804ca55dd5b28cffdff48cb34142930999621a54acee6be83c342051d884",
+		             Setcode24MultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+		// specials
+		assertEquals("f3a07ae84fc343259d7fa4847b86335b3fdcfc8b31f1ba4b7a9499d5530f0b18",
+		             BridgeMultisigWalletTemplate.DEFAULT_TVC().codeHash(contextId));
+```
+
+#### Supported TIP-3 Token contracts
+
+java4ever supports all popular types of Multisig contracts.
+You can check if it's your needed smart-contract by retrieving its code hash.
+
+```java
+// creating token Root
+var tokenRoot = new TIP3Builder()
+        .setRootKeys(LOCAL_KEYS_ROOT)
+        .setOwnerAddress(LOCAL_MSIG_ROOT.address())
+.setName("Test Token")
+        .setSymbol("TST")
+        .setDecimals(6)
+        .setRandomNonce(new Random().nextInt())
+.build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
+// deploying token wallet
+tokenRoot.deployWallet(LOCAL_MSIG_WALLET1.address(),
+                             CurrencyUnit.VALUE(EVER, "0.5"))
+.sendFrom(LOCAL_MSIG_ROOT,
+          CurrencyUnit.VALUE(EVER, "1.5"));
+// mint operation
+tokenRoot.mint(mintAmount, receiverAddress, EVER_ZERO, receiverAddress, false,
+                     TvmCell.EMPTY)
+               .sendFromTree(LOCAL_MSIG_ROOT,
+                             CurrencyUnit.VALUE(EVER, "0.3"),
+                             true,
+                             MessageFlag.FEE_EXTRA,
+                             true,
+                             TIP3TokenWalletContract.DEFAULT_ABI());
+// getters
+assertEquals(mintAmount, tokenRoot.totalSupply().get().value0());
+assertEquals(mintAmount, tokenRoot.balance().get().value0());
+```
+
+#### Supported TIP-4 Nft contracts
+
+java4ever provides `TIP4Collection`, `TIP4IndexBasis`, 
+`TIP4Index`, `TIP4Nft` and `TIP4Wallet` templates and contract wrappers.
 
 ### Deploying smart-contracts
 

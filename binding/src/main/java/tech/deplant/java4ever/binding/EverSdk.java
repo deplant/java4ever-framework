@@ -8,11 +8,13 @@ import tech.deplant.java4ever.binding.loader.DefaultLoader;
 import tech.deplant.java4ever.binding.loader.DefaultLoaderContext;
 import tech.deplant.java4ever.binding.loader.LibraryLoader;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * The type Ever sdk.
@@ -229,7 +231,7 @@ public class EverSdk {
 						           e,
 						           finalResultString));
 				throw new EverSdkException(new EverSdkException.ErrorResult(-501,
-				                                                            "FUNC:sdk.tc_create_context request deserialization failed!"),
+				                                                            "FUNC:sdk.tc_create_context request deserialization failed! " + e.getMessage() + finalResultString),
 				                           e.getCause());
 			}
 		} catch (JsonProcessingException e) {
@@ -313,7 +315,7 @@ public class EverSdk {
 			                           ex4.getCause());
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof EverSdkException everEx) {
-				throw everEx;
+				throw new EverSdkException(everEx.errorResponse());
 			} else {
 				logger.log(System.Logger.Level.ERROR,
 				           () -> "EVER-SDK Call unknown execution exception! %s".formatted(e.toString()));

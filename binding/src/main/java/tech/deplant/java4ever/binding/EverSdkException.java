@@ -70,6 +70,16 @@ public class EverSdkException extends Exception {
 		return this.errorResponse;
 	}
 
+	@Override
+	public String toString() {
+		try {
+			return errorResponse().toLog() + super.toString();
+		} catch (Exception e) {
+			return super.toString();
+		}
+	}
+
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public record ErrorResultData(String coreVersion,
 	                              String phase,
@@ -93,8 +103,7 @@ public class EverSdkException extends Exception {
 	                              Integer resultCode,
 	                              String bindingLibrary,
 	                              String bindingVersion,
-	                              String serverCode) {
-	}
+	                              String serverCode) {}
 
 	public record ErrorResult(long code, String message, ErrorResultData data) {
 		public ErrorResult(long code, String message) {
@@ -102,17 +111,16 @@ public class EverSdkException extends Exception {
 		}
 
 		public String toLog() {
+
 			if (data() != null && data().localError() != null && data().localError().data() != null &&
 			    data().localError().data().exitCode() > 0) {
-				return "%d (exit: %d) %s".formatted(data().localError().code(), data()
-						.localError()
-						.data()
-						.exitCode(), data().localError().message());
+				return "%d (exit: %d) %s".formatted(data().localError().code(),
+				                                    data().localError().data().exitCode(),
+				                                    data().localError().message());
 			} else {
 				return "%d %s".formatted(code(), message());
 			}
+
 		}
 	}
-
-
 }

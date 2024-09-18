@@ -79,7 +79,12 @@ public record Uint(int size, BigInteger value) implements AbiValue<BigInteger> {
 
 	@Override
 	public String toString() {
-		return "0x" + value().toString(16);
+		if (size() > 0) {
+			return String.format("0x%0" + size()/8 + "X",value()).toLowerCase();
+		} else {
+			return String.format("0x%X",value()).toLowerCase();
+		}
+
 	}
 
 	@Override

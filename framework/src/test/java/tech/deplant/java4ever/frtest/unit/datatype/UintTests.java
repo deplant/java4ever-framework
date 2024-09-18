@@ -33,7 +33,7 @@ public class UintTests {
 
 	@Test
 	public void bigint_to_correct_hex() throws JsonProcessingException, EverSdkException {
-		assertEquals("0x388a1b17", new Uint(new BigInteger("948574999")).toABI());
+		assertEquals("0x00000000388a1b17", Uint.of(128,new BigInteger("948574999")).toABI());
 	}
 
 	@ParameterizedTest

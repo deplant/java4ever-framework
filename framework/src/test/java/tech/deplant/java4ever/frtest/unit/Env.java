@@ -27,9 +27,9 @@ import static tech.deplant.java4ever.framework.CurrencyUnit.Ever.MILLIEVER;
 public class Env {
 
 
-	final static String LOCAL_ENDPOINT = System.getenv("LOCAL_NODE_ENDPOINT");
-	final static String DEV_ENDPOINT = System.getenv("DEV_NET_OSIRIS_ENDPOINT");
-	final static String MAIN_ENDPOINT = System.getenv("MAIN_NET_OSIRIS_ENDPOINT");
+	final static String LOCAL_ENDPOINT = "https://nodese.truequery.tech/graphql";
+	final static String DEV_ENDPOINT = "https://devnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql";
+	final static String MAIN_ENDPOINT = "https://mainnet.evercloud.dev/032a23e8f6254ca0b4ae4046819e7ac1/graphql";
 	public static BigInteger EVER_ZERO = CurrencyUnit.VALUE(EVER, "0");
 	public static BigInteger MILLI_100 = CurrencyUnit.VALUE(MILLIEVER, "100");
 	public static BigInteger EVER_ONE = CurrencyUnit.VALUE(EVER, "1");
@@ -83,7 +83,7 @@ public class Env {
 			             .build();
 
 			GIVER = switch (networkName) {
-				case "local" -> EverOSGiver.V2(CTX);
+				case "local" -> EverOSGiver.V3(CTX);
 				case "everscale_dev" -> new SafeMultisigWalletContract(CTX,
 				                                                       "0:b238570f9ebe536885b6060c7c9d74a20704e5efa844b17afcf814c7b9ddcfee",
 				                                                       new Credentials(
@@ -120,7 +120,7 @@ public class Env {
 			                     .networkQueryTimeout(300_000L)
 			                     .build();
 
-			GIVER_LOCAL = EverOSGiver.V2(SDK_LOCAL);
+			GIVER_LOCAL = EverOSGiver.V3(SDK_LOCAL);
 
 			isInitialized = true;
 		}

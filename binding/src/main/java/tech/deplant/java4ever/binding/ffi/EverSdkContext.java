@@ -150,7 +150,7 @@ public class EverSdkContext implements tc_response_handler_t.Function {
 				EverSdkException.ErrorResult sdkResponse = JsonContext.SDK_JSON_MAPPER()
 				                                                      .readValue(responseString,
 				                                                                 EverSdkException.ErrorResult.class);
-				future.completeExceptionally(new EverSdkException(sdkResponse));
+				future.completeExceptionally(new EverSdkException(sdkResponse, "Error response from SDK"));
 			} catch (JsonProcessingException ex1) {
 				// if error response parsing failed
 				logger.log(System.Logger.Level.ERROR,
@@ -159,7 +159,8 @@ public class EverSdkContext implements tc_response_handler_t.Function {
 				                                                                                     ex1.toString()));
 				future.completeExceptionally(new EverSdkException(new EverSdkException.ErrorResult(-500,
 				                                                                                   "EVER-SDK Error deserialization failed!"),
-				                                                  ex1.getCause()));
+																  "EVER-SDK Error deserialization failed!",
+				                                                  ex1));
 			}
 		} else {
 			logger.log(System.Logger.Level.ERROR,
@@ -233,12 +234,9 @@ public class EverSdkContext implements tc_response_handler_t.Function {
 
 	private void cleanup() {
 		while (this.cleanupQueue.poll() instanceof RequestData request) {
-			request.queueLock().lock();
-			//try (var arena = request.nativeArena()) {
-			logger.log(System.Logger.Level.TRACE, () -> "Memory session arena closed");
-			//} finally {
-			request.queueLock().unlock();
-			//}
+			if (request.queueLock().isLocked()) {
+				request.queueLock().unlock();
+			}
 		}
 	}
 

@@ -11,10 +11,47 @@
       ]
     },
     {
+      "name": "GiverV3",
+      "abi": "artifacts/giver/GiverV3.abi.json",
+      "interfaces": [
+        "GiverContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "BridgeMultisigWallet",
+      "abi": "artifacts/multisig/BridgeMultisigWallet_f3a07ae84fc343259d7fa4847b86335b3fdcfc8b31f1ba4b7a9499d5530f0b18.abi.json",
+      "tvc": "artifacts/multisig/BridgeMultisigWallet_f3a07ae84fc343259d7fa4847b86335b3fdcfc8b31f1ba4b7a9499d5530f0b18.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "Safe24MultisigWallet",
+      "abi": "artifacts/multisig/SafeMultisigWallet24_7d0996943406f7d62a4ff291b1228bf06ebd3e048b58436c5b70fb77ff8b4bf2.abi.json",
+      "tvc": "artifacts/multisig/SafeMultisigWallet24_7d0996943406f7d62a4ff291b1228bf06ebd3e048b58436c5b70fb77ff8b4bf2.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
       "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SafeMultisigWallet",
-      "abi": "artifacts/multisig/SafeMultisigWallet.abi.json",
-      "tvc": "artifacts/multisig/SafeMultisigWallet.tvc",
+      "abi": "artifacts/multisig/SafeMultisigWallet_80d6c47c4a25543c9b397b71716f3fae1e2c5d247174c52e2c19bd896442b105.abi.json",
+      "tvc": "artifacts/multisig/SafeMultisigWallet_80d6c47c4a25543c9b397b71716f3fae1e2c5d247174c52e2c19bd896442b105.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "SafeMultisigSolc064Wallet",
+      "abi": "artifacts/multisig/SafeMultisigWallet_1974b06efa89ba22d1962d06efaef6d00751b7cdc3156c151bb0cc1c504e7e8c.abi.json",
+      "tvc": "artifacts/multisig/SafeMultisigWallet_1974b06efa89ba22d1962d06efaef6d00751b7cdc3156c151bb0cc1c504e7e8c.tvc",
       "shareOutputs": true,
       "interfaces": [
         "MultisigContract"
@@ -23,8 +60,28 @@
     {
       "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SetcodeMultisigWallet",
-      "abi": "artifacts/multisig/SetcodeMultisigWallet.abi.json",
-      "tvc": "artifacts/multisig/SetcodeMultisigWallet.tvc",
+      "abi": "artifacts/multisig/SetcodeMultisigWallet_e2b60b6b602c10ced7ea8ede4bdf96342c97570a3798066f3fb50a4b2b27a208.abi.json",
+      "tvc": "artifacts/multisig/SetcodeMultisigWallet_e2b60b6b602c10ced7ea8ede4bdf96342c97570a3798066f3fb50a4b2b27a208.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "SetcodeMultisigSolc063Wallet",
+      "abi": "artifacts/multisig/SetcodeMultisigWallet_ad57a772ca0c56462e07a086e447abbb7605bd6ac1424cc4178dc9f4730093ff.abi.json",
+      "tvc": "artifacts/multisig/SetcodeMultisigWallet_ad57a772ca0c56462e07a086e447abbb7605bd6ac1424cc4178dc9f4730093ff.tvc",
+      "shareOutputs": true,
+      "interfaces": [
+        "MultisigContract"
+      ]
+    },
+    {
+      "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
+      "name": "Setcode24MultisigWallet",
+      "abi": "artifacts/multisig/SetcodeMultisigWallet24_a491804ca55dd5b28cffdff48cb34142930999621a54acee6be83c342051d884.abi.json",
+      "tvc": "artifacts/multisig/SetcodeMultisigWallet24_a491804ca55dd5b28cffdff48cb34142930999621a54acee6be83c342051d884.tvc",
       "shareOutputs": true,
       "interfaces": [
         "MultisigContract"
@@ -33,8 +90,8 @@
     {
       "contractPkg": "tech.deplant.java4ever.framework.contract.multisig",
       "name": "SurfMultisigWallet",
-      "abi": "artifacts/multisig/SurfMultisigWallet.abi.json",
-      "tvc": "artifacts/multisig/SurfMultisigWallet.tvc",
+      "abi": "artifacts/multisig/SurfMultisigWallet_207dc560c5956de1a2c1479356f8f3ee70a59767db2bf4788b1d61ad42cdad82.abi.json",
+      "tvc": "artifacts/multisig/SurfMultisigWallet_207dc560c5956de1a2c1479356f8f3ee70a59767db2bf4788b1d61ad42cdad82.tvc",
       "shareOutputs": true,
       "interfaces": [
         "MultisigContract"
@@ -43,8 +100,8 @@
     {
       "contractPkg": "tech.deplant.java4ever.framework.contract.multisig2",
       "name": "SafeMultisigWallet2",
-      "abi": "artifacts/multisig2/SafeMultisig.abi.json",
-      "tvc": "artifacts/multisig2/SafeMultisig.tvc",
+      "abi": "artifacts/multisig2/SafeMultisigWallet_7377910a1b5d0c8073ba02523e139c7f42f9772fe0076a4d0b211ccec071eb7a.abi.json",
+      "tvc": "artifacts/multisig2/SafeMultisigWallet_7377910a1b5d0c8073ba02523e139c7f42f9772fe0076a4d0b211ccec071eb7a.tvc",
       "shareOutputs": true,
       "interfaces": [
         "MultisigContract2"
@@ -53,8 +110,8 @@
     {
       "contractPkg": "tech.deplant.java4ever.framework.contract.multisig2",
       "name": "SetcodeMultisigWallet2",
-      "abi": "artifacts/multisig2/SetcodeMultisig.abi.json",
-      "tvc": "artifacts/multisig2/SetcodeMultisig.tvc",
+      "abi": "artifacts/multisig2/SetcodeMultisigWallet_d66d198766abdbe1253f3415826c946c371f5112552408625aeb0b31e0ef2df3.abi.json",
+      "tvc": "artifacts/multisig2/SetcodeMultisigWallet_d66d198766abdbe1253f3415826c946c371f5112552408625aeb0b31e0ef2df3.tvc",
       "shareOutputs": true,
       "interfaces": [
         "MultisigContract2"

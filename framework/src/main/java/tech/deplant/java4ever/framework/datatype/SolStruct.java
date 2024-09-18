@@ -268,7 +268,11 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					case String s -> new Object[]{AbiValue.of(rootDetails, s)};
 					case Object[] arr -> Arrays.stream(arr).map(element -> {
 						try {
-							return AbiValue.of(rootDetails, element).toJava();
+							if (rootDetails.prefix().equals(AbiTypePrefix.TUPLE)) {
+								return SolStruct.fromABI(param.components(), (Map<String, Object>) element).toJava();
+							} else {
+								return AbiValue.of(rootDetails, element).toJava();
+							}
 						} catch (EverSdkException e) {
 							// in the complex cases, if we can't serialize, we can try to put object as is
 							return element;
@@ -277,7 +281,7 @@ public record SolStruct(Abi.AbiParam[] abiParams,
 					case List list -> list.stream().map(element -> {
 						try {
 							if (rootDetails.prefix().equals(AbiTypePrefix.TUPLE)) {
-								return SolStruct.fromJava(param.components(), (Map<String, Object>) element);
+								return SolStruct.fromABI(param.components(), (Map<String, Object>) element).toJava();
 							} else {
 								return AbiValue.of(rootDetails, element).toJava();
 							}

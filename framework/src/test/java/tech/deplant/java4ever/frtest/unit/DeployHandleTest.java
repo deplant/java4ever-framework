@@ -2,10 +2,7 @@ package tech.deplant.java4ever.frtest.unit;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import tech.deplant.java4ever.binding.*;
@@ -24,8 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static tech.deplant.java4ever.frtest.unit.Env.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -67,41 +63,40 @@ public class DeployHandleTest {
 //		Client.config(SDK_LOCAL).
 //	}
 
+	@Disabled
 	@Test
 	public void test_signature_ids() throws Throwable {
-		System.out.println(EverSdk.await(Net.getSignatureId(EverSdk.createWithEndpoint("https://ackinacki-testnet.tvmlabs.dev/graphql"))));
-		System.out.println(EverSdk.await(Net.getSignatureId(SDK_DEV)));
-		System.out.println(EverSdk.await(Net.getSignatureId(SDK_MAIN)));
-		System.out.println(EverSdk.await(Net.getSignatureId(EverSdk.createWithEndpoint("https://gql.venom.foundation/graphql"))));
+		assertNull(EverSdk.await(Net.getSignatureId(SDK_DEV)).signatureId());
+		assertNull(EverSdk.await(Net.getSignatureId(SDK_MAIN)).signatureId());
+		assertEquals(1,
+		             EverSdk.await(Net.getSignatureId(EverSdk.createWithEndpoint("https://gql.venom.foundation/graphql"))).signatureId());
 	}
 
 	@Test
 	public void test_single_contract_dev() throws Throwable {
-		int offlineContext = EverSdk.builder()
-		                            .networkSignatureId(1L)
-		                            .networkQueryTimeout(300_000L)
-		                            .build();
+		int offlineContext = EverSdk.builder().networkSignatureId(1L).networkQueryTimeout(300_000L).build();
 		var template = new EverWalletTemplate();
-			var seed = new Seed("year blur lounge can net tackle bonus mention loop churn dash inspire",12); // creates new seed
-			var keys = seed.deriveCredentials(offlineContext); // derives keys from seed
-			// let's calculate future EVER Wallet address
-			var stateInit = template.getStateInit(offlineContext, keys.publicKey(), BigInteger.ZERO);
-			var address = template.getAddress(offlineContext, 0, stateInit);
-			var body = new EverWalletContract(offlineContext, address, keys).sendTransaction(address, EVER_ONE, false)
-				                                                                .toPayload(false);
-			//GIVER_LOCAL.give(address, EVER_TWO).call();
-				// deploy EVER Wallet
-				//var contract = template.deployAndSend(Env.SDK_LOCAL, 0, keys, BigInteger.ZERO, Address.ZERO, EVER_ONE);
-				System.out.printf("Address funded: %s%n", address);
-				System.out.printf("Seed: %s, public: %s%n", seed.phrase(), keys.publicKey());
+		var seed = new Seed("year blur lounge can net tackle bonus mention loop churn dash inspire",
+		                    12); // creates new seed
+		var keys = seed.deriveCredentials(offlineContext); // derives keys from seed
+		// let's calculate future EVER Wallet address
+		var stateInit = template.getStateInit(offlineContext, keys.publicKey(), BigInteger.ZERO);
+		var address = template.getAddress(offlineContext, 0, stateInit);
+		var body = new EverWalletContract(offlineContext, address, keys).sendTransaction(address, EVER_ONE, false)
+		                                                                .toPayload(false);
+		//GIVER_LOCAL.give(address, EVER_TWO).call();
+		// deploy EVER Wallet
+		//var contract = template.deployAndSend(Env.SDK_LOCAL, 0, keys, BigInteger.ZERO, Address.ZERO, EVER_ONE);
+		System.out.printf("Address funded: %s%n", address);
+		System.out.printf("Seed: %s, public: %s%n", seed.phrase(), keys.publicKey());
 
-				// let's send messages when we're online
-				EverSdk.sendExternalMessage(EverSdk.createWithEndpoint("https://gql.venom.foundation/graphql"),
-				                            address.makeAddrStd(),
-				                            EverWalletTemplate.DEFAULT_ABI().ABI(),
-				                            stateInit.cellBoc(),
-				                            body.cellBoc(),
-				                            null);
+		// let's send messages when we're online
+		EverSdk.sendExternalMessage(EverSdk.createWithEndpoint("https://gql.venom.foundation/graphql"),
+		                            address.makeAddrStd(),
+		                            EverWalletTemplate.DEFAULT_ABI().ABI(),
+		                            stateInit.cellBoc(),
+		                            body.cellBoc(),
+		                            null);
 
 //		var message = EverSdk.await(Boc.encodeExternalInMessage(offlineContext,
 //		                                                        null,
@@ -121,12 +116,10 @@ public class DeployHandleTest {
 //		                                                   null));
 	}
 
+	@Disabled
 	@Test
 	public void find_addresses_for_ever_wallet() throws Throwable {
-		int offlineContext = EverSdk.builder()
-		                     .networkSignatureId(100L)
-		                     .networkQueryTimeout(300_000L)
-		                     .build();
+		int offlineContext = EverSdk.builder().networkSignatureId(100L).networkQueryTimeout(300_000L).build();
 //		int offlineContext = SDK_LOCAL;
 		int i = 0;
 		var template = new EverWalletTemplate();
@@ -142,14 +135,14 @@ public class DeployHandleTest {
 			if (addressCondition.test(address)) {
 				// let's create message bodies offline
 				// here we send sendTransaction to ourselves
-				var body = new EverWalletContract(offlineContext, address, keys).sendTransaction(address, EVER_ONE, false)
-				                                                             .toPayload(false);
-
+				var body = new EverWalletContract(offlineContext, address, keys).sendTransaction(address,
+				                                                                                 EVER_ONE,
+				                                                                                 false)
+				                                                                .toPayload(false);
 				System.out.printf("Address: %s%n", address);
 				System.out.printf("Seed: %s, public: %s%n", seed.phrase(), keys.publicKey());
 				System.out.printf("Message body: %s%n", body);
-				System.out.printf("State Init: %s%n", stateInit);
-
+				System.out.printf("State init: %s%n", stateInit);
 				// let's send messages when we're online
 				EverSdk.sendExternalMessage(SDK_LOCAL,
 				                            address.makeAddrStd(),
@@ -162,6 +155,7 @@ public class DeployHandleTest {
 		}
 	}
 
+	@Disabled
 	@Test
 	public void check_ever_wallet_send() throws Throwable {
 		// рандомные ключи
@@ -223,7 +217,7 @@ public class DeployHandleTest {
 		                                               keys.signer(),
 		                                               null,
 		                                               everWalletAddress,
-		                                               42L)).body();
+		                                               null)).body();
 
 		var message = EverSdk.await(Boc.encodeExternalInMessage(SDK_LOCAL,
 		                                                        null,

@@ -80,8 +80,8 @@ public interface Subscriptions {
 		private Builder(SubscriptionType type, String... outputFields) {
 			String text = """
 					subscription {
-								<TYPE>(
-								   <FILTER>
+								<TYPE> (
+								   filter: { <FILTER> }
 					                ) {
 					              <OUTPUT>
 								}

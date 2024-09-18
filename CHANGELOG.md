@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.0
+
+- Added support for public key derivation from secret. Check the following [Deriving keys from private](README.md#deriving-keys-from-private) section of the README file.
+- Added support of additional Multisig contract variations. Check the following [Supported Multisig Contracts](README.md#supported-multisig-contracts) section of the README file.
+- Fixes for `tuple[]` conversion in ABI inputs and outputs
+- Fixes for subscriptions
+- Better error handling
+- Support of **GiverV3** on local node
+- Project moved to module structure (preparation for future improvements)
+
 ## 3.1.2
 
 - Better support for signature_id

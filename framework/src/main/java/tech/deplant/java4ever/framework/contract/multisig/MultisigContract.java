@@ -85,14 +85,6 @@ public abstract class MultisigContract extends GiverContract {
 	public abstract FunctionHandle<ResultOfGetCustodians> getCustodians();
 
 	/**
-	 * Accept transfer function handle.
-	 *
-	 * @param payload the payload
-	 * @return the function handle
-	 */
-	public abstract FunctionHandle<Void> acceptTransfer(Byte[] payload);
-
-	/**
 	 * Submit transaction function handle.
 	 *
 	 * @param dest       the dest

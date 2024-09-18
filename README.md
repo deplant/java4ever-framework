@@ -470,8 +470,9 @@ You can check if it's your needed smart-contract by retrieving its code hash.
 
 #### Supported TIP-3 Token contracts
 
-java4ever supports all popular types of Multisig contracts.
-You can check if it's your needed smart-contract by retrieving its code hash.
+java4ever supports TIP3TokenRootContract and TIP3TokenWalletContract. 
+Also, TIP3Builder is available for specifying token parameters builder-style.
+Here is a quick example of working with TIP-3:
 
 ```java
 // creating token Root

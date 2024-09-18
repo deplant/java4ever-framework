@@ -233,11 +233,7 @@ public class EverSdkContext implements tc_response_handler_t.Function {
 	}
 
 	private void cleanup() {
-		while (this.cleanupQueue.poll() instanceof RequestData request) {
-			if (request.queueLock().isLocked()) {
-				request.queueLock().unlock();
-			}
-		}
+		this.cleanupQueue.poll();
 	}
 
 	private <P> String processParams(final P params) {

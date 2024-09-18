@@ -11,6 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="java4ever.framework.main" />
     <orderEntry type="module" module-name="java4ever.binding.main" />
+    <orderEntry type="library" name="Gradle: org.bouncycastle:bcpkix-jdk15on:1.70" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-jdk-platform-logging:2.0.9" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-simple:2.0.9" level="project" />
     <orderEntry type="library" name="Gradle: org.junit.jupiter:junit-jupiter-params:5.10.1" level="project" />
@@ -21,6 +22,8 @@
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.module:jackson-module-parameter-names:2.16.1" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.bouncycastle:bcutil-jdk15on:1.70" level="project" />
+    <orderEntry type="library" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.70" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:2.0.9" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apiguardian:apiguardian-api:1.1.2" level="project" />
     <orderEntry type="library" name="Gradle: org.junit.platform:junit-platform-commons:1.10.1" level="project" />

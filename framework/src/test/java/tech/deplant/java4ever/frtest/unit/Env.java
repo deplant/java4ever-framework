@@ -77,10 +77,7 @@ public class Env {
 				case "ton_main" -> "https://ton-testnet.tvmlabs.dev/graphql";
 				default -> throw new IllegalStateException("Unexpected network name: " + networkName);
 			};
-			CTX = EverSdk.builder()
-			             .networkEndpoints(ENDPOINT)
-			             .networkQueryTimeout(TIMEOUT)
-			             .build();
+			CTX = EverSdk.builder().networkEndpoints(ENDPOINT).networkQueryTimeout(TIMEOUT).build();
 
 			GIVER = switch (networkName) {
 				case "local" -> EverOSGiver.V3(CTX);
@@ -99,7 +96,7 @@ public class Env {
 		}
 	}
 
-	public static void INIT() throws IOException, EverSdkException {
+	public synchronized static void INIT() throws IOException, EverSdkException {
 		if (!isInitialized) {
 
 			EverSdk.load(new AbsolutePathLoader("c:/opt/sdk/ton_client.dll"));
@@ -107,18 +104,9 @@ public class Env {
 			// should be first
 			SDK_EMPTY = EverSdk.createDefault();
 			SDK_LOCAL = EverSdk.createWithEndpoint(LOCAL_ENDPOINT);
-			SDK_DEV = EverSdk.builder()
-			                 .networkEndpoints(DEV_ENDPOINT)
-			                 .networkQueryTimeout(300_000L)
-			                 .build();
-			SDK_MAIN = EverSdk.builder()
-			                  .networkEndpoints(MAIN_ENDPOINT)
-			                  .networkQueryTimeout(300_000L)
-			                  .build();
-			SDK_OFFLINE = EverSdk.builder()
-			                     .networkSignatureId(0L)
-			                     .networkQueryTimeout(300_000L)
-			                     .build();
+			SDK_DEV = EverSdk.builder().networkEndpoints(DEV_ENDPOINT).networkQueryTimeout(300_000L).build();
+			SDK_MAIN = EverSdk.builder().networkEndpoints(MAIN_ENDPOINT).networkQueryTimeout(300_000L).build();
+			SDK_OFFLINE = EverSdk.builder().networkSignatureId(0L).networkQueryTimeout(300_000L).build();
 
 			GIVER_LOCAL = EverOSGiver.V3(SDK_LOCAL);
 
@@ -126,50 +114,47 @@ public class Env {
 		}
 	}
 
-	public static void INIT_LOCAL_WALLETS() throws IOException, EverSdkException {
-		LOCAL_KEYS_ROOT = RNG_KEYS();
-		LOCAL_KEYS_WALLET1 = RNG_KEYS();
-		LOCAL_KEYS_WALLET2 = RNG_KEYS();
+	public synchronized static void INIT_LOCAL_WALLETS() throws IOException, EverSdkException {
+		if (LOCAL_MSIG_WALLET2 == null) {
+			LOCAL_KEYS_ROOT = RNG_KEYS();
+			LOCAL_KEYS_WALLET1 = RNG_KEYS();
+			LOCAL_KEYS_WALLET2 = RNG_KEYS();
 
-		LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigContract.Type.SAFE)
-		                                       .prepareAndDeploy(SDK_LOCAL,
-		                                                         LOCAL_KEYS_ROOT,
-		                                                         GIVER_LOCAL,
-		                                                         CurrencyUnit.VALUE(EVER, "4.5"));
+			LOCAL_MSIG_ROOT = new MultisigBuilder().setType(MultisigContract.Type.SAFE)
+			                                       .prepareAndDeploy(SDK_LOCAL,
+			                                                         LOCAL_KEYS_ROOT,
+			                                                         GIVER_LOCAL,
+			                                                         CurrencyUnit.VALUE(EVER, "4.5"));
 
-		LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigContract.Type.SURF)
-		                                          .prepareAndDeploy(SDK_LOCAL,
-		                                                            LOCAL_KEYS_ROOT,
-		                                                            GIVER_LOCAL,
-		                                                            CurrencyUnit.VALUE(EVER, "4.5"));
+			LOCAL_MSIG_WALLET1 = new MultisigBuilder().setType(MultisigContract.Type.SURF)
+			                                          .prepareAndDeploy(SDK_LOCAL,
+			                                                            LOCAL_KEYS_ROOT,
+			                                                            GIVER_LOCAL,
+			                                                            CurrencyUnit.VALUE(EVER, "4.5"));
 
-		LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigContract.Type.SETCODE)
-		                                          .prepareAndDeploy(SDK_LOCAL,
-		                                                            LOCAL_KEYS_ROOT,
-		                                                            GIVER_LOCAL,
-		                                                            CurrencyUnit.VALUE(EVER, "4.5"));
+			LOCAL_MSIG_WALLET2 = new MultisigBuilder().setType(MultisigContract.Type.SETCODE)
+			                                          .prepareAndDeploy(SDK_LOCAL,
+			                                                            LOCAL_KEYS_ROOT,
+			                                                            GIVER_LOCAL,
+			                                                            CurrencyUnit.VALUE(EVER, "4.5"));
+		}
 	}
 
 	public static void INIT_LOCAL_TIP3() throws IOException, EverSdkException {
 		TIP3_NONCE = BigInteger.valueOf(new Random().nextInt());
-		LOCAL_TIP3_ROOT = new TIP3Builder()
-				.setRootKeys(LOCAL_KEYS_ROOT)
-				.setOwnerAddress(LOCAL_MSIG_ROOT.address())
-				.setName("Test Token")
-				.setSymbol("TST")
-				.setDecimals(6)
-				.setRandomNonce(new Random().nextInt())
-				.build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
+		LOCAL_TIP3_ROOT = new TIP3Builder().setRootKeys(LOCAL_KEYS_ROOT)
+		                                   .setOwnerAddress(LOCAL_MSIG_ROOT.address())
+		                                   .setName("Test Token")
+		                                   .setSymbol("TST")
+		                                   .setDecimals(6)
+		                                   .setRandomNonce(new Random().nextInt())
+		                                   .build(SDK_LOCAL, GIVER_LOCAL, CurrencyUnit.VALUE(EVER, "1.3"));
 
-		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET1.address(),
-		                             CurrencyUnit.VALUE(EVER, "0.5"))
-		               .sendFrom(LOCAL_MSIG_ROOT,
-		                         CurrencyUnit.VALUE(EVER, "1.5"));
+		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET1.address(), CurrencyUnit.VALUE(EVER, "0.5"))
+		               .sendFrom(LOCAL_MSIG_ROOT, CurrencyUnit.VALUE(EVER, "1.5"));
 
-		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET2.address(),
-		                             CurrencyUnit.VALUE(EVER, "0.5"))
-		               .sendFrom(LOCAL_MSIG_ROOT,
-		                         CurrencyUnit.VALUE(EVER, "1.5"));
+		LOCAL_TIP3_ROOT.deployWallet(LOCAL_MSIG_WALLET2.address(), CurrencyUnit.VALUE(EVER, "0.5"))
+		               .sendFrom(LOCAL_MSIG_ROOT, CurrencyUnit.VALUE(EVER, "1.5"));
 
 		LOCAL_TIP3_WALLET1 = new TIP3TokenWalletContract(SDK_LOCAL,
 		                                                 LOCAL_TIP3_ROOT.walletOf(LOCAL_MSIG_WALLET1.address())
